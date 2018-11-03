@@ -1,0 +1,19 @@
+{
+  "name": "libweb_cat",
+  "version": "1.0.0",
+  "description": "Catalog of library websites.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "library",
+    "catalog",
+    "website"
+  ],
+  "author": "Allan Berry <allan.berry@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^1.10.0"
+  }
+}
