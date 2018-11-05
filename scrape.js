@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const moment = require('moment');
 const fs = require('fs');
+const yaml = require('js-yaml');
 const util = require('./util.js');
 
 // config
@@ -54,12 +55,19 @@ const sites = [
 ]
 
 async function main() {
+  const date = moment().utc();
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
   for (const s of sites) {
-    const date = moment().utc();
-    const dir = `${sitesDir}/${s.slug}/${date.format('YYYY-MM-DD')}`;
+    const currentDate = date.format('YYYY-MM-DD');
+    const dir = `${sitesDir}/${s.slug}/${currentDate}`;
+    let metadata = {
+      slug: s.slug,
+      url: s.url,
+      accessed: currentDate,
+      screenshots: []
+    };
 
     // make sure directory exists, and if not, create it
     if (!fs.existsSync(dir)){
@@ -75,11 +83,17 @@ async function main() {
 
     // load predetermined sizes, and take screenshot
     for (let k in sizes) {
+      const filename = `${s.slug}-${k}.png`;
+      path = `${dir}/${filename}`;
       await page.setViewport(sizes[k]);
       await page.screenshot({
-        path: `${dir}/${s.slug}-${k}.png`,
+        path: path,
         fullPage: true
       });
+      metadata.screenshots.push({
+        filename: filename,
+        accessed: date.format()
+      })
     }
 
     // create square tile for general web display
@@ -92,6 +106,12 @@ async function main() {
       path: `${dir}/${s.slug}-tile.png`,
       fullPage: false
     });
+    
+    // output metadata
+    const y = yaml.safeDump(metadata)
+    await fs.writeFile(`${dir}/md.yaml`, y, function(err) {
+      if(err) { console.log(err); }
+    }); 
   }
 
   await browser.close();
