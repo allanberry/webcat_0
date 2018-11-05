@@ -1,6 +1,10 @@
 const puppeteer = require('puppeteer');
+const moment = require('moment');
 const fs = require('fs');
-const imagesDir = 'images';
+const util = require('./util.js');
+
+// config
+const sitesDir = 'sites';
 const tileSize = {
   x: 0,
   y: 0, 
@@ -23,25 +27,29 @@ const sizes = {
 };
 
 const sites = [
+  // {
+  //   slug: 'harvard',
+  //   url: 'https://library.harvard.edu'
+  // },
+  // {
+  //   slug: 'stanford',
+  //   url: 'https://library.stanford.edu'
+  // },
+  // {
+  //   slug: 'uic',
+  //   url: 'https://library.uic.edu'
+  // },
+  // {
+  //   slug: 'uiuc',
+  //   url: 'https://library.illinois.edu'
+  // },
+  // {
+  //   slug: 'umich',
+  //   url: 'https://www.lib.umich.edu/'
+  // },
   {
-    slug: 'harvard',
-    url: 'https://library.harvard.edu'
-  },
-  {
-    slug: 'stanford',
-    url: 'https://library.stanford.edu'
-  },
-  {
-    slug: 'uic',
-    url: 'https://library.uic.edu'
-  },
-  {
-    slug: 'uiuc',
-    url: 'https://library.illinois.edu'
-  },
-  {
-    slug: 'umich',
-    url: 'https://www.lib.umich.edu/'
+    slug: 'umich_search',
+    url: 'https://search.lib.umich.edu/everything'
   },
 ]
 
@@ -50,33 +58,38 @@ async function main() {
   const page = await browser.newPage();
 
   for (const s of sites) {
+    const date = moment().utc();
+    const dir = `${sitesDir}/${s.slug}/${date.format('YYYY-MM-DD')}`;
 
     // make sure directory exists, and if not, create it
-    const dir = `${imagesDir}/${s.slug}`;
     if (!fs.existsSync(dir)){
-      fs.mkdirSync(dir);
+      util.mkDirByPathSync(dir);
     }
 
     // load page
-    await page.goto(s.url);
+    await page.goto(s.url, {
+      waitUntil: 'networkidle0',
+      timeout: 3000 // a little buffer in case of SPA, but not too long
+    });
 
 
     // load predetermined sizes, and take screenshot
     for (let k in sizes) {
       await page.setViewport(sizes[k]);
       await page.screenshot({
-        path: `${imagesDir}/${s.slug}/${s.slug}-${k}.png`,
+        path: `${dir}/${s.slug}-${k}.png`,
         fullPage: true
       });
     }
 
     // create square tile for general web display
+    // TODO: refactor to crop from another screenshot?
     await page.setViewport({
       width: tileSize.width,
       height: tileSize.height
     });
     await page.screenshot({
-      path: `${imagesDir}/${s.slug}/${s.slug}-tile.png`,
+      path: `${dir}/${s.slug}-tile.png`,
       fullPage: false
     });
   }
