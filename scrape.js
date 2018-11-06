@@ -5,7 +5,7 @@ const yaml = require('js-yaml');
 const util = require('./util.js');
 
 // config
-const sitesDir = 'sites';
+const allSitesDir = 'sites';
 const tileSize = {
   x: 0,
   y: 0, 
@@ -61,17 +61,13 @@ async function main() {
 
   for (const s of sites) {
     const currentDate = date.format('YYYY-MM-DD');
-    const dir = `${sitesDir}/${s.slug}/${currentDate}`;
-    let metadata = {
-      slug: s.slug,
-      url: s.url,
-      accessed: currentDate,
-      screenshots: []
-    };
+    const siteDir = `${allSitesDir}/${s.slug}`;
+    const currentDir = `${siteDir}/${currentDate}`;
+    let screenshots = [];
 
     // make sure directory exists, and if not, create it
-    if (!fs.existsSync(dir)){
-      util.mkDirByPathSync(dir);
+    if (!fs.existsSync(currentDir)){
+      util.mkDirByPathSync(currentDir);
     }
 
     // load page
@@ -80,17 +76,16 @@ async function main() {
       timeout: 3000 // a little buffer in case of SPA, but not too long
     });
 
-
     // load predetermined sizes, and take screenshot
     for (let k in sizes) {
       const filename = `${s.slug}-${k}.png`;
-      path = `${dir}/${filename}`;
+      path = `${currentDir}/${filename}`;
       await page.setViewport(sizes[k]);
       await page.screenshot({
         path: path,
         fullPage: true
       });
-      metadata.screenshots.push({
+      screenshots.push({
         filename: filename,
         accessed: date.format()
       })
@@ -103,15 +98,37 @@ async function main() {
       height: tileSize.height
     });
     await page.screenshot({
-      path: `${dir}/${s.slug}-tile.png`,
+      path: `${currentDir}/${s.slug}-tile.png`,
       fullPage: false
     });
     
     // output metadata
-    const y = yaml.safeDump(metadata)
-    await fs.writeFile(`${dir}/md.yaml`, y, function(err) {
-      if(err) { console.log(err); }
-    }); 
+    const mdFile = `${siteDir}/md.yaml`;
+    if (fs.existsSync(mdFile)) {
+      await fs.readFile(mdFile, 'utf8', async function(err, contents) {
+        if(err) { console.log(err); }
+        // unserialize and add latest data
+        let metadata = yaml.safeLoad(contents);
+        metadata.screenshots = metadata.screenshots.concat(screenshots);
+
+        // serialize
+        const y = yaml.safeDump(metadata);
+        await fs.writeFile(mdFile, y, function(err) {
+          if(err) { console.log(err); }
+        });
+      });
+    } else {
+      // serialize and save
+      const y = yaml.safeDump({
+        slug: s.slug,
+        url: s.url,
+        created: date.format(),
+        screenshots: screenshots
+      });
+      await fs.writeFile(mdFile, y, function(err) {
+        if(err) { console.log(err); }
+      });
+    }
   }
 
   await browser.close();
