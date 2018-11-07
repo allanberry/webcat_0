@@ -62,10 +62,11 @@ async function main() {
   for (const s of sites) {
     const siteDir = `${allSitesDir}/${s.slug}`;
     const mdFile = `${siteDir}/md.yaml`;
-    const currentDir = `${siteDir}/${date.format('YYYY-MM-DD-HHMM')}`;
+    const token = date.format();
     let metadata;
 
     // create directory if it doesn't exist
+    const currentDir = `${siteDir}/${token}`;
     if (!fs.existsSync(currentDir)){
       util.mkDirByPathSync(currentDir);
     }
@@ -95,17 +96,21 @@ async function main() {
 
     // load predetermined sizes, and take screenshot
     for (let k in sizes) {
-      const path = `${currentDir}/${k}.png`;
+      const filename = `${k}.png`;
       await page.setViewport(sizes[k]);
       // take screenshot
       await page.screenshot({
-        path: path,
+        path: `${siteDir}/${token}/${filename}`, // path relative to site root
         fullPage: true
       });
       // record metadata about screenshot
       metadata.screenshots.push({
-        filename: path,
-        accessed: date.format()
+        filename: `${token}/${filename}`, // path relative to metadata file
+        accessed: date.format(),
+
+        // TODO: broken?  hangs execution
+        // width: k.width,
+        // height: k.height
       })
     }
     
