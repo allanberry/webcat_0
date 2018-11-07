@@ -14,17 +14,17 @@ const tileSize = {
 };
 
 const sizes = {
-  // '0360': {width: 360,  height: 0},
-  '0600': {width: 600, height: 0},
-  // '0640': {width: 640,  height: 0},
-  // '0768': {width: 768,  height: 0},
-  // '1000': {width: 1000, height: 0},
-  // '1024': {width: 1024, height: 0},
-  '1200': {width: 1200, height: 0},
-  // '1280': {width: 1280, height: 0},
-  // '1500': {width: 1500, height: 0},
-  // '1920': {width: 1920, height: 0},
-  // '1080': {width: 1080, height: 0},
+  // '0360x0': {width: 360,  height: 0},
+  '0600x0': {width: 600, height: 0},
+  // '0640x0': {width: 640,  height: 0},
+  // '0768x0': {width: 768,  height: 0},
+  // '1000x0': {width: 1000, height: 0},
+  // '1024x0': {width: 1024, height: 0},
+  '1200x0': {width: 1200, height: 0},
+  // '1280x0': {width: 1280, height: 0},
+  // '1500x0': {width: 1500, height: 0},
+  // '1920x0': {width: 1920, height: 0},
+  // '1080x0': {width: 1080, height: 0},
 };
 
 const sites = [
@@ -60,14 +60,31 @@ async function main() {
   const page = await browser.newPage();
 
   for (const s of sites) {
-    const currentDate = date.format('YYYY-MM-DD');
     const siteDir = `${allSitesDir}/${s.slug}`;
-    const currentDir = `${siteDir}/${currentDate}`;
-    let screenshots = [];
+    const mdFile = `${siteDir}/md.yaml`;
+    const currentDir = `${siteDir}/${date.format('YYYY-MM-DD-HHMM')}`;
+    let metadata;
 
-    // make sure directory exists, and if not, create it
+    // create directory if it doesn't exist
     if (!fs.existsSync(currentDir)){
       util.mkDirByPathSync(currentDir);
+    }
+
+    // initialize metadata
+    if (fs.existsSync(mdFile)) {
+      // input from file
+      await fs.readFile(mdFile, 'utf8', async function(err, contents) {
+        if(err) { console.log(err); }
+        metadata = yaml.safeLoad(contents);
+      });
+    } else {
+      // create from scratch
+      metadata = {
+        slug: s.slug,
+        url: s.url,
+        created: date.format(),
+        screenshots: []
+      };
     }
 
     // load page
@@ -78,57 +95,36 @@ async function main() {
 
     // load predetermined sizes, and take screenshot
     for (let k in sizes) {
-      const filename = `${s.slug}-${k}.png`;
-      path = `${currentDir}/${filename}`;
+      const path = `${currentDir}/${k}.png`;
       await page.setViewport(sizes[k]);
+      // take screenshot
       await page.screenshot({
         path: path,
         fullPage: true
       });
-      screenshots.push({
-        filename: filename,
+      // record metadata about screenshot
+      metadata.screenshots.push({
+        filename: path,
         accessed: date.format()
       })
     }
+    
+    // output metadata
+    await fs.writeFile(mdFile, yaml.safeDump(metadata), function(err) {
+      if(err) { console.log(err); }
+    });
 
     // create square tile for general web display
     // TODO: refactor to crop from another screenshot?
+    // TODO: should not happen on every run
     await page.setViewport({
       width: tileSize.width,
       height: tileSize.height
     });
     await page.screenshot({
-      path: `${currentDir}/${s.slug}-tile.png`,
+      path: `${siteDir}/tile.png`,
       fullPage: false
     });
-    
-    // output metadata
-    const mdFile = `${siteDir}/md.yaml`;
-    if (fs.existsSync(mdFile)) {
-      await fs.readFile(mdFile, 'utf8', async function(err, contents) {
-        if(err) { console.log(err); }
-        // unserialize and add latest data
-        let metadata = yaml.safeLoad(contents);
-        metadata.screenshots = metadata.screenshots.concat(screenshots);
-
-        // serialize
-        const y = yaml.safeDump(metadata);
-        await fs.writeFile(mdFile, y, function(err) {
-          if(err) { console.log(err); }
-        });
-      });
-    } else {
-      // serialize and save
-      const y = yaml.safeDump({
-        slug: s.slug,
-        url: s.url,
-        created: date.format(),
-        screenshots: screenshots
-      });
-      await fs.writeFile(mdFile, y, function(err) {
-        if(err) { console.log(err); }
-      });
-    }
   }
 
   await browser.close();
