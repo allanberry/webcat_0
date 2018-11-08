@@ -3,6 +3,7 @@ const moment = require('moment');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const util = require('./util.js');
+const imgSize = require('image-size');
 
 // config
 const allSitesDir = 'sites';
@@ -28,26 +29,26 @@ const sizes = {
 };
 
 const sites = [
-  // {
-  //   slug: 'harvard',
-  //   url: 'https://library.harvard.edu'
-  // },
-  // {
-  //   slug: 'stanford',
-  //   url: 'https://library.stanford.edu'
-  // },
-  // {
-  //   slug: 'uic',
-  //   url: 'https://library.uic.edu'
-  // },
-  // {
-  //   slug: 'uiuc',
-  //   url: 'https://library.illinois.edu'
-  // },
-  // {
-  //   slug: 'umich',
-  //   url: 'https://www.lib.umich.edu/'
-  // },
+  {
+    slug: 'harvard',
+    url: 'https://library.harvard.edu'
+  },
+  {
+    slug: 'stanford',
+    url: 'https://library.stanford.edu'
+  },
+  {
+    slug: 'uic',
+    url: 'https://library.uic.edu'
+  },
+  {
+    slug: 'uiuc',
+    url: 'https://library.illinois.edu'
+  },
+  {
+    slug: 'umich',
+    url: 'https://www.lib.umich.edu/'
+  },
   {
     slug: 'umich_search',
     url: 'https://search.lib.umich.edu/everything'
@@ -71,65 +72,68 @@ async function main() {
       util.mkDirByPathSync(currentDir);
     }
 
-    // initialize metadata
-    if (fs.existsSync(mdFile)) {
-      // input from file
-      await fs.readFile(mdFile, 'utf8', async function(err, contents) {
+    try {
+      // initialize metadata
+      if (fs.existsSync(mdFile)) {
+        // input from file
+        await fs.readFile(mdFile, 'utf8', async function(err, contents) {
+          if(err) { console.log(err); }
+          metadata = yaml.safeLoad(contents);
+        });
+      } else {
+        // create from scratch
+        metadata = {
+          slug: s.slug,
+          url: s.url,
+          created: date.format(),
+          screenshots: []
+        };
+      }
+
+      // load page
+      await page.goto(s.url, {
+        waitUntil: 'networkidle0',
+      });
+
+      // load predetermined sizes, and take screenshot
+      for (let key in sizes) {
+        const filename = `${key}.png`;
+        const imgPath = `${siteDir}/${token}/${filename}`;
+        await page.setViewport(sizes[key]);
+        // take screenshot
+        await page.screenshot({
+          path: imgPath, // path relative to site root
+          fullPage: true
+        });
+        // record metadata about screenshot
+        const dimensions = imgSize(imgPath); // TODO? make async (doesn't seem like a big deal)
+        metadata.screenshots.push({
+          filename: `${token}/${filename}`, // path relative to metadata file
+          accessed: date.format(),
+          width: dimensions.width,
+          height: dimensions.height
+        })
+      }
+      
+      // output metadata
+      await fs.writeFile(mdFile, yaml.safeDump(metadata), function(err) {
         if(err) { console.log(err); }
-        metadata = yaml.safeLoad(contents);
       });
-    } else {
-      // create from scratch
-      metadata = {
-        slug: s.slug,
-        url: s.url,
-        created: date.format(),
-        screenshots: []
-      };
-    }
 
-    // load page
-    await page.goto(s.url, {
-      waitUntil: 'networkidle0',
-      timeout: 3000 // a little buffer in case of SPA, but not too long
-    });
-
-    // load predetermined sizes, and take screenshot
-    for (let k in sizes) {
-      const filename = `${k}.png`;
-      await page.setViewport(sizes[k]);
-      // take screenshot
+      // create square tile for general web display
+      // TODO: refactor to crop from another screenshot?
+      // TODO: should not happen on every run
+      await page.setViewport({
+        width: tileSize.width,
+        height: tileSize.height
+      });
       await page.screenshot({
-        path: `${siteDir}/${token}/${filename}`, // path relative to site root
-        fullPage: true
+        path: `${siteDir}/tile.png`,
+        fullPage: false
       });
-      // record metadata about screenshot
-      metadata.screenshots.push({
-        filename: `${token}/${filename}`, // path relative to metadata file
-        accessed: date.format(),
-
-        // TODO: broken?  hangs execution
-        // width: k.width,
-        // height: k.height
-      })
+    } catch(err) {
+      console.error(`FAILED: ${s.slug} ${token} -- ${err}`)
     }
-    
-    // output metadata
-    await fs.writeFile(mdFile, yaml.safeDump(metadata), function(err) {
-      if(err) { console.log(err); }
-    });
-
-    // create square tile for general web display
-    // TODO: refactor to crop from another screenshot?
-    // TODO: should not happen on every run
-    await page.setViewport({
-      width: tileSize.width,
-      height: tileSize.height
-    });
-    await page.screenshot({
-      path: `${siteDir}/tile.png`,
-      fullPage: false
-    });
   }
 
   await browser.close();

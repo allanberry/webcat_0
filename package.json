@@ -14,6 +14,7 @@
   "author": "Allan Berry <allan.berry@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "image-size": "^0.6.3",
     "js-yaml": "^3.12.0",
     "moment": "^2.22.2",
     "puppeteer": "^1.10.0"
