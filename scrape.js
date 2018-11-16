@@ -33,26 +33,26 @@ const sites = [
     slug: 'harvard',
     url: 'https://library.harvard.edu'
   },
-  {
-    slug: 'stanford',
-    url: 'https://library.stanford.edu'
-  },
-  {
-    slug: 'uic',
-    url: 'https://library.uic.edu'
-  },
-  {
-    slug: 'uiuc',
-    url: 'https://library.illinois.edu'
-  },
-  {
-    slug: 'umich',
-    url: 'https://www.lib.umich.edu/'
-  },
-  {
-    slug: 'umich_search',
-    url: 'https://search.lib.umich.edu/everything'
-  },
+  // {
+  //   slug: 'stanford',
+  //   url: 'https://library.stanford.edu'
+  // },
+  // {
+  //   slug: 'uic',
+  //   url: 'https://library.uic.edu'
+  // },
+  // {
+  //   slug: 'uiuc',
+  //   url: 'https://library.illinois.edu'
+  // },
+  // {
+  //   slug: 'umich',
+  //   url: 'https://www.lib.umich.edu/'
+  // },
+  // {
+  //   slug: 'umich_search',
+  //   url: 'https://search.lib.umich.edu/everything'
+  // },
 ]
 
 async function main() {
@@ -62,9 +62,13 @@ async function main() {
 
   for (const s of sites) {
     const siteDir = `${allSitesDir}/${s.slug}`;
-    const mdFile = `${siteDir}/md.yaml`;
     const token = date.format();
-    let metadata;
+
+    const siteMdFile = `${siteDir}/md.yaml`;
+    const currMdFile = `${siteDir}/${token}/md.yaml`;
+    const htmlFile = `${siteDir}/${token}/page.html`;
+    let siteMetadata;
+    let currMetadata;
 
     // create directory if it doesn't exist
     const currentDir = `${siteDir}/${token}`;
@@ -73,28 +77,38 @@ async function main() {
     }
 
     try {
-      // initialize metadata
-      if (fs.existsSync(mdFile)) {
+      // initialize site metadata
+      if (fs.existsSync(siteMdFile)) {
         // input from file
-        await fs.readFile(mdFile, 'utf8', async function(err, contents) {
+        await fs.readFile(siteMdFile, 'utf8', async function(err, contents) {
           if(err) { console.log(err); }
-          metadata = yaml.safeLoad(contents);
+          siteMetadata = yaml.safeLoad(contents);
         });
       } else {
         // create from scratch
-        metadata = {
+        siteMetadata = {
           slug: s.slug,
           url: s.url,
-          created: date.format(),
-          screenshots: []
+          created: date.format()
         };
       }
+
+      // initialize current metadata
+      currMetadata = {
+        screenshots: []
+      };
 
       // load page
       await page.goto(s.url, {
         waitUntil: 'networkidle0',
       });
 
+      // retrieve html
+      // hat tip: https://github.com/GoogleChrome/puppeteer/issues/331#issuecomment-323711582
+      const bodyHtml = await page.evaluate(() => {
+        return new XMLSerializer().serializeToString(document.doctype) + document.documentElement.outerHTML
+      });
+      
       // load predetermined sizes, and take screenshot
       for (let key in sizes) {
         const filename = `${key}.png`;
@@ -107,7 +121,7 @@ async function main() {
         });
         // record metadata about screenshot
         const dimensions = imgSize(imgPath); // TODO? make async (doesn't seem like a big deal)
-        metadata.screenshots.push({
+        currMetadata.screenshots.push({
           filename: `${token}/${filename}`, // path relative to metadata file
           accessed: date.format(),
           width: dimensions.width,
@@ -116,7 +130,15 @@ async function main() {
       }
       
       // output metadata
-      await fs.writeFile(mdFile, yaml.safeDump(metadata), function(err) {
+      await fs.writeFile(siteMdFile, yaml.safeDump(siteMetadata), function(err) {
+        if(err) { console.log(err); }
+      });
+      await fs.writeFile(currMdFile, yaml.safeDump(currMetadata), function(err) {
+        if(err) { console.log(err); }
+      });
+
+      // output HTML
+      await fs.writeFile(htmlFile, bodyHtml, function(err) {
         if(err) { console.log(err); }
       });
 
