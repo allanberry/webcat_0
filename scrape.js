@@ -6,7 +6,7 @@ const util = require('./util.js');
 const imgSize = require('image-size');
 
 // config
-const allSitesDir = 'sites';
+const scrapesDir = 'scrapes';
 const tileSize = {
   x: 0,
   y: 0, 
@@ -28,40 +28,18 @@ const sizes = {
   // '1080x0': {width: 1080, height: 0},
 };
 
-const sites = [
-  {
-    slug: 'harvard',
-    url: 'https://library.harvard.edu'
-  },
-  // {
-  //   slug: 'stanford',
-  //   url: 'https://library.stanford.edu'
-  // },
-  // {
-  //   slug: 'uic',
-  //   url: 'https://library.uic.edu'
-  // },
-  // {
-  //   slug: 'uiuc',
-  //   url: 'https://library.illinois.edu'
-  // },
-  // {
-  //   slug: 'umich',
-  //   url: 'https://www.lib.umich.edu/'
-  // },
-  // {
-  //   slug: 'umich_search',
-  //   url: 'https://search.lib.umich.edu/everything'
-  // },
-]
-
 async function main() {
   const date = moment().utc();
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
+  const sites = yaml.safeLoad(fs.readFileSync('sites.yaml', 'utf8'));
+
+  console.log(sites);
+  console.log('');
+
   for (const s of sites) {
-    const siteDir = `${allSitesDir}/${s.slug}`;
+    const siteDir = `${scrapesDir}/${s.slug}`;
     const token = date.format();
 
     const siteMdFile = `${siteDir}/md.yaml`;
@@ -81,7 +59,7 @@ async function main() {
       if (fs.existsSync(siteMdFile)) {
         // input from file
         await fs.readFile(siteMdFile, 'utf8', async function(err, contents) {
-          if(err) { console.log(err); }
+          if(err) { console.error(err); }
           siteMetadata = yaml.safeLoad(contents);
         });
       } else {
@@ -131,15 +109,15 @@ async function main() {
       
       // output metadata
       await fs.writeFile(siteMdFile, yaml.safeDump(siteMetadata), function(err) {
-        if(err) { console.log(err); }
+        if(err) { console.error(err); }
       });
       await fs.writeFile(currMdFile, yaml.safeDump(currMetadata), function(err) {
-        if(err) { console.log(err); }
+        if(err) { console.error(err); }
       });
 
       // output HTML
       await fs.writeFile(htmlFile, bodyHtml, function(err) {
-        if(err) { console.log(err); }
+        if(err) { console.error(err); }
       });
 
       // create square tile for general web display
