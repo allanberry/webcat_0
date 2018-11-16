@@ -29,14 +29,12 @@ const sizes = {
 };
 
 async function main() {
+  const version = '0.1'
   const date = moment().utc();
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
   const sites = yaml.safeLoad(fs.readFileSync('sites.yaml', 'utf8'));
-
-  console.log(sites);
-  console.log('');
 
   for (const s of sites) {
     const siteDir = `${scrapesDir}/${s.slug}`;
@@ -67,7 +65,8 @@ async function main() {
         siteMetadata = {
           slug: s.slug,
           url: s.url,
-          created: date.format()
+          created: date.format(),
+          version: version
         };
       }
 
@@ -103,7 +102,8 @@ async function main() {
           filename: `${token}/${filename}`, // path relative to metadata file
           accessed: date.format(),
           width: dimensions.width,
-          height: dimensions.height
+          height: dimensions.height,
+          version: version
         })
       }
       

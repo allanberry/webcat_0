@@ -1,10 +1,10 @@
 # sites to scrape
 
-- slug: harvard
-  url: 'https://library.harvard.edu'
+# - slug: harvard
+#   url: 'https://library.harvard.edu'
 
-# - slug: stanford
-#   url: 'https://library.stanford.edu'
+- slug: stanford
+  url: 'https://library.stanford.edu'
 
 # - slug: uic
 #   url: 'https://library.uic.edu'

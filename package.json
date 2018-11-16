@@ -1,6 +1,6 @@
 {
   "name": "libweb_cat",
-  "version": "1.0.0",
+  "version": "0.1",
   "description": "Catalog of library websites.",
   "main": "app.js",
   "scripts": {
