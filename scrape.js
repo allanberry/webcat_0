@@ -83,11 +83,12 @@ async function scrape(browser, site, date) {
       // record metadata about screenshot
       const dimensions = imgSize(imgPath); // TODO? make async (doesn't seem like a big deal)
       currMetadata.screenshots.push({
-        filename: `${token}/${filename}`, // path relative to metadata file
+        filename: filename,
         accessed: date.format(),
         width: dimensions.width,
         height: dimensions.height,
-        version: config.version
+        version: config.version,
+        userAgent: await browser.userAgent()
       })
     }
     
