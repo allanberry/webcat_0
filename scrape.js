@@ -5,14 +5,21 @@ const yaml = require('js-yaml');
 const imgSize = require('image-size');
 const util = require('./util.js');
 const config = require('./config.json');
+const package = require('./package.json');
+const axios = require('axios');
+
 
 (async function () {
   const sites = yaml.safeLoad(fs.readFileSync('sites.yaml', 'utf8'));
-  const date = moment().utc();
-
+  const dates = [
+    moment.utc("1900-01-01"), // first
+    // moment.utc() // latest
+  ]
   const browser = await puppeteer.launch();
   for (const site of sites) {
-    await scrape(browser, site, date);
+    for (const date of dates) {
+      await scrape(browser, site, date);
+    }
   }
   await browser.close();
 }());
@@ -26,16 +33,19 @@ async function scrape(browser, site, date) {
   let siteMetadata;
   let currMetadata;
 
-  // setup
-  const page = await browser.newPage();
-
   // create directory if it doesn't exist
   const currentDir = `${siteDir}/${token}`;
   if (!fs.existsSync(currentDir)){
     util.mkDirByPathSync(currentDir);
   }
 
+  // setup browser
+  const page = await browser.newPage();
+
   try {
+    // if date is historical (more than a minute ago), access from wayback machine
+    const realUrl = await getRealUrl(site.url, date);
+
     // initialize site metadata
     if (fs.existsSync(siteMdFile)) {
       // input from file
@@ -48,8 +58,7 @@ async function scrape(browser, site, date) {
       siteMetadata = {
         slug: site.slug,
         url: site.url,
-        created: date.format(),
-        version: config.version
+        version: package.version
       };
     }
 
@@ -58,8 +67,8 @@ async function scrape(browser, site, date) {
       screenshots: []
     };
 
-    // load page
-    await page.goto(site.url, {
+    // retrieve page
+    await page.goto(realUrl, {
       waitUntil: 'networkidle0',
     });
 
@@ -84,10 +93,11 @@ async function scrape(browser, site, date) {
       const dimensions = imgSize(imgPath); // TODO? make async (doesn't seem like a big deal)
       currMetadata.screenshots.push({
         filename: filename,
-        accessed: date.format(),
+        dateArchived: token,
+        dateRetrieved: moment.utc().format(),
         width: dimensions.width,
         height: dimensions.height,
-        version: config.version,
+        version: package.version,
         userAgent: await browser.userAgent()
       })
     }
@@ -122,4 +132,25 @@ async function scrape(browser, site, date) {
 
   // clean up
   await page.close();
+}
+
+// generic function to hit a JSON access point
+const getData = async url => {
+  try {
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const getRealUrl = async (url, date) => {
+  if (date.isBefore(moment.utc(), 'minute')) {
+    // retrieve url from wayback machine
+    const waybackProbeUrl = `https://archive.org/wayback/available?url=${url}&timestamp=${date.format('YYYYMMDDHHmmss')}`;
+    const waybackResponse = await getData(waybackProbeUrl);
+    return waybackResponse.archived_snapshots.closest.url;
+  } else {
+    return site.url;
+  }
 }

@@ -1,5 +1,4 @@
 {
-  "version": "0.1",
   "scrapesDir": "scrapes",
   "tileSize": {
     "x": 0,
