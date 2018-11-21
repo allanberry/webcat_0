@@ -5,6 +5,9 @@
 
 - slug: stanford
   url: 'https://library.stanford.edu'
+  dates:
+    - '1900-01-01'
+    - '2014-01-01'
 
 # - slug: uic
 #   url: 'https://library.uic.edu'

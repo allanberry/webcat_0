@@ -11,15 +11,23 @@ const axios = require('axios');
 
 (async function () {
   const sites = yaml.safeLoad(fs.readFileSync('sites.yaml', 'utf8'));
-  const dates = [
-    moment.utc("1900-01-01"), // first
-    // moment.utc() // latest
-  ]
+
+
+
+
+
   const browser = await puppeteer.launch();
   for (const site of sites) {
+
+    // convert dates to a more useful format
+    const dates = site.dates.map(date => moment.utc(date));
+
+    // scrape once for each date
     for (const date of dates) {
       await scrape(browser, site, date);
     }
+    // finish by scraping current site
+    await scrape(browser, site, moment.utc());
   }
   await browser.close();
 }());
@@ -42,9 +50,11 @@ async function scrape(browser, site, date) {
   // setup browser
   const page = await browser.newPage();
 
+  // convert url, e.g. to wayback machine
+  const retrievalUrl = await getRetrievalUrl(site.url, date);
+
   try {
     // if date is historical (more than a minute ago), access from wayback machine
-    const realUrl = await getRealUrl(site.url, date);
 
     // initialize site metadata
     if (fs.existsSync(siteMdFile)) {
@@ -64,11 +74,16 @@ async function scrape(browser, site, date) {
 
     // initialize current metadata
     currMetadata = {
+      urlRetrieved: retrievalUrl,
+      dateArchived: token,
+      dateRetrieved: moment.utc().format(),
+      version: package.version,
+      userAgent: await browser.userAgent(),
       screenshots: []
     };
 
     // retrieve page
-    await page.goto(realUrl, {
+    await page.goto(retrievalUrl, {
       waitUntil: 'networkidle0',
     });
 
@@ -93,12 +108,8 @@ async function scrape(browser, site, date) {
       const dimensions = imgSize(imgPath); // TODO? make async (doesn't seem like a big deal)
       currMetadata.screenshots.push({
         filename: filename,
-        dateArchived: token,
-        dateRetrieved: moment.utc().format(),
         width: dimensions.width,
         height: dimensions.height,
-        version: package.version,
-        userAgent: await browser.userAgent()
       })
     }
     
@@ -144,7 +155,7 @@ const getData = async url => {
   }
 };
 
-const getRealUrl = async (url, date) => {
+const getRetrievalUrl = async (url, date) => {
   if (date.isBefore(moment.utc(), 'minute')) {
     // retrieve url from wayback machine
     const waybackProbeUrl = `https://archive.org/wayback/available?url=${url}&timestamp=${date.format('YYYYMMDDHHmmss')}`;
