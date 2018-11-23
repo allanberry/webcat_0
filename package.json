@@ -1,6 +1,6 @@
 {
   "name": "libweb_cat",
-  "version": "0.1",
+  "version": "1.0",
   "description": "Catalog of library websites.",
   "main": "app.js",
   "scripts": {
@@ -19,5 +19,6 @@
     "js-yaml": "^3.12.0",
     "moment": "^2.22.2",
     "puppeteer": "^1.10.0"
-  }
+  },
+  "repository": "https://github.com/allanberry/website_catalog.git"
 }
