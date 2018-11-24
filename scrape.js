@@ -3,17 +3,17 @@ const moment = require('moment');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const imgSize = require('image-size');
-const util = require('./util.js');
-const config = require('./config.json');
-const package = require('./package.json');
 const axios = require('axios');
 const colors = require('colors/safe');
+const util = require('./util.js');
+const config = require('./config.json');
+const pack = require('./package.json');
 
 
 /**
  * Runs the script.
  */
-(async function () {
+(async function main () {
   try {
     const sites = yaml.safeLoad(fs.readFileSync('sites.yaml', 'utf8'));
     const browser = await puppeteer.launch();
@@ -70,7 +70,7 @@ const scrape = async (browser, inputSite, inputDate) => {
       const siteMdFile = `${siteDir}/md.yaml`;
       const currentDir = `${siteDir}/${dateToken}`;
       const currMdFile = `${siteDir}/${dateToken}/md.yaml`;
-      const htmlFile = `${siteDir}/${dateToken}/page-orig.html`;
+      const htmlFile = `${siteDir}/${dateToken}/page.html`;
       const htmlFileModified = `${siteDir}/${dateToken}/page-mod.html`;
 
       // create directory if it doesn't exist
@@ -91,7 +91,7 @@ const scrape = async (browser, inputSite, inputDate) => {
         siteMetadata = {
           slug: workingSite.slug,
           url: workingSite.url,
-          version: package.version
+          version: pack.version
         };
       }
 
@@ -101,21 +101,12 @@ const scrape = async (browser, inputSite, inputDate) => {
       });
 
       // retrieve html
-      // hat tip: https://github.com/GoogleChrome/puppeteer/issues/331#issuecomment-323711582
-      const bodyHtml = await page.evaluate(() => {
-        return new XMLSerializer().serializeToString(document.doctype) + document.documentElement.outerHTML
-      });
-
-      // output HTML
-      await fs.writeFile(htmlFile, bodyHtml, (err) => {
-        if(err) { console.error(err); }
-      });
-      
-      // modify page to remove Wayback Machine elements, before taking screenshots
-      await page.evaluate(() => {
-        let dom = document.querySelector('#id');
-        dom.innerHTML = "change to something"
-        return dom;
+      // adding "id_" to the date string gets the original (non-wayback) html
+      // save HTML
+      await fs.writeFile(htmlFile,
+        await getData(workingSite.url.replace(/\d{14}/, '$&id_')),
+        (err) => {
+          if(err) { console.error(err); }
       });
 
       // retrieve predetermined sizes, and take screenshots
@@ -124,7 +115,7 @@ const scrape = async (browser, inputSite, inputDate) => {
         wayback: workingSite.wayback,
         dateArchived: dateToken,
         dateRetrieved: moment.utc().format(),
-        version: package.version,
+        version: pack.version,
         userAgent: await browser.userAgent(),
         screenshots: []
       };
