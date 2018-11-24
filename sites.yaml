@@ -1,22 +1,32 @@
 # sites to scrape
 
-# - slug: harvard
-#   url: 'https://library.harvard.edu'
+- slug: harvard
+  url: 'https://library.harvard.edu'
+  categories:
+    - 'academic library'
 
-- slug: stanford
-  url: 'https://library.stanford.edu'
-  dates:
-    - '1900-01-01'
-    - '2014-01-01'
+# - slug: stanford
+#   url: 'https://library.stanford.edu'
+#   categories:
+#     - 'academic library'
 
 # - slug: uic
 #   url: 'https://library.uic.edu'
+#   categories:
+#     - 'academic library'
 
 # - slug: uiuc
 #   url: 'https://library.illinois.edu'
+#   categories:
+#     - 'academic library'
 
 # - slug: umich
 #   url: 'https://www.lib.umich.edu/'
+#   categories:
+#     - 'academic library'
 
 # - slug: umich_search
 #   url: 'https://search.lib.umich.edu/everything'
+#   categories:
+#     - 'academic library'
+#     - 'discovery system'
