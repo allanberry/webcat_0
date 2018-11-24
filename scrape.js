@@ -7,6 +7,8 @@ const util = require('./util.js');
 const config = require('./config.json');
 const package = require('./package.json');
 const axios = require('axios');
+const colors = require('colors/safe');
+
 
 /**
  * Runs the script.
@@ -38,35 +40,38 @@ const axios = require('axios');
 
 
 /**
- * Scrapes the internet for a site.
+ * Scrapes the internet for a site, and archives it.
  * @param {browser} browser - A puppeteer browser object.
- * @param {site} inputSite - A site object.
+ * @param {site} inputSite - A site object to be archived.
  */
 const scrape = async (browser, inputSite, inputDate) => {
   try {
     
-
-    // establish actual site from Wayback Machine
+    // If the site is historical, deal with the Wayback Machine.
+    // Otherwise, initialize a new internal site object "workingSite".
     const workingSite = inputDate.isBefore(moment().utc(), 'day')
       ? await getWayback(inputSite.slug, inputSite.url, inputDate)
       : {
         slug: inputSite.slug,
         url: inputSite.url,
         date: inputDate,
+        wayback: false,
       };
 
-    // only proceed if a workingSite exists
+    // workingSite will be null if the WM does not have any archived sites,
+    // so make sure it exists before proceeding.
     if (workingSite) {
       // setup browser
       const page = await browser.newPage();
 
       // setup variables
       const siteDir = `${config.scrapesDir}/${workingSite.slug}`;
-      const token = workingSite.date.format();
+      const dateToken = workingSite.date.format();
       const siteMdFile = `${siteDir}/md.yaml`;
-      const currentDir = `${siteDir}/${token}`;
-      const currMdFile = `${siteDir}/${token}/md.yaml`;
-      const htmlFile =   `${siteDir}/${token}/page.html`;
+      const currentDir = `${siteDir}/${dateToken}`;
+      const currMdFile = `${siteDir}/${dateToken}/md.yaml`;
+      const htmlFile = `${siteDir}/${dateToken}/page-orig.html`;
+      const htmlFileModified = `${siteDir}/${dateToken}/page-mod.html`;
 
       // create directory if it doesn't exist
       if (!fs.existsSync(currentDir)){
@@ -100,11 +105,24 @@ const scrape = async (browser, inputSite, inputDate) => {
       const bodyHtml = await page.evaluate(() => {
         return new XMLSerializer().serializeToString(document.doctype) + document.documentElement.outerHTML
       });
+
+      // output HTML
+      await fs.writeFile(htmlFile, bodyHtml, (err) => {
+        if(err) { console.error(err); }
+      });
       
-      // load predetermined sizes, and take screenshot
+      // modify page to remove Wayback Machine elements, before taking screenshots
+      await page.evaluate(() => {
+        let dom = document.querySelector('#id');
+        dom.innerHTML = "change to something"
+        return dom;
+      });
+
+      // retrieve predetermined sizes, and take screenshots
       let currMetadata = {
         urlRetrieved: workingSite.url,
-        dateArchived: token,
+        wayback: workingSite.wayback,
+        dateArchived: dateToken,
         dateRetrieved: moment.utc().format(),
         version: package.version,
         userAgent: await browser.userAgent(),
@@ -113,13 +131,17 @@ const scrape = async (browser, inputSite, inputDate) => {
       for (let key in config.defaultSizes) {
         const val = config.defaultSizes[key];
         const filename = `${key}.png`;
-        const imgPath = `${siteDir}/${token}/${filename}`;
+        const imgPath = `${siteDir}/${dateToken}/${filename}`;
+
+        // set width and height
         await page.setViewport(val);
+
         // take screenshot
         await page.screenshot({
           path: imgPath, // path relative to site root
           fullPage: true
         });
+
         // record metadata about screenshot
         const dimensions = imgSize(imgPath); // TODO? make async (doesn't seem like a big deal)
         currMetadata.screenshots.push({
@@ -128,7 +150,7 @@ const scrape = async (browser, inputSite, inputDate) => {
           height: dimensions.height,
         })
       }
-      
+
       // output metadata
       await fs.writeFile(siteMdFile, yaml.safeDump(siteMetadata), function(err) {
         if(err) { console.error(err); }
@@ -137,16 +159,13 @@ const scrape = async (browser, inputSite, inputDate) => {
         if(err) { console.error(err); }
       });
 
-      // output HTML
-      await fs.writeFile(htmlFile, bodyHtml, function(err) {
-        if(err) { console.error(err); }
-      });
-
       // report to console
-      console.log(`OK: ${workingSite.slug} - ${token}`);
+      console.log(colors.green(`Ok: ${workingSite.slug} - ${dateToken}`));
 
       // clean up
       await page.close();
+    } else {
+      console.log(`No site exists for ${inputSite.slug} (${inputSite.url} - ${inputDate})`.warn)
     }
   } catch(error) {
     console.error(error)
@@ -173,6 +192,7 @@ const getData = async url => {
  * @param {string} slug - An identifier.
  * @param {string} url - A url to get data from the Wayback machine.
  * @param {moment} date - A moment date object.
+ * @returns {workingSite|null} - a workingSite object.
  */
 const getWayback = async (slug, url, date) => {
   try {
@@ -189,6 +209,7 @@ const getWayback = async (slug, url, date) => {
       slug: slug,
       url: waybackResponse.archived_snapshots.closest.url,
       date: moment.utc(waybackResponse.archived_snapshots.closest.timestamp, 'YYYYMMDDHHmmss'),
+      wayback: true
     };
   } catch (error) {
     console.error(error);
