@@ -72,7 +72,7 @@ const scrape = async (browser, inputSite, inputDate) => {
       const currentDir = `${siteDir}/${dateToken}`;
       const currMdFile = `${siteDir}/${dateToken}/md.yaml`;
       const htmlFile = `${siteDir}/${dateToken}/page.html`;
-      const htmlFileModified = `${siteDir}/${dateToken}/page-mod.html`;
+      const cssFile = `${siteDir}/${dateToken}/styles.css`;
 
       // create directory if it doesn't exist
       if (!fs.existsSync(currentDir)){
@@ -99,6 +99,16 @@ const scrape = async (browser, inputSite, inputDate) => {
       // retrieve page
       await page.goto(workingSite.url, {
         waitUntil: 'networkidle0',
+      });
+
+      // retrieve and save css
+      const css = await minimalcss.minimize({
+        browser: browser,
+        styletags: true,
+        urls: [workingSite.url] });
+      await fs.writeFile(cssFile, await css.finalCss,
+        (err) => {
+          if(err) { console.error(err); }
       });
 
       // retrieve html
