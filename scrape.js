@@ -8,6 +8,7 @@ const colors = require('colors/safe');
 const util = require('./util.js');
 const config = require('./config.json');
 const pack = require('./package.json');
+const minimalcss = require('minimalcss');
 
 
 /**
@@ -108,6 +109,14 @@ const scrape = async (browser, inputSite, inputDate) => {
         (err) => {
           if(err) { console.error(err); }
       });
+
+      // modify page to remove Wayback Machine elements, before taking screenshots
+      if (workingSite.wayback) {
+        await page.evaluate(() => {
+          let dom = document.querySelector('#wm-ipp');
+          dom.parentNode.removeChild(dom);
+        });
+      }
 
       // retrieve predetermined sizes, and take screenshots
       let currMetadata = {
