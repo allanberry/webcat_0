@@ -60,10 +60,10 @@
 # - parent_institution: Grove City College
 
 - slug: harvard
+  parent_institution: Harvard University
   city: Cambridge
   state: MA
   country: US
-  parent_institution: Harvard University
   url: 'https://library.harvard.edu'
 
 # - parent_institution: Hillsdale College
