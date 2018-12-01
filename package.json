@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "scrape": "node scrape.js",
     "site:dev": "vuepress dev site",
     "site:build": "vuepress build site"
   },

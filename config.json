@@ -1,5 +1,5 @@
 {
-  "scrapesDir": "scrapes",
+  "scrapesDir": "scrape/scrapes",
   "tileSize": {
     "x": 0,
     "y": 0, 
