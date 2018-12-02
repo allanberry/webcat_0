@@ -85,7 +85,14 @@
 # - parent_institution: Loyola University, Chicago
 # - parent_institution: Malcolm X College
 # - parent_institution: Marquette University
-# - parent_institution: Massachusetts Institute of Technology
+
+- slug: mit
+  url: https://libraries.mit.edu/
+  parent_institution: Massachusetts Institute of Technology
+  city: Cambridge
+  state: MA
+  country: US
+
 # - parent_institution: Miami Dade College
 # - parent_institution: Miami University
 # - parent_institution: Michigan State University
@@ -115,7 +122,11 @@
 # - parent_institution: Rice University
 # - parent_institution: Rochester Institute of Technology
 # - parent_institution: Rutgers University
-# - parent_institution: Rutgers, The State University of New Jersey
+
+- slug: rutgers
+  parent_institution: Rutgers, The State University of New Jersey
+  url: https://www.libraries.rutgers.edu/
+
 # - parent_institution: Saint Louis University
 # - parent_institution: San Diego State University
 # - parent_institution: San Francisco State University
@@ -135,7 +146,11 @@
 # - parent_institution: Stevens Institute of Technology
 # - parent_institution: Stony Brook University
 # - parent_institution: Swarthmore College
-# - parent_institution: Syracuse University
+
+- slug: syr
+  parent_institution: Syracuse University
+  url: https://library.syr.edu/
+
 # - parent_institution: Temple University
 # - parent_institution: Texas A&M University
 # - parent_institution: Texas Christian University
@@ -203,13 +218,13 @@
   country: US
   url: 'https://www.lib.umich.edu/'
 
-# - slug: umich_dearborn
-#   parent_institution: University of Michigan, Dearborn
-#   url: https://library.umd.umich.edu/
+- slug: umich_dearborn
+  parent_institution: University of Michigan, Dearborn
+  url: https://library.umd.umich.edu/
 
-# - slug: umflint
-#   parent_institution: University of Michigan, Flint
-#   url: https://www.umflint.edu/library
+- slug: umflint
+  parent_institution: University of Michigan, Flint
+  url: https://www.umflint.edu/library
 
 # - parent_institution: University of Minnesota
 # - parent_institution: University of Minnesota, Twin Cities
@@ -218,7 +233,14 @@
 # - parent_institution: University of Nebraska, Lincoln
 # - parent_institution: University of Nevada, Reno
 # - parent_institution: University of North Carolina, Charlotte
-# - parent_institution: University of North Carolina, Chapel Hill
+
+- slug: unc
+  parent_institution: University of North Carolina, Chapel Hill
+  city: Chapel Hill
+  state: NC
+  country: US
+  url: https://library.unc.edu/
+
 # - parent_institution: University of North Texas
 
 - slug: nd
@@ -240,14 +262,27 @@
 # - parent_institution: University of Southern California
 # - parent_institution: University of Tennessee
 # - parent_institution: University of Tennessee, Knoxville
-# - parent_institution: University of Texas, Austin
+
+- slug: utexas
+  parent_institution: University of Texas, Austin
+  url: https://www.lib.utexas.edu/
+
 # - parent_institution: University of Texas, San Antonio
 # - parent_institution: University of Tulsa
 # - parent_institution: University of Virginia
-# - parent_institution: University of Washington
-# - parent_institution: University of Wisconsin
-# - parent_institution: University of Wisconsin, Madison
-# - parent_institution: University of Wisconsin, Milwaukee
+
+- slug: washington
+  parent_institution: University of Washington
+  url: http://www.lib.washington.edu/
+
+- slug: wisc
+  parent_institution: University of Wisconsin, Madison
+  url: https://www.library.wisc.edu/
+
+- slug: uwm
+  parent_institution: University of Wisconsin, Milwaukee
+  url: https://uwm.edu/libraries/
+
 # - parent_institution: University of Wyoming
 # - parent_institution: Utah State University, Logan
 # - parent_institution: Vanderbilt University
@@ -258,7 +293,11 @@
 # - parent_institution: Washington State University
 # - parent_institution: Washington University, St. Louis
 # - parent_institution: Wayne County Community College
-# - parent_institution: Wayne State University
+
+- slug: wayne
+  parent_institution: Wayne State University
+  url: https://library.wayne.edu/
+
 # - parent_institution: Wellesley College
 # - parent_institution: West Virginia University
 # - parent_institution: Western Governors University

@@ -7,8 +7,7 @@ const axios = require('axios');
 const colors = require('colors/safe');
 const util = require('./util.js');
 const config = require('./config.json');
-const pack = require('./package.json');
-const minimalcss = require('minimalcss');
+const pack = require('../package.json');
 
 
 /**
@@ -31,7 +30,7 @@ const minimalcss = require('minimalcss');
       }
 
       // finish by scraping current site
-      await scrape(browser, site, moment.utc());
+      // await scrape(browser, site, moment.utc());
     }
     await browser.close();
   } catch (error) {
@@ -74,111 +73,123 @@ const scrape = async (browser, inputSite, inputDate) => {
       const htmlFile = `${siteDir}/${dateToken}/page.html`;
       const cssFile = `${siteDir}/${dateToken}/styles.css`;
 
-      // create directory if it doesn't exist
-      if (!fs.existsSync(currentDir)){
+      // create directory if it doesn't exist; else, skip
+      if (!fs.existsSync(currentDir)) {
         util.mkDirByPathSync(currentDir);
-      }
+        
+        try {
 
-      // initialize site metadata
-      let siteMetadata;
-      if (fs.existsSync(siteMdFile)) {
-        // input from file
-        await fs.readFile(siteMdFile, 'utf8', async function(err, contents) {
-          if(err) { console.error(err); }
-          siteMetadata = yaml.safeLoad(contents);
-        });
+          // initialize site metadata
+          let siteMetadata;
+          if (fs.existsSync(siteMdFile)) {
+            // input from file
+            await fs.readFile(siteMdFile, 'utf8', async function(err, contents) {
+              if(err) { console.error(err); }
+              siteMetadata = yaml.safeLoad(contents);
+            });
+          } else {
+            // create from scratch
+            siteMetadata = {
+              slug: workingSite.slug,
+              url: workingSite.url,
+              version: pack.version
+            };
+          }
+
+          // retrieve page
+          await page.goto(workingSite.url, {
+            waitUntil: 'networkidle0',
+          });
+
+          // retrieve and save css
+          // const css = await minimalcss.minimize({
+          //   browser: browser,
+          //   styletags: true,
+          //   urls: [workingSite.url] });
+          // await fs.writeFile(cssFile, await css.finalCss,
+          //   (err) => {
+          //     if(err) { console.error(err); }
+          // });
+
+          // retrieve html
+          // adding "id_" to the date string gets the original (non-wayback) html
+          // save HTML
+          await fs.writeFile(htmlFile,
+            await getData(workingSite.url.replace(/\d{14}/, '$&id_')),
+            (err) => {
+              if(err) { console.error(err); }
+          });
+
+          // modify page to remove Wayback Machine elements, before taking screenshots
+          if (workingSite.wayback) {
+            await page.evaluate(() => {
+              let dom = document.querySelector('#wm-ipp');
+              dom.parentNode.removeChild(dom);
+            });
+          }
+
+          // retrieve predetermined sizes, and take screenshots
+          let currMetadata = {
+            urlRetrieved: workingSite.url,
+            wayback: workingSite.wayback,
+            dateArchived: dateToken,
+            dateRetrieved: moment.utc().format(),
+            version: pack.version,
+            userAgent: await browser.userAgent(),
+            screenshots: []
+          };
+          for (let key in config.defaultSizes) {
+            const val = config.defaultSizes[key];
+            const filename = `${key}.png`;
+            const imgPath = `${siteDir}/${dateToken}/${filename}`;
+
+            // set width and height
+            await page.setViewport(val);
+
+            // take screenshot
+            await page.screenshot({
+              path: imgPath, // path relative to site root
+              fullPage: true
+            });
+
+            // record metadata about screenshot
+            const dimensions = imgSize(imgPath); // TODO? make async (doesn't seem like a big deal)
+            currMetadata.screenshots.push({
+              filename: filename,
+              width: dimensions.width,
+              height: dimensions.height,
+            })
+          }
+
+          // output metadata
+          await fs.writeFile(siteMdFile, yaml.safeDump(siteMetadata), function(err) {
+            if(err) { console.error(err); }
+          });
+          await fs.writeFile(currMdFile, yaml.safeDump(currMetadata), function(err) {
+            if(err) { console.error(err); }
+          });
+
+          // report to console
+          console.log(colors.green(`Ok: ${workingSite.slug} - ${dateToken}`));
+
+          // clean up
+          await page.close();
+        } catch(error) {
+          console.error(colors.red(`${error.name}: ${workingSite.slug} - ${dateToken}`));
+      
+          // delete directory if exists
+          if (fs.existsSync(currentDir)) {
+            fs.rmdir(currentDir, error => error);
+          }
+        }
       } else {
-        // create from scratch
-        siteMetadata = {
-          slug: workingSite.slug,
-          url: workingSite.url,
-          version: pack.version
-        };
+        console.log(colors.yellow(`Exists: ${inputSite.slug} - ${dateToken}`))
       }
-
-      // retrieve page
-      await page.goto(workingSite.url, {
-        waitUntil: 'networkidle0',
-      });
-
-      // retrieve and save css
-      const css = await minimalcss.minimize({
-        browser: browser,
-        styletags: true,
-        urls: [workingSite.url] });
-      await fs.writeFile(cssFile, await css.finalCss,
-        (err) => {
-          if(err) { console.error(err); }
-      });
-
-      // retrieve html
-      // adding "id_" to the date string gets the original (non-wayback) html
-      // save HTML
-      await fs.writeFile(htmlFile,
-        await getData(workingSite.url.replace(/\d{14}/, '$&id_')),
-        (err) => {
-          if(err) { console.error(err); }
-      });
-
-      // modify page to remove Wayback Machine elements, before taking screenshots
-      if (workingSite.wayback) {
-        await page.evaluate(() => {
-          let dom = document.querySelector('#wm-ipp');
-          dom.parentNode.removeChild(dom);
-        });
-      }
-
-      // retrieve predetermined sizes, and take screenshots
-      let currMetadata = {
-        urlRetrieved: workingSite.url,
-        wayback: workingSite.wayback,
-        dateArchived: dateToken,
-        dateRetrieved: moment.utc().format(),
-        version: pack.version,
-        userAgent: await browser.userAgent(),
-        screenshots: []
-      };
-      for (let key in config.defaultSizes) {
-        const val = config.defaultSizes[key];
-        const filename = `${key}.png`;
-        const imgPath = `${siteDir}/${dateToken}/${filename}`;
-
-        // set width and height
-        await page.setViewport(val);
-
-        // take screenshot
-        await page.screenshot({
-          path: imgPath, // path relative to site root
-          fullPage: true
-        });
-
-        // record metadata about screenshot
-        const dimensions = imgSize(imgPath); // TODO? make async (doesn't seem like a big deal)
-        currMetadata.screenshots.push({
-          filename: filename,
-          width: dimensions.width,
-          height: dimensions.height,
-        })
-      }
-
-      // output metadata
-      await fs.writeFile(siteMdFile, yaml.safeDump(siteMetadata), function(err) {
-        if(err) { console.error(err); }
-      });
-      await fs.writeFile(currMdFile, yaml.safeDump(currMetadata), function(err) {
-        if(err) { console.error(err); }
-      });
-
-      // report to console
-      console.log(colors.green(`Ok: ${workingSite.slug} - ${dateToken}`));
-
-      // clean up
-      await page.close();
     } else {
-      console.log(`No site exists for ${inputSite.slug} (${inputSite.url} - ${inputDate})`.warn)
+      console.log(colors.yellow(`No site exists for ${inputSite.slug} (${inputSite.url} - ${inputDate})`))
     }
   } catch(error) {
-    console.error(error)
+    console.error(error);
   }  
 }
 
