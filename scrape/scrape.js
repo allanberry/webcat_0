@@ -6,18 +6,18 @@ const imgSize = require('image-size');
 const axios = require('axios');
 const colors = require('colors/safe');
 const util = require('./util.js');
-const config = require('./config.json');
 const pack = require('../package.json');
 
+const config = yaml.safeLoad(fs.readFileSync('scrape/config.yaml', 'utf8'));
 
 /**
  * Runs the script.
  */
 (async function main () {
   try {
-    const sites = yaml.safeLoad(fs.readFileSync('sites.yaml', 'utf8'));
+
     const browser = await puppeteer.launch();
-    for (const site of sites) {
+    for (const site of config.sites) {
 
       // convert dates to a more useful format
       const dates = site.dates

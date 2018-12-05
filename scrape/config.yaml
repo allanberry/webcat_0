@@ -1,0 +1,351 @@
+scrapesDir: scrape/scrapes
+tileSize:
+  x: 0
+  y: 0
+  width: 600
+  height: 600
+  
+defaultSizes:
+  0600x0:
+    width: 600
+    height: 0
+  1200x0: 
+    width: 1200
+    height: 0
+
+defaultDates:
+  - "1995-01-01"
+  - "1996-01-01"
+  - "1997-01-01"
+  - "1998-01-01"
+  - "1999-01-01"
+  - "2001-01-01"
+  - "2002-01-01"
+  - "2003-01-01"
+  - "2004-01-01"
+  - "2005-01-01"
+  - "2006-01-01"
+  - "2007-01-01"
+  - "2008-01-01"
+  - "2009-01-01"
+  - "2010-01-01"
+  - "2011-01-01"
+  - "2012-01-01"
+  - "2013-01-01"
+  - "2014-01-01"
+  - "2015-01-01"
+  - "2016-01-01"
+  - "2017-01-01"
+  - "2018-01-01"
+
+scrapeLatest: false
+
+sites:
+  # - parent_institution: American University
+  # - parent_institution: Amherst College
+  # - parent_institution: Arizona State University
+  # - parent_institution: Ashford University
+  # - parent_institution: Auburn University
+  # - parent_institution: Baylor University
+  # - parent_institution: Binghamton University
+  # - parent_institution: Biola University
+  # - parent_institution: Bob Jones University
+  # - parent_institution: Boston College
+  # - parent_institution: Boston University
+  # - parent_institution: Bowdoin College
+  # - parent_institution: Brandeis University
+  # - parent_institution: Brigham Young University
+  # - parent_institution: Brown University
+  # - parent_institution: California Institute of Technology
+  # - parent_institution: California Polytechnic State University, San Luis Obispo
+  # - parent_institution: California State Polytechnic University, Pomona
+  # - parent_institution: California State University, Fresno
+  # - parent_institution: California State University, Fullerton
+  # - parent_institution: California State University, Long Beach
+  # - parent_institution: California State University, Los Angeles
+  # - parent_institution: California State University, Northridge
+  # - parent_institution: California State University, Sacramento
+  # - parent_institution: Carleton College
+  # - parent_institution: Carnegie Mellon University
+  # - parent_institution: Carroll College
+  # - parent_institution: Case Western Reserve University
+  # - parent_institution: Central Michigan University
+  # - parent_institution: Centre College
+  # - parent_institution: Chaminade University of Honolulu
+  # - parent_institution: Clark University
+  # - parent_institution: Clemson University
+  # - parent_institution: College of Environmental Science and Forestry
+  # - parent_institution: College of the Ozarks
+  # - parent_institution: College of William and Mary
+  # - parent_institution: Colorado College
+  # - parent_institution: Colorado School of Mines
+  # - parent_institution: Colorado State University
+  # - parent_institution: Columbia College Chicago
+  # - parent_institution: Columbia University
+  # - parent_institution: Cornell University
+  # - parent_institution: Creighton University
+  # - parent_institution: Dartmouth College
+  # - parent_institution: Drexel University
+  # - parent_institution: Duke University
+  # - parent_institution: East Carolina University
+  # - parent_institution: Emory University
+  # - parent_institution: Florida International University
+  # - parent_institution: Florida State University
+  # - parent_institution: Fordham University
+  # - parent_institution: Full Sail University
+  # - parent_institution: George Mason University
+  # - parent_institution: George Washington University
+  # - parent_institution: Georgetown University
+  # - parent_institution: Georgia Institute of Technology
+  # - parent_institution: Georgia State University
+  # - parent_institution: Grand Valley State University
+  # - parent_institution: Grinnell College
+  # - parent_institution: Grove City College
+
+  - slug: harvard
+    parent_institution: Harvard University
+    city: Cambridge
+    state: MA
+    country: US
+    url: 'https://library.harvard.edu'
+
+  # - parent_institution: Hillsdale College
+  # - parent_institution: Houston Baptist University
+  # - parent_institution: Howard University
+  # - parent_institution: Illinois Institute of Technology
+  # - parent_institution: Indiana University, Bloomington
+  # - parent_institution: Iowa State University
+  # - parent_institution: Ivy Tech Community College, Central Indiana
+  # - parent_institution: James Madison University
+  # - parent_institution: Johns Hopkins University
+  # - parent_institution: Kansas State University
+  # - parent_institution: Kennesaw State University
+  # - parent_institution: Kent State University
+  # - parent_institution: Lehigh University
+  # - parent_institution: Liberty University
+  # - parent_institution: Lone Star College System
+  # - parent_institution: Louisiana State University
+  # - parent_institution: Loyola University, Chicago
+  # - parent_institution: Malcolm X College
+  # - parent_institution: Marquette University
+
+  - slug: mit
+    url: https://libraries.mit.edu/
+    parent_institution: Massachusetts Institute of Technology
+    city: Cambridge
+    state: MA
+    country: US
+
+  # - parent_institution: Miami Dade College
+  # - parent_institution: Miami University
+  # - parent_institution: Michigan State University
+  # - parent_institution: Middlebury College
+  # - parent_institution: Mississippi State University
+  # - parent_institution: Montclair State University
+  # - parent_institution: New Mexico State University
+  # - parent_institution: New York University
+  # - parent_institution: Newberry Library
+  # - parent_institution: North Carolina State University
+  # - parent_institution: Northeastern University
+  # - parent_institution: Northern Arizona University
+  # - parent_institution: Northern Virginia Community College
+  # - parent_institution: Northwestern University
+  # - parent_institution: Oberlin College
+  # - parent_institution: Ohio State University
+  # - parent_institution: Oklahoma State University
+  # - parent_institution: Oregon State University
+  # - parent_institution: Penn State
+  # - parent_institution: Pennsylvania State University
+  # - parent_institution: Pepperdine University
+  # - parent_institution: Pratt Institute
+  # - parent_institution: Princeton University
+  # - parent_institution: Purdue University
+  # - parent_institution: Regent University
+  # - parent_institution: Rensselaer Polytechnic Institute
+  # - parent_institution: Rice University
+  # - parent_institution: Rochester Institute of Technology
+  # - parent_institution: Rutgers University
+
+  - slug: rutgers
+    parent_institution: Rutgers, The State University of New Jersey
+    url: https://www.libraries.rutgers.edu/
+
+  # - parent_institution: Saint Louis University
+  # - parent_institution: San Diego State University
+  # - parent_institution: San Francisco State University
+  # - parent_institution: San Jose State University
+  # - parent_institution: Simmons College
+  # - parent_institution: South Dakota School of Mines & Technology
+  # - parent_institution: Southern Methodist University
+  # - parent_institution: Southern New Hampshire University
+
+  - slug: stanford
+    parent_institution: Stanford University
+    city: Stanford
+    state: CA
+    country: US
+    url: 'https://library.stanford.edu'
+
+  # - parent_institution: Stevens Institute of Technology
+  # - parent_institution: Stony Brook University
+  # - parent_institution: Swarthmore College
+
+  - slug: syr
+    parent_institution: Syracuse University
+    url: https://library.syr.edu/
+
+  # - parent_institution: Temple University
+  # - parent_institution: Texas A&M University
+  # - parent_institution: Texas Christian University
+  # - parent_institution: Texas State University
+  # - parent_institution: Texas Tech University
+  # - parent_institution: The Catholic University of America
+  # - parent_institution: The College of Idaho
+  # - parent_institution: Tufts University
+  # - parent_institution: Tulane University
+  # - parent_institution: University of Alabama
+  # - parent_institution: University of Alaska, Fairbanks
+  # - parent_institution: University of Arizona
+  # - parent_institution: University of Arkansas
+  # - parent_institution: University of California, Berkeley
+  # - parent_institution: University of California, Davis
+  # - parent_institution: University of California, Irvine
+  # - parent_institution: University of California, Los Angeles
+  # - parent_institution: University of California, Riverside
+  # - parent_institution: University of California, San Diego
+  # - parent_institution: University of California, Santa Barbara
+  # - parent_institution: University of California, Santa Cruz
+  # - parent_institution: University of Central Florida
+  # - parent_institution: University of Chicago
+  # - parent_institution: University of Cincinnati
+  # - parent_institution: University of Colorado Boulder
+  # - parent_institution: University of Colorado, Boulder
+  # - parent_institution: University of Connecticut
+  # - parent_institution: University of Dallas
+  # - parent_institution: University of Delaware
+  # - parent_institution: University of Denver
+  # - parent_institution: University of Florida
+  # - parent_institution: University of Georgia
+  # - parent_institution: University of Hawaii, Manoa
+  # - parent_institution: University of Houston
+
+  - slug: uic
+    parent_institution: University of Illinois, Chicago
+    city: Chicago
+    state: IL
+    country: US
+    url: 'https://library.uic.edu'
+
+  # - parent_institution: University of Illinois, Springfield
+
+  - parent_institution: University of Illinois, Urbana-Champaign
+    slug: uiuc
+    city: Champaign
+    state: IL
+    country: US
+    url: 'https://library.illinois.edu'
+
+  # - parent_institution: University of Iowa
+  # - parent_institution: University of Jamestown
+  # - parent_institution: University of Kansas
+  # - parent_institution: University of Kentucky
+  # - parent_institution: University of Maryland, College Park
+  # - parent_institution: University of Massachusetts Amherst
+  # - parent_institution: University of Massachusetts, Amherst
+  # - parent_institution: University of Miami
+
+  - slug: umich
+    parent_institution: University of Michigan, Ann Arbor
+    city: Ann Arbor
+    state: MI
+    country: US
+    url: 'https://www.lib.umich.edu/'
+
+  - slug: umich_dearborn
+    parent_institution: University of Michigan, Dearborn
+    url: https://library.umd.umich.edu/
+
+  - slug: umflint
+    parent_institution: University of Michigan, Flint
+    url: https://www.umflint.edu/library
+
+  # - parent_institution: University of Minnesota
+  # - parent_institution: University of Minnesota, Twin Cities
+  # - parent_institution: University of Mississippi, Oxford
+  # - parent_institution: University of Missouri
+  # - parent_institution: University of Nebraska, Lincoln
+  # - parent_institution: University of Nevada, Reno
+  # - parent_institution: University of North Carolina, Charlotte
+
+  - slug: unc
+    parent_institution: University of North Carolina, Chapel Hill
+    city: Chapel Hill
+    state: NC
+    country: US
+    url: https://library.unc.edu/
+
+  # - parent_institution: University of North Texas
+
+  - slug: nd
+    parent_institution: University of Notre Dame
+    library_name: Hesburgh Libraries
+    city: Notre Dame
+    state: IN
+    country: US
+    url: https://library.nd.edu/
+
+  # - parent_institution: University of Oklahoma
+  # - parent_institution: University of Oregon
+  # - parent_institution: University of Pennsylvania
+  # - parent_institution: University of Pittsburgh
+  # - parent_institution: University of Rochester
+  # - parent_institution: University of San Diego
+  # - parent_institution: University of South Carolina
+  # - parent_institution: University of South Florida
+  # - parent_institution: University of Southern California
+  # - parent_institution: University of Tennessee
+  # - parent_institution: University of Tennessee, Knoxville
+
+  - slug: utexas
+    parent_institution: University of Texas, Austin
+    url: https://www.lib.utexas.edu/
+
+  # - parent_institution: University of Texas, San Antonio
+  # - parent_institution: University of Tulsa
+  # - parent_institution: University of Virginia
+
+  - slug: washington
+    parent_institution: University of Washington
+    url: http://www.lib.washington.edu/
+
+  - slug: wisc
+    parent_institution: University of Wisconsin, Madison
+    url: https://www.library.wisc.edu/
+
+  - slug: uwm
+    parent_institution: University of Wisconsin, Milwaukee
+    url: https://uwm.edu/libraries/
+
+  # - parent_institution: University of Wyoming
+  # - parent_institution: Utah State University, Logan
+  # - parent_institution: Vanderbilt University
+  # - parent_institution: Villanova University
+  # - parent_institution: Virginia Commonwealth University
+  # - parent_institution: Virginia Tech
+  # - parent_institution: Wake Forest University
+  # - parent_institution: Washington State University
+  # - parent_institution: Washington University, St. Louis
+  # - parent_institution: Wayne County Community College
+
+  - slug: wayne
+    parent_institution: Wayne State University
+    url: https://library.wayne.edu/
+
+  # - parent_institution: Wellesley College
+  # - parent_institution: West Virginia University
+  # - parent_institution: Western Governors University
+  # - parent_institution: Willamette University
+  # - parent_institution: Williams College
+  # - parent_institution: Worcester Polytechnic Institute
+  # - parent_institution: Yale University
+  # - parent_institution: Yeshiva University
