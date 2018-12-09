@@ -8,7 +8,7 @@ const colors = require('colors/safe');
 const util = require('./util.js');
 const pack = require('../package.json');
 
-const config = yaml.safeLoad(fs.readFileSync('scrape/config.yaml', 'utf8'));
+const config = yaml.safeLoad(fs.readFileSync('../config.yaml', 'utf8'));
 
 /**
  * Runs the script.
