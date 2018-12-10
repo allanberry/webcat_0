@@ -104,9 +104,6 @@ sites:
 
   - slug: harvard
     parent_institution: Harvard University
-    city: Cambridge
-    state: MA
-    country: US
     url: 'https://library.harvard.edu'
 
   # - parent_institution: Hillsdale College
@@ -260,6 +257,13 @@ sites:
     state: MI
     country: US
     url: 'https://www.lib.umich.edu/'
+
+  - slug: umich_search
+    parent_institution: University of Michigan, Ann Arbor
+    city: Ann Arbor
+    state: MI
+    country: US
+    url: 'https://search.lib.umich.edu/everything'
 
   - slug: umich_dearborn
     parent_institution: University of Michigan, Dearborn
