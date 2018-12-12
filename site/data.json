@@ -16,14 +16,12 @@
     },
     "versions": [
       {
-        "date": "2017-01-01",
-        "delta": 1,
-        "complexity": 123
-      },
-      {
-        "date": "2018-01-01",
-        "delta": 0.75,
-        "complexity": 234
+        "date": "2018-12-12",
+        "complexity": 123,
+        "complexity_delta": 123,
+        "source_qty": 6,
+        "source_qty_non_origin": 3,
+        "source_total_kb": 125
       }
     ],
     "keywords": [
