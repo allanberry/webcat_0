@@ -1,52 +1,52 @@
 
 
 - parent_organization: harvard
-  url: 'https://library.harvard.edu'
+  url: 
 
 - parent_organization: mit
-  url: https://libraries.mit.edu/
+  url: 
 
 - parent_organization: rutgers
-  url: https://www.libraries.rutgers.edu/
+  url: 
 
 - parent_organization: stanford
-  url: 'https://library.stanford.edu'
+  url: 
 
 - parent_organization: syr
-  url: https://library.syr.edu/
+  url: 
 
 - parent_organization: uic
-  url: 'https://library.uic.edu'
+  url: 
 
 - parent_organization: uiuc
-  url: 'https://library.illinois.edu'
+  url: 
 
 - parent_organization: umich
-  url: 'https://www.lib.umich.edu/'
+  url: 
 
 - parent_organization: umich_dearborn
-  url: https://library.umd.umich.edu/
+  url: 
 
 - parent_organization: umflint
   url: https://www.umflint.edu/library
 
 - parent_organization: unc
-  url: https://library.unc.edu/
+  url: 
 
 - parent_organization: nd
-  url: https://library.nd.edu/
+  url: 
 
 - parent_organization: utexas
-  url: https://www.lib.utexas.edu/
+  url: 
 
 - parent_organization: washington
-  url: http://www.lib.washington.edu/
+  url: 
 
 - parent_organization: wisc
-  url: https://www.library.wisc.edu/
+  url: 
 
 - parent_organization: uwm
-  url: https://uwm.edu/libraries/
+  url: 
 
 - parent_organization: wayne
-  url: https://library.wayne.edu/
+  url: 
