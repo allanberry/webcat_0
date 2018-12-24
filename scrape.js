@@ -4,11 +4,11 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const imgSize = require('image-size');
 const axios = require('axios');
+const minimalcss = require('minimalcss');
 const colors = require('colors/safe');
 const util = require('./util.js');
 const config = require('./config.json');
 const pack = require('./package.json');
-const minimalcss = require('minimalcss');
 
 
 /**
@@ -170,15 +170,16 @@ const scrape = async (browser, inputSite, inputDate) => {
       });
 
       // report to console
-      console.log(colors.green(`Ok: ${workingSite.slug} - ${dateToken}`));
+      console.log(colors.green(`Ok:   ${workingSite.slug} - ${dateToken}`));
 
       // clean up
       await page.close();
     } else {
-      console.log(`No site exists for ${inputSite.slug} (${inputSite.url} - ${inputDate})`.warn)
+      console.log(colors.warn(`No site exists for ${inputSite.slug} (${inputSite.url} - ${inputDate})`))
     }
   } catch(error) {
-    console.error(error)
+    // console.error(error)
+    console.log(colors.red(`Fail: ${workingSite.slug} - ${dateToken}`));
   }  
 }
 
