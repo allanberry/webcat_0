@@ -1,0 +1,44 @@
+[
+  {
+    "_id": "uic",
+    "_created": "2018-12-11",
+    "_modified": "2018-12-11",
+    "name": "University of Illinois at Chicago Library",
+    "url": "https://library.uic.edu",
+    "address": {
+      "street": "801 S. Morgan",
+      "city": "Chicago",
+      "state": "IL",
+      "zip": "60607"
+    },
+    "total_expenditures": {
+      "2018": "9999999"
+    },
+    "versions": [
+      {
+        "date": "2018-12-12",
+        "complexity": 123,
+        "complexity_delta": 123,
+        "source_qty": 6,
+        "source_qty_non_origin": 3,
+        "source_total_kb": 125
+      }
+    ],
+    "keywords": [
+      "arl",
+      "public"
+    ],
+    "parent":   {
+      "name": "University of Illinois, Chicago",
+      "url": "https://uic.edu",
+      "founded": "1859",
+      "total_expenditures": {
+        "2018": "9999999"
+      },
+      "enrollment": {
+        "2018": "99999"
+      },
+      "notes": "Medical campus founded in 1859; modern integration occurred in the 1960s. Source: https://www.uic.edu/about/history"
+    }
+  }
+]
