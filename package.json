@@ -4,8 +4,8 @@
   "description": "Catalog of library websites.",
   "main": "app.js",
   "scripts": {
-    "gather": "node gather/gather.js",
-    "refine": "node gather/refine.js",
+    "gather": "node data/gather.js",
+    "refine": "node data/refine.js",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
@@ -43,7 +43,8 @@
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
     "vue-template-compiler": "^2.5.17",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "webpack-chain": "^5.0.1"
   },
   "eslintConfig": {
     "root": true,
