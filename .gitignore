@@ -20,7 +20,7 @@ yarn-error.log*
 *.sw*
 
 # client build
-/client/dist/
+/client/_dist/
 
 # project specific data
 data/scrapes/

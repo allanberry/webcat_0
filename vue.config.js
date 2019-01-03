@@ -35,5 +35,5 @@ module.exports = {
    * Change 'dist' dir to 'client/dist'
    * https://github.com/vuejs/vue-cli/issues/1496#issuecomment-410546250
    */
-  outputDir: `${clientDir}/dist`,
+  outputDir: `${clientDir}/_dist`,
 };
