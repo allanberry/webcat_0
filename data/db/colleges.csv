@@ -1,0 +1,101 @@
+_id,name,city,state,url,ipeds_id
+asu,Arizona State University,Tempe,AZ,https://www.asu.edu/,104151
+auburn,Auburn University,Auburn,AL,http://www.auburn.edu/,100858
+bc,Boston College,Chestnut Hill,MA,https://www.bc.edu/,164924
+bu,Boston University,Boston,MA,https://www.bu.edu/,164988
+byu,Brigham Young University,Provo,UT,https://www.byu.edu/,230038
+brown,Brown University,Providence,RI,https://www.brown.edu/,217156
+case,Case Western Reserve University,Cleveland,OH,https://case.edu/,201645
+colostate,Colorado State University,Fort Collins,CO,https://www.colostate.edu/,126818
+columbia,Columbia University,New York,NY,https://www.columbia.edu/,190150
+cornell,Cornell University,Ithaca,NY,https://www.cornell.edu/,190415
+dartmouth,Dartmouth College,Hanover,NH,https://home.dartmouth.edu/,182670
+duke,Duke University,Durham,NC,https://www.duke.edu/,198419
+emory,Emory University,Atlanta,GA,http://www.emory.edu/,139658
+fsu,Florida State University,Tallahassee,FL,https://www.fsu.edu/,134097
+gwu,George Washington University,Washington,DC,https://www.gwu.edu/,131469
+georgetown,Georgetown University,Washington,DC,https://www.georgetown.edu/,131496
+gatech,Georgia Tech,Atlanta,GA,https://www.gatech.edu/,139755
+harvard,Harvard University,Cambridge,MA,https://www.harvard.edu/,166027
+howard,Howard University,Washington,DC,https://www2.howard.edu/,131520
+indiana,Indiana University,Bloomington,IN,https://www.indiana.edu/,151351
+iastate,Iowa State University,Ames,IA,https://www.iastate.edu/,153603
+jhu,Johns Hopkins University,Baltimore,MD,https://www.jhu.edu/,162928
+kent,Kent State University,Kent,OH,https://www.kent.edu/,203517
+lsu,Louisina State University,Baton Rouge,LA,https://www.lsu.edu/,159391
+mit,Massachusetts Institute of Technology,Cambridge,MA,http://www.mit.edu/,166683
+miamioh,Miami University,Oxford,OH,https://miamioh.edu/,204024
+msu,Michigan State University,East Lansing,MI,https://msu.edu/,171100
+nyu,New York University,New York,NY,https://www.nyu.edu/,193900
+ncsu,North Carolina State University,Raleigh,NC,https://www.ncsu.edu/,199193
+nw,Northwestern University,Evanston,IL,https://www.northwestern.edu/,147767
+osu,Ohio State University,Columbus,OH,https://www.osu.edu/,204796
+okstate,Oklahoma State University,Stillwater,OK,https://www.okstate.edu/,207388
+psu,Pennsylvania State University,State College,PA,https://www.psu.edu/,214777
+princeton,Princeton University,Princeton,NJ,https://www.princeton.edu/,186131
+purdue,Purdue University,West Lafayette,IN,https://www.purdue.edu/,243780
+rice,Rice University,Houston,TX,https://www.rice.edu/,227757
+rutgers,Rutgers University,New Brunswick,NJ,https://www.rutgers.edu/,186380
+siu,Southern Illinois University,Carbondale,IL,https://siu.edu/,149222
+stanford,Stanford University,Stanford,CA,https://www.stanford.edu/,243744
+albany,University at Albany,Albany,NY,https://www.albany.edu/,196060
+buffalo,University at Buffalo,Buffalo,NY,http://www.buffalo.edu/,196088
+stonybrook,Stony Brook University,Stony Brook,NY,https://www.stonybrook.edu/,196097
+syr,Syracuse University,Syracuse,NY,https://www.syracuse.edu/,196413
+temple,Temple University,Philadelphia,PA,https://www.temple.edu/,216339
+tamu,Texas A&M University,College Station,TX,https://www.tamu.edu/,228723
+ttu,Texas Tech University,Lubbock,TX,https://www.ttu.edu/,229115
+tulane,Tulane University,New Orleans,LA,https://tulane.edu/,160755
+ua,University of Alabama,Tuscaloosa,AL,https://www.ua.edu/,100751
+arizona,University of Arizona,Tucson,AZ,https://www.arizona.edu/,104179
+berkeley,"University of California, Berkeley",Berkeley,CA,https://www.berkeley.edu/,110635
+ucdavis,"University of California, Davis",Davis,CA,https://www.ucdavis.edu/,110644
+uci,"University of California, Irvine",Irvine,CA,https://uci.edu/,110653
+ucla,"University of California, Los Angeles",Los Angeles,CA,http://www.ucla.edu/,110662
+ucr,"University of California, Riverside",Riverside,CA,https://www.ucr.edu/,110671
+ucsd,"University of California, San Diego",San Diego,CA,https://ucsd.edu/,110680
+scsb,"University of California, Santa Barbara",Santa Barbara,CA,https://www.ucsb.edu/,110705
+uchicago,University of Chicago,Chicago,IL,https://www.uchicago.edu/,144050
+uc,University of Cincinnati,Cincinnati,OH,https://www.uc.edu/,201885
+colorado,University of Colorado,Boulder,CO,http://www.cu.edu/,126614
+uconn,University of Connecticut,Storrs,CT,https://uconn.edu/,129020
+udel,University of Delaware,Newark,DE,https://www.udel.edu/,130943
+ufl,University of Florida,Gainesville,FL,http://www.ufl.edu/,134130
+uga,University of Georgia,Athens,GA,https://www.uga.edu/,139959
+hawaii,University of Hawai'i,Manoa,HI,https://www.hawaii.edu/,141574
+uh,University of Houston,Houston,TX,http://www.uh.edu/,225511
+illinois,University of Illinois,Champaign,IL,https://illinois.edu/,145637
+uic,"University of Illinois, Chicago",Chicago,IL,https://www.uic.edu/,145600
+uiowa,University of Iowa,Iowa City,IA,https://uiowa.edu/,153658
+ku,University of Kansas,Lawrence,KS,https://ku.edu/,155317
+uky,University of Kentucky,Lexington,KY,http://www.uky.edu/,157085
+louisville,University of Louisville,Louisville,KY,http://louisville.edu/,157289
+umd,University of Maryland,College Park,MD,https://www.umd.edu/,163286
+umass,University of Massachusetts,Amherst,MA,https://www.umass.edu/,166629
+umich,University of Michigan,Ann Arbor,MI,https://umich.edu/,170976
+umn,University of Minnesota,MInneapolis,MN,https://twin-cities.umn.edu/,174066
+missouri,University of Missouri,Columbia,MO,https://missouri.edu/,178396
+unl,University of Nebraska,Lincoln,NB,https://www.unl.edu/,181464
+unm,University of New Mexico,Albuquerque,NM,http://www.unm.edu/,187985
+unc,University of North Carolina,Chapel Hill,NC,https://www.unc.edu/,199120
+nd,University of Notre Dame,South Bend,IN,https://www.nd.edu/,152080
+ohio,University of Ohio,Athens,OH,https://www.ohio.edu/,204857
+ou,University of Oklahoma,Norman,OK,https://www.ou.edu/,207500
+uoregon,University of Oregon,Eugene,OR,https://www.uoregon.edu/,209551
+upenn,University of Pennsylvania,Philadelphia,PA,https://www.upenn.edu/,215062
+pitt,University of Pittsburgh,Pittsburgh,PA,https://www.pitt.edu/,215293
+rochester,University of Rochester,Rochester,NY,https://www.rochester.edu/,195030
+sc,University of South Carolina,Columbia,SC,https://www.sc.edu/,218663
+usc,University of Southern California,Los Angeles,CA,https://www.usc.edu/,123961
+utk,University of Tennessee,Knoxville,TN,https://www.utk.edu/,221759
+utexas,University of Texas,Austin,TX,https://www.utexas.edu/,228778
+utah,University of Utah,Salt Lake City,UT,https://www.utah.edu/,230764
+virginia,University of Virginia,Charlottesville,VA,http://www.virginia.edu/,234076
+washington,University of Washington,Seattle,WA,https://www.washington.edu/,236948
+wisc,University of Wisconsin,Madison,WI,https://www.wisc.edu/,240444
+vanderbilt,Vanderbilt University,Nashville,TN,https://www.vanderbilt.edu/,221999
+vt,Virginia Tech,Blacksburg,VA,https://vt.edu/,233921
+wsu,Washington State University,Pullman,WA,https://wsu.edu/,236939
+wustl,Washington University,St. Louis,MO,https://wustl.edu/,179867
+wayne,Wayne State University,Detroit,MI,https://wayne.edu/,172644
+yale,Yale University,New Haven,CT,https://www.yale.edu/,130794
