@@ -1,4 +1,4 @@
-_id,parent_college,name,arl_name,arl_code,library_url
+slug,parent_college,name,arl_name,arl_code,url
 asu,asu,Library,ARIZONA STATE,400,https://lib.asu.edu/
 auburn,auburn,Libraries,AUBURN,440,https://www.lib.auburn.edu/
 bc,bc,Libraries,BOSTON COLLEGE,550,https://library.bc.edu/

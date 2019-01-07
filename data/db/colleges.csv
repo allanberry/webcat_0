@@ -1,4 +1,4 @@
-_id,name,city,state,url,ipeds_id
+slug,name,city,state,url,ipeds_id
 asu,Arizona State University,Tempe,AZ,https://www.asu.edu/,104151
 auburn,Auburn University,Auburn,AL,http://www.auburn.edu/,100858
 bc,Boston College,Chestnut Hill,MA,https://www.bc.edu/,164924
