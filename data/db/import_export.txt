@@ -1,3 +1,0 @@
-mongoimport -d website_catalog -c college --type csv --file ~/Projects/website_catalog/data/db/colleges.csv --headerline
-
-mongoexport -d website_catalog -c library --type csv --out ~/Projects/website_catalog/data/db/libraries_out.csv --fields "slug,college,name,arl_name,arl_code,url"
