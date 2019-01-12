@@ -4,7 +4,7 @@
   "description": "Catalog of library websites.",
   "main": "app.js",
   "scripts": {
-    "gather": "node data/gather.js",
+    "gather_scrapes": "node data/gather_scrapes.js",
     "refine": "node data/refine.js",
     "serve": "node server/main.js",
     "dev": "nodemon server/main.js",
@@ -36,6 +36,7 @@
     "dotenv": "^6.2.0",
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0-0",
+    "googleapis": "^27.0.0",
     "image-size": "^0.6.3",
     "js-yaml": "^3.12.0",
     "markdown-it-footnote": "^3.0.1",
