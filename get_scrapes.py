@@ -1,17 +1,19 @@
 from __future__ import print_function
-from googleapiclient.discovery import build
+from googleapiclient import discovery
 from httplib2 import Http
 from oauth2client import file, client, tools
+from pprint import pprint
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly"
+SCOPES = "https://www.googleapis.com/auth/spreadsheets"
 
 # The ID and range of a sample spreadsheet.
 SPREADSHEET_ID = "1hqFgqqKbNZwBvB63IzwnbkaKApF4jblnvjTjpxIXu40"
 
+
 def lists_to_dicts(lists):
     output = []
-    
+
     if not lists:
         print("No data found.")
     else:
@@ -19,7 +21,7 @@ def lists_to_dicts(lists):
         for i, row in enumerate(lists):
             # first name is column names
             if i is 0:
-                names = row 
+                names = row
             else:
                 d = {}
                 for j, col in enumerate(row):
@@ -41,45 +43,57 @@ def main():
         flow = client.flow_from_clientsecrets("credentials.json", SCOPES)
         creds = tools.run_flow(flow, store)
 
-    # Call the Sheets API
-    libraries = lists_to_dicts((
-        build("sheets", "v4", http=creds.authorize(Http()))
-        .spreadsheets()
-        .values()
-        .get(spreadsheetId=SPREADSHEET_ID, range="libraries!A:Z")
-        .execute()
-        .get("values", [])
-    ))
+    service = discovery.build("sheets", "v4", http=creds.authorize(Http()))
 
-    print(libraries)
+    # Call the Sheets API
+    libraries = lists_to_dicts(
+        (
+            service.spreadsheets()
+            .values()
+            .get(spreadsheetId=SPREADSHEET_ID, range="libraries!A:Z")
+            .execute()
+            .get("values", [])
+        )
+    )
+
+    value_range_body = {
+        "values": [
+            [
+                "id",
+                "library",
+                "url",
+                "wayback",
+                "date_retrieved",
+                "date_archived",
+                "source",
+            ]
+        ],
+        "majorDimension": "ROWS",
+        "range": "visits!A2:Z",
+    }
+
+    request = (
+        service.spreadsheets()
+        .values()
+        .append(
+            spreadsheetId=SPREADSHEET_ID,
+            range="visits!A2:Z",
+            valueInputOption="USER_ENTERED",
+            body=value_range_body,
+        )
+    )
+
+    response = request.execute()
+
+    # # TODO: Change code below to process the `response` dict:
+    # pprint(response)
 
 
 if __name__ == "__main__":
     main()
 
-# """
-# BEFORE RUNNING:
-# ---------------
-# 1. If not already done, enable the Google Sheets API
-#    and check the quota for your project at
-#    https://console.developers.google.com/apis/api/sheets
-# 2. Install the Python client library for Google APIs by running
-#    `pip install --upgrade google-api-python-client`
-# """
-# from pprint import pprint
 
-# from googleapiclient import discovery
-
-# # TODO: Change placeholder below to generate authentication credentials. See
-# # https://developers.google.com/sheets/quickstart/python#step_3_set_up_the_sample
-# #
-# # Authorize using one of the following scopes:
-# #     'https://www.googleapis.com/auth/drive'
-# #     'https://www.googleapis.com/auth/drive.file'
-# #     'https://www.googleapis.com/auth/spreadsheets'
-# credentials = None
-
-# service = discovery.build('sheets', 'v4', credentials=credentials)
+#
 
 # # The ID of the spreadsheet to update.
 # spreadsheet_id = '1hqFgqqKbNZwBvB63IzwnbkaKApF4jblnvjTjpxIXu40'
