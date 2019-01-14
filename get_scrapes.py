@@ -7,8 +7,25 @@ from oauth2client import file, client, tools
 SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly"
 
 # The ID and range of a sample spreadsheet.
-SPREADSHEET_ID = '1hqFgqqKbNZwBvB63IzwnbkaKApF4jblnvjTjpxIXu40'
-RANGE_NAME = "libraries!A2:J101"
+SPREADSHEET_ID = "1hqFgqqKbNZwBvB63IzwnbkaKApF4jblnvjTjpxIXu40"
+
+def lists_to_dicts(lists):
+    output = []
+    
+    if not lists:
+        print("No data found.")
+    else:
+        names = []
+        for i, row in enumerate(lists):
+            # first name is column names
+            if i is 0:
+                names = row 
+            else:
+                d = {}
+                for j, col in enumerate(row):
+                    d[names[j]] = col
+                output.append(d)
+    return output
 
 
 def main():
@@ -23,24 +40,18 @@ def main():
     if not creds or creds.invalid:
         flow = client.flow_from_clientsecrets("credentials.json", SCOPES)
         creds = tools.run_flow(flow, store)
-    service = build("sheets", "v4", http=creds.authorize(Http()))
 
     # Call the Sheets API
-    sheet = service.spreadsheets()
-    result = (
-        sheet.values()
-        .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+    libraries = lists_to_dicts((
+        build("sheets", "v4", http=creds.authorize(Http()))
+        .spreadsheets()
+        .values()
+        .get(spreadsheetId=SPREADSHEET_ID, range="libraries!A:Z")
         .execute()
-    )
-    values = result.get("values", [])
+        .get("values", [])
+    ))
 
-    if not values:
-        print("No data found.")
-    else:
-        print("Name, Major:")
-        for row in values:
-            # Print columns A and E, which correspond to indices 0 and 4.
-            print("%s, %s" % (row[0], row[4]))
+    print(libraries)
 
 
 if __name__ == "__main__":
