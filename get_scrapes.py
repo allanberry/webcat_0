@@ -3,7 +3,8 @@ from googleapiclient import discovery
 from httplib2 import Http
 from oauth2client import file, client, tools
 from pprint import pprint
-from requests import requests
+import requests
+from datetime import datetime
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = "https://www.googleapis.com/auth/spreadsheets"
@@ -41,6 +42,19 @@ def download_libraries(service):
             .get("values", [])
         )
     )
+
+def visit(library):
+    r = requests.get(library['library_url'])
+
+    return {
+        "id": library['id'] + "-" + datetime.now().strftime("%Y%M%d%H%M"),
+        "library": library['id'],
+        "url": library['library_url'],
+        "wayback": False,
+        "date_retrieved": datetime.now().isoformat(),
+        "date_archived": None,
+        "source": r.text
+    }
 
 
 def upload_visit(service, visit):
@@ -95,17 +109,11 @@ def main():
     # Call the Sheets API
     libraries = download_libraries(service)
 
-    visit = {
-        "id": "asdf",
-        "library": "asdf",
-        "url": "asdf",
-        "wayback": "asdf",
-        "date_retrieved": "asdf",
-        "date_archived": "asdf",
-        "source": "asdf",
-    }
+    library = libraries[0]
 
-    upload_visit(service, visit)
+    # visit(library)
+
+    upload_visit(service, visit(library))
 
 
 if __name__ == "__main__":
