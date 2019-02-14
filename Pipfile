@@ -4,14 +4,15 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+requests = "*"
+arrow = "*"
+pyppeteer = "*"
 black = "*"
 
 [packages]
-requests = "*"
 hug = "*"
-dataset = "*"
 pyicu = "*"
-arrow = "*"
+dataset = "*"
 
 [requires]
 python_version = "3.7"

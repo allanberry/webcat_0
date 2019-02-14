@@ -2,6 +2,9 @@ import requests
 import dataset
 import arrow
 import csv
+import asyncio
+from pyppeteer import launch
+
 
 # config
 initial_date = '1995-01-01'
@@ -52,28 +55,51 @@ def scrape_wayback(site, date_input):
         print(f'--: {site["slug"]} {date_short} (exists)')
 
 
-def main():
+async def main():
     # setup site
 
-    with open("data/libraries.csv") as libraries_csv:
-        reader = csv.reader(libraries_csv)
+    # with open("data/libraries.csv") as libraries_csv:
+    #     reader = csv.reader(libraries_csv)
 
-        # setup date
-        date = arrow.get(initial_date)
+    #     # setup date
+    #     date = arrow.get(initial_date)
 
-        cols = next(reader)
-        for row in reader:
-            site = {}
-            for index, col in enumerate(row):
-                site[cols[index]] = col
+    #     cols = next(reader)
+    #     for row in reader:
+    #         site = {}
+    #         for index, col in enumerate(row):
+    #             site[cols[index]] = col
             
-            while date <= arrow.utcnow():
-                scrape_wayback(site, date)
-                date = date.shift(years=+1)
+    #         while date <= arrow.utcnow():
+    #             scrape_wayback(site, date)
+    #             date = date.shift(years=+1)
+
+    browser = await launch()
+    page = await browser.newPage()
+
+    url = 'https://web.archive.org/web/20090720015749/http://library.uic.edu/'
+    await page.goto(url)
+        # wait_until('networkidle0')
+
+    defaultSizes = {
+            "0600x0": {"width": 600, "height": 0},
+            "1200x0": {"width": 1200, "height": 0}}
+
+    await page.setViewport({"width": 200, "height": 0})
+
+
+    await page.evaluate('''() => {
+            let dom = document.querySelector('#wm-ipp');
+            dom.parentNode.removeChild(dom);
+        }''')
+
+
+    await page.screenshot({'path': 'data/screenshots/example.png'})
+    await browser.close()
             
             
 
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
