@@ -120,3 +120,6 @@ token.json
 
 # other
 node_modules/
+
+# screenshots
+data/screenshots/
