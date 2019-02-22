@@ -4,46 +4,56 @@ import arrow
 import csv
 import asyncio
 import os
-from pyppeteer import launch
+import pyppeteer
 
 
 # config
-initial_date = '2017-01-01'
+initial_date = '2018-01-01'
 
 # setup db
 db = dataset.connect("sqlite:///data/webcat.db")
 
-
 async def get_screenshots(site, date_short):
-    # setup puppeteer
-    browser = await launch()
-
-    page = await browser.newPage()
-
-    url = f'https://web.archive.org/web/{date_short}/{site["url"]}'
-    await page.goto(url)
-        # wait_until('networkidle0')
-
-    await page.evaluate('''() => {
-                let dom = document.querySelector('#wm-ipp');
-                dom.parentNode.removeChild(dom);
-            }''')
 
     defaultSizes = {
-            "0600x0": {"width": 600, "height": 0},
-            "1200x0": {"width": 1200, "height": 0}}
+        "0600x0": {"width": 600, "height": 0},
+        "1200x0": {"width": 1200, "height": 0}}
+
+    # make sure path exists
+    screenshot_path = f'data/screenshots/{site["slug"]}/{date_short}/'
+    os.makedirs(screenshot_path, exist_ok=True)
 
     for key, value in defaultSizes.items():
-        await page.setViewport(value)
 
-        screenshot_path = f'data/screenshots/{site["slug"]}/{date_short}/'
-        os.makedirs(screenshot_path, exist_ok=True)
+        print(key, value)
 
-        await page.screenshot({'path': f'{screenshot_path}/{key}.png'})
+        # # setup
+        # browser = await pyppeteer.launch(
+        #     autoClose=False
+        # )
+        # page = await browser.newPage()
+        # url = f'https://web.archive.org/web/{date_short}/{site["url"]}'
+        # await page.goto(url, {
+        #     'waitUntil': 'networkidle0'
+        # })
 
-    
-    # tear down puppeteer
-    await browser.close()
+        # # remove wayback crap
+        # await page.evaluate('''() => {
+        #     let dom = document.querySelector('#wm-ipp');
+        #     dom.parentNode.removeChild(dom);
+        # }''')
+
+        # # take screenshot
+        # await page.setViewport(value)
+        # await page.screenshot({
+        #     'path': f'{screenshot_path}/{key}.png',
+        #     'fullPage': True
+        # })
+
+        # # cleanup
+        # await page.close()
+        # await browser.close()
+
 
 
 # async def scrape_wayback(browser, site, date_input):
@@ -95,8 +105,6 @@ async def scrape_wayback(site, date_input):
 
 async def main():
 
-
-
     # setup site
     with open("data/libraries.csv") as libraries_csv:
         reader = csv.reader(libraries_csv)
@@ -114,13 +122,8 @@ async def main():
             
             # iterate sites/dates
             while date <= arrow.utcnow():
-                # await scrape_wayback(browser, site, date)
                 await scrape_wayback(site, date)
                 date = date.shift(years=+1)
-
-
-            
-
 
 
 if __name__ == "__main__":
