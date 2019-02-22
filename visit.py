@@ -55,7 +55,6 @@ async def get_screenshots(site, date_short):
         # await browser.close()
 
 
-
 # async def scrape_wayback(browser, site, date_input):
 async def scrape_wayback(site, date_input):
     # get correct date
