@@ -4,8 +4,9 @@ const moment = require("moment");
 const csvParse = require("csv-parse/lib/sync");
 const colors = require("colors");
 const puppeteer = require("puppeteer");
-const rm = require("rimraf");
+// const rm = require("rimraf");
 const startDate = "1995-01-01";
+
 
 // main
 (async () => {
@@ -30,7 +31,7 @@ const startDate = "1995-01-01";
       while (date.isBefore(moment())) {
         // scrape
         await scrapeWayback(browser, library, date);
-        date = date.add(6, "months");
+        date = date.add(1, "years");
       }
     }
 
@@ -43,7 +44,7 @@ const startDate = "1995-01-01";
 
 async function scrapeWayback(browser, library, dateInput) {
   const wbFormat = "YYYYMMDDHHmmss";
-  let dir;
+
   let date;
 
   try {
@@ -52,40 +53,50 @@ async function scrapeWayback(browser, library, dateInput) {
         library.url
       }/&timestamp=${dateInput.format(wbFormat)}`
     );
-    date = moment.utc(
-      r.body.archived_snapshots.closest.timestamp,
-      wbFormat
-    );
+    date = moment.utc(r.body.archived_snapshots.closest.timestamp, wbFormat);
     const waybackUrl = `http://web.archive.org/web/${date.format(wbFormat)}/${
       library.url
     }`;
-    const waybackUrlRaw = `http://web.archive.org/web/${date.format(
+    const waybackRawUrl = `http://web.archive.org/web/${date.format(
       wbFormat
     )}id_/${library.url}`;
 
-    const raw = await request.get(waybackUrlRaw);
+    const waybackRaw = await request.get(waybackRawUrl);
 
-    let output = JSON.stringify({
+    let output = {
       slug: library.slug,
-      urlSite: library.url,
-      waybackUrl,
-      waybackUrlRaw,
-      dateWayback: date.format(),
+      site: library.url,
+      date: dateInput.format(),
       dateRetrieved: moment.utc().format(),
-      responseContentType: raw["Content-Type"],
-      responseEncoding: raw.encoding
-      // responseBody: raw.text
-    });
 
-    // output
-    dir = `data/scrapes/${library.slug}/${date.format(wbFormat)}`;
+      // for data from puppeteer, for the most part
+      rendered: {
+        url: waybackUrl,
+        page: {},
+        browser: {}
+      },
 
-    if (!fs.existsSync(dir)) {
-      await fs.promises.mkdir(dir, { recursive: true });
-      await fs.promises.writeFile(`${dir}/md.json`, output);
-      await fs.promises.writeFile(`${dir}/index.html`, raw.text);
+      // for raw HTML, from Superagent
+      raw: {
+        url: waybackRawUrl,
+        response: {
+          status: waybackRaw.status,
+          type: waybackRaw.type,
+          headers: waybackRaw.header, 
+        }
+      }
+    };
 
-      // screenshots
+    // filesystem
+    const metaDir = `data/scrapes/meta`;
+    const pagesDir = `data/scrapes/pages`;
+    const screensDir = `data/scrapes/screens`;
+    await fs.promises.mkdir(metaDir, { recursive: true });
+    await fs.promises.mkdir(pagesDir, { recursive: true });
+    await fs.promises.mkdir(screensDir, { recursive: true });
+
+    // puppeteer
+    try {
       const viewports = {
         // "0001x0001": {
         //   width: 1,
@@ -95,59 +106,113 @@ async function scrapeWayback(browser, library, dateInput) {
         // },
         "0600": {
           width: 600,
-          height: 1,
+          height: 1
           // isMobile: true,
           // isLandscape: false
         },
         "1200": {
           width: 1200,
-          height: 1,
+          height: 1
           // isMobile: false,
           // isLandscape: true
         }
       };
+
+      // scraping
       for (const v in viewports) {
         const page = await browser.newPage();
+
+        // Navigate to page
         await page.goto(waybackUrl, {
-          waitUntil: "networkidle0",
+          waitUntil: "networkidle0"
           // timeout: 100000
         });
+
+        // strip wayback div
         await page.evaluate(() => {
-          let dom = document.querySelector("#wm-ipp");
-          dom.parentNode.removeChild(dom);
+          let waybackDiv = document.querySelector("#wm-ipp");
+          waybackDiv.parentNode.removeChild(waybackDiv);
         });
         await page.setViewport(viewports[v]);
-        await page.screenshot({
-          path: `${dir}/${v}.png`,
-          fullPage: true
-        });
+
+        // screenshots
+        const screenFile = `${screensDir}/${library.slug}-${date.format(wbFormat)}-${v}.png`;
+        if (!fs.existsSync(screenFile)) {
+          await page.screenshot({
+            path: screenFile,
+            fullPage: true,
+            omitBackground: true,
+          });
+          console.log(
+            `${colors.green("scrn OK")}: ${library.slug}-${date.format(
+              wbFormat
+            )}-${v}.png`)
+        } else {
+          console.log(
+            `${colors.yellow("scrn --")}: ${library.slug}-${date.format(
+              wbFormat
+            )}-${v}.png`
+          );
+        }
+
+        // collect extra puppeteer metadata
+        output.rendered.page.metrics = await page.metrics();
+        output.rendered.page.title = await page.title()
+        // output.wayback.page.accessibility = await page.accessibility.snapshot();
+        output.rendered.browser.userAgent = await browser.userAgent();
+        output.rendered.browser.version = await browser.version();
+
+        // cleanup
         await page.close();
       }
-
-      // report
+      // );
+    } catch (error) {
       console.log(
-        `${colors.green("OK:")} ${date.format(wbFormat)} ${library.slug}`
+        // `${colors.red("NOPE   ")}: ${date.format(wbFormat)} ${
+        //   library.slug
+        // } (${colors.red(error.name)})`
+        error
+      );
+    }
+
+    // output metadata
+    const mdFile = `${metaDir}/${library.slug}-${date.format(wbFormat)}.json`;
+    if (!fs.existsSync(mdFile)) {
+      await fs.promises.writeFile(mdFile, JSON.stringify(output));
+      console.log(
+        `${colors.green("meta OK")}: ${library.slug}-${date.format(
+          wbFormat
+        )}.json`
       );
     } else {
       console.log(
-        `${colors.yellow("exists:")} ${date.format(wbFormat)} ${
-          library.slug
-        }`
+        `${colors.yellow("meta --")}: ${library.slug}-${date.format(
+          wbFormat
+        )}.json`
       );
     }
-  } catch (error) {
-    console.log(
-      `${colors.red("NOPE:")} ${date.format(wbFormat)} ${
-        library.slug
-      } (${colors.red(error.name)})`
-      // error
-    );
-    // clean up bad directories
-    if (dir && fs.existsSync(dir)) {
-      rm.sync(dir);
-    }
-  }
 
+    // output raw html
+    const pageFile = `${pagesDir}/${library.slug}-${date.format(wbFormat)}.html`;
+    if (!fs.existsSync(pageFile)) {
+      await fs.promises.writeFile(pageFile, waybackRaw.text);
+      console.log(
+        `${colors.green("page OK")}: ${library.slug}-${date.format(
+          wbFormat
+        )}.html`
+      );
+    } else {
+      console.log(
+        `${colors.yellow("page --")}: ${library.slug}-${date.format(
+          wbFormat
+        )}.html`
+      );
+    }
+
+
+  } catch (error) {
+    console.error(error);
+  }
   // const result = await axios.get(library.url);
   // console.log(result.data)
 }
