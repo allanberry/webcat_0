@@ -5,8 +5,7 @@ const csvParse = require("csv-parse/lib/sync");
 const colors = require("colors");
 const puppeteer = require("puppeteer");
 const rm = require("rimraf");
-
-const startDate = "2017-01-01";
+const startDate = "1995-01-01";
 
 // main
 (async () => {
@@ -31,7 +30,7 @@ const startDate = "2017-01-01";
       while (date.isBefore(moment())) {
         // scrape
         await scrapeWayback(browser, library, date);
-        date = date.add(1, "years");
+        date = date.add(6, "months");
       }
     }
 
@@ -88,17 +87,23 @@ async function scrapeWayback(browser, library, dateInput) {
 
       // screenshots
       const viewports = {
-        "0600x0": {
+        // "0001x0001": {
+        //   width: 1,
+        //   height: 1,
+        //   // isMobile: false,
+        //   isLandscape: false
+        // },
+        "0600": {
           width: 600,
-          height: 0,
-          isMobile: true,
-          isLandscape: false
+          height: 1,
+          // isMobile: true,
+          // isLandscape: false
         },
-        "1200x0": {
+        "1200": {
           width: 1200,
-          height: 0,
-          isMobile: false,
-          isLandscape: true
+          height: 1,
+          // isMobile: false,
+          // isLandscape: true
         }
       };
       for (const v in viewports) {

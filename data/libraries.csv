@@ -1,4 +1,101 @@
 slug,college_name,url_college,city,state,library_name,url,arl_name,arl_id,ipeds_id
+asu,Arizona State University,https://www.asu.edu/,Tempe,AZ,Arizona State University Library,https://lib.asu.edu/,ARIZONA STATE,400,104151
+auburn,Auburn University,http://www.auburn.edu/,Auburn,AL,Auburn University Libraries,https://www.lib.auburn.edu/,AUBURN,440,100858
+bc,Boston College,https://www.bc.edu/,Chestnut Hill,MA,Boston College Libraries,https://library.bc.edu/,BOSTON COLLEGE,550,164924
+bu,Boston University,https://www.bu.edu/,Boston,MA,Boston University Libraries,http://www.bu.edu/library/,BOSTON,500,164988
+byu,Brigham Young University,https://www.byu.edu/,Provo,UT,"Brigham Young University, Harold B. Lee Library",https://lib.byu.edu/,BRIGHAM YOUNG,600,230038
+brown,Brown University,https://www.brown.edu/,Providence,RI,Brown University Library,https://library.brown.edu/,BROWN,800,217156
+case,Case Western Reserve University,https://case.edu/,Cleveland,OH,"Case Western Reserve University, Kelvin Smith Library",http://library.case.edu/,CASE WESTERN RESERVE,1500,201645
+colostate,Colorado State University,https://www.colostate.edu/,Fort Collins,CO,Colorado State University Libraries,https://lib.colostate.edu/,COLORADO STATE,1900,126818
+columbia,Columbia University,https://www.columbia.edu/,New York,NY,Columbia University Libraries,https://library.columbia.edu/,COLUMBIA,2000,190150
+cornell,Cornell University,https://www.cornell.edu/,Ithaca,NY,Cornell University Library,https://www.library.cornell.edu/,CORNELL,2200,190415
+dartmouth,Dartmouth College,https://home.dartmouth.edu/,Hanover,NH,Dartmouth College Library,https://www.library.dartmouth.edu/,DARTMOUTH,2300,182670
+duke,Duke University,https://www.duke.edu/,Durham,NC,Duke University Libraries,https://library.duke.edu/,DUKE,2400,198419
+emory,Emory University,http://www.emory.edu/,Atlanta,GA,"Emory University, Robert W. Woodruff Library",http://web.library.emory.edu/,EMORY,2500,139658
+fsu,Florida State University,https://www.fsu.edu/,Tallahassee,FL,Florida State University Libraries,https://www.lib.fsu.edu/,FLORIDA STATE,2700,134097
+gwu,George Washington University,https://www.gwu.edu/,Washington,DC,George Washington University Libraries,https://library.gwu.edu/,GEORGE WASHINGTON,2750,131469
+georgetown,Georgetown University,https://www.georgetown.edu/,Washington,DC,Georgetown University Library,https://www.library.gatech.edu/,GEORGETOWN,2800,131496
+gatech,Georgia Tech,https://www.gatech.edu/,Atlanta,GA,Georgia Tech Library,https://www.library.gatech.edu/,GEORGIA TECH,2950,139755
+harvard,Harvard University,https://www.harvard.edu/,Cambridge,MA,Harvard University Library,https://library.harvard.edu/,HARVARD,3100,166027
+howard,Howard University,https://www2.howard.edu/,Washington,DC,Howard University Libraries,http://library.howard.edu/library/,HOWARD,3400,131520
+indiana,Indiana University,https://www.indiana.edu/,Bloomington,IN,Indiana University Libraries,https://libraries.indiana.edu/,INDIANA,3600,151351
+iastate,Iowa State University,https://www.iastate.edu/,Ames,IA,Iowa Stateu University Library,http://www.lib.iastate.edu/,IOWA STATE,3800,153603
+jhu,Johns Hopkins University,https://www.jhu.edu/,Baltimore,MD,"Johns Hopkins University, Sheridan Libraries",https://www.library.jhu.edu/,JOHNS HOPKINS,3900,162928
+kent,Kent State University,https://www.kent.edu/,Kent,OH,Kent State University Libraries,https://www.library.kent.edu/,KENT STATE,4200,203517
+lsu,Louisina State University,https://www.lsu.edu/,Baton Rouge,LA,Louisina State University Libraries,https://www.lib.lsu.edu/,LOUISIANA STATE,4400,159391
+mit,Massachusetts Institute of Technology,http://www.mit.edu/,Cambridge,MA,Massachusetts Institute of Technology Libraries,https://libraries.mit.edu/,MIT,4900,166683
+miamioh,Miami University,https://miamioh.edu/,Oxford,OH,Miami University Libraries,https://www.lib.miamioh.edu/,MIAMI,5000,204024
+msu,Michigan State University,https://msu.edu/,East Lansing,MI,Michigan State University Libraries,https://lib.msu.edu/,MICHIGAN STATE,5200,171100
+nyu,New York University,https://www.nyu.edu/,New York,NY,"New York University, Division of Libraries",http://library.nyu.edu/,NEW YORK,5700,193900
+ncsu,North Carolina State University,https://www.ncsu.edu/,Raleigh,NC,North Carolina State University Libraries,https://www.lib.ncsu.edu/,NORTH CAROLINA STATE,5850,199193
+nw,Northwestern University,https://www.northwestern.edu/,Evanston,IL,Northwestern University Libraries,https://www.library.northwestern.edu/,NORTHWESTERN,5900,147767
+osu,Ohio State University,https://www.osu.edu/,Columbus,OH,Ohio State University Libraries,https://library.osu.edu/,OHIO STATE,6100,204796
+okstate,Oklahoma State University,https://www.okstate.edu/,Stillwater,OK,Oklahoma State University Library,https://library.okstate.edu/,OKLAHOMA STATE,6300,207388
+psu,Pennsylvania State University,https://www.psu.edu/,State College,PA,Pennsylvania State University Libraries,https://libraries.psu.edu/,PENNSYLVANIA STATE,6600,214777
+princeton,Princeton University,https://www.princeton.edu/,Princeton,NJ,Princeton University Library,http://library.princeton.edu/,PRINCETON,6800,186131
+purdue,Purdue University,https://www.purdue.edu/,West Lafayette,IN,Purdue University Libraries,https://www.lib.purdue.edu/,PURDUE,6900,243780
+rice,Rice University,https://www.rice.edu/,Houston,TX,"Rice University, Fondren Library",https://library.rice.edu/,RICE,7100,227757
+rutgers,Rutgers University,https://www.rutgers.edu/,New Brunswick,NJ,Rutgers University Libraries,https://www.libraries.rutgers.edu/,RUTGERS,7300,186380
+siu,Southern Illinois University,https://siu.edu/,Carbondale,IL,"Southern Illinois University, Morris Library",https://lib.siu.edu/,SOUTHERN ILLINOIS,7600,149222
+stanford,Stanford University,https://www.stanford.edu/,Stanford,CA,Stanford University Libraries,https://library.stanford.edu/,STANFORD,7700,243744
+albany,University at Albany,https://www.albany.edu/,Albany,NY,"University at Albany, University Libraries",https://library.albany.edu/,SUNY-ALBANY,7800,196060
+buffalo,University at Buffalo,http://www.buffalo.edu/,Buffalo,NY,"University at Buffalo, University Libraries",https://library.buffalo.edu/,SUNY-BUFFALO,7900,196088
+stonybrook,Stony Brook University,https://www.stonybrook.edu/,Stony Brook,NY,Stony Brook University Libraries,http://www.library.stonybrook.edu/,SUNY-STONY BROOK,8000,196097
+syr,Syracuse University,https://www.syracuse.edu/,Syracuse,NY,Syracuse University Libraries,https://library.syr.edu/,SYRACUSE,8100,196413
+temple,Temple University,https://www.temple.edu/,Philadelphia,PA,Temple University Libraries,https://library.temple.edu/,TEMPLE,8200,216339
+tamu,Texas A&M University,https://www.tamu.edu/,College Station,TX,Texas A&M University Libraries,https://library.tamu.edu/,TEXAS A&M,8500,228723
+ttu,Texas Tech University,https://www.ttu.edu/,Lubbock,TX,"Texas Tech University, University Libraries",https://library.ttu.edu/,TEXAS TECH,8550,229115
+tulane,Tulane University,https://tulane.edu/,New Orleans,LA,"Tulane University, Howard Tilton Memorial Library",https://library.tulane.edu/,TULANE,8700,160755
+ua,University of Alabama,https://www.ua.edu/,Tuscaloosa,AL,University of Alabama Libraries,https://www.lib.ua.edu/,ALABAMA,100,100751
+arizona,University of Arizona,https://www.arizona.edu/,Tucson,AZ,"University of Arizona, University Libraries",http://new.library.arizona.edu/,ARIZONA,300,104179
+berkeley,"University of California, Berkeley",https://www.berkeley.edu/,Berkeley,CA,"University of California, Berkeley Library",http://www.lib.berkeley.edu/,"CALIFORNIA, BERKELEY",900,110635
+ucdavis,"University of California, Davis",https://www.ucdavis.edu/,Davis,CA,"University of California, Davis, University Library",https://www.library.ucdavis.edu/,"CALIFORNIA, DAVIS",1000,110644
+uci,"University of California, Irvine",https://uci.edu/,Irvine,CA,"University of California, Irvine Libraries",https://lib.uci.edu/,"CALIFORNIA, IRVINE",1050,110653
+ucla,"University of California, Los Angeles",http://www.ucla.edu/,Los Angeles,CA,"University of California, Los Angeles Library",http://www.library.ucla.edu/,"CALIFORNIA, LOS ANGELES",1100,110662
+ucr,"University of California, Riverside",https://www.ucr.edu/,Riverside,CA,"University of California, Riverside Library",https://library.ucr.edu/,"CALIFORNIA, RIVERSIDE",1200,110671
+ucsd,"University of California, San Diego",https://ucsd.edu/,San Diego,CA,"University of California, San Diego Library",https://library.ucsd.edu/,"CALIFORNIA, SAN DIEGO",1300,110680
+scsb,"University of California, Santa Barbara",https://www.ucsb.edu/,Santa Barbara,CA,"University of California, Santa Barbara Library",https://www.library.ucsb.edu/,"CALIFORNIA, SANTA BARBARA",1400,110705
+uchicago,University of Chicago,https://www.uchicago.edu/,Chicago,IL,University of Chicago Library,https://www.lib.uchicago.edu/,CHICAGO,1600,144050
+uc,University of Cincinnati,https://www.uc.edu/,Cincinnati,OH,University of Cincinnati Libraries,https://www.libraries.uc.edu/,CINCINNATI,1700,201885
+colorado,University of Colorado,http://www.cu.edu/,Boulder,CO,"University of Colorado, University Libraries",https://www.colorado.edu/libraries/,COLORADO,1800,126614
+uconn,University of Connecticut,https://uconn.edu/,Storrs,CT,University of Connecticut Library,https://lib.uconn.edu/,CONNECTICUT,2100,129020
+udel,University of Delaware,https://www.udel.edu/,Newark,DE,"University of Delaware, Library, Museums & Press",https://library.udel.edu/,DELAWARE,2350,130943
+ufl,University of Florida,http://www.ufl.edu/,Gainesville,FL,"University of Florida, George A. Smathers Libraries",http://library.ufl.edu/,FLORIDA,2600,134130
+uga,University of Georgia,https://www.uga.edu/,Athens,GA,University of Georgia Libraries,https://www.libs.uga.edu/,GEORGIA,2900,139959
+hawaii,University of Hawai'i,https://www.hawaii.edu/,Manoa,HI,University of Hawai'i Library,http://manoa.hawaii.edu/library/,HAWAII,3200,141574
+uh,University of Houston,http://www.uh.edu/,Houston,TX,University of Houston Libraries,https://libraries.uh.edu/,HOUSTON,3300,225511
+illinois,University of Illinois,https://illinois.edu/,Champaign,IL,"University of Illinois, University Library",https://library.illinois.edu/,"ILLINOIS, URBANA",3500,145637
+uic,"University of Illinois, Chicago",https://www.uic.edu/,Chicago,IL,"University of Illinois, Chicago Library",https://library.uic.edu/,"ILLINOIS, CHICAGO",3490,145600
+uiowa,University of Iowa,https://uiowa.edu/,Iowa City,IA,University of Iowa Libraries,https://www.lib.uiowa.edu/,IOWA,3700,153658
+ku,University of Kansas,https://ku.edu/,Lawrence,KS,University of Kansas Libraries,https://lib.ku.edu/,KANSAS,4100,155317
+uky,University of Kentucky,http://www.uky.edu/,Lexington,KY,University of Kentucky Libraries,http://libraries.uky.edu/,KENTUCKY,4300,157085
+louisville,University of Louisville,http://louisville.edu/,Louisville,KY,University of Louisville Libraries,http://louisville.edu/library/,LOUISVILLE,4420,157289
+umd,University of Maryland,https://www.umd.edu/,College Park,MD,University of Maryland Libraries,https://www.lib.umd.edu/,MARYLAND,4700,163286
+umass,University of Massachusetts,https://www.umass.edu/,Amherst,MA,University of Massachusetts Libraries,https://www.library.umass.edu/,MASSACHUSETTS,4800,166629
+umich,University of Michigan,https://umich.edu/,Ann Arbor,MI,University of Michigan Library,https://www.lib.umich.edu/,MICHIGAN,5100,170976
+umn,University of Minnesota,https://twin-cities.umn.edu/,MInneapolis,MN,University of Minnesota Libraries,https://www.lib.umn.edu/,MINNESOTA,5300,174066
+missouri,University of Missouri,https://missouri.edu/,Columbia,MO,University of Missouri Libraries,http://library.missouri.edu/,MISSOURI,5400,178396
+unl,University of Nebraska,https://www.unl.edu/,Lincoln,NB,University of Nebraska Libraries,https://libraries.unl.edu/,NEBRASKA,5500,181464
+unm,University of New Mexico,http://www.unm.edu/,Albuquerque,NM,University of New Mexico Libraries,https://library.unm.edu/,NEW MEXICO,5600,187985
+unc,University of North Carolina,https://www.unc.edu/,Chapel Hill,NC,University of North Carolina Libraries,https://library.unc.edu/,NORTH CAROLINA,5800,199120
+nd,University of Notre Dame,https://www.nd.edu/,South Bend,IN,"University of Notre Dame, Hesburgh Libraries",https://library.nd.edu/,NOTRE DAME,6000,152080
+ohio,University of Ohio,https://www.ohio.edu/,Athens,OH,"University of Ohio, University Libraries",https://www.library.ohio.edu/,OHIO,6050,204857
+ou,University of Oklahoma,https://www.ou.edu/,Norman,OK,University of Oklahoma Libraries,https://libraries.ou.edu/,OKLAHOMA,6200,207500
+uoregon,University of Oregon,https://www.uoregon.edu/,Eugene,OR,University of Oregon Libraries,https://library.uoregon.edu/,OREGON,6400,209551
+upenn,University of Pennsylvania,https://www.upenn.edu/,Philadelphia,PA,University of Pennsylvania Libraries,https://www.library.upenn.edu/,PENNSYLVANIA,6500,215062
+pitt,University of Pittsburgh,https://www.pitt.edu/,Pittsburgh,PA,"University of Pittsburgh, University Library System",https://www.library.pitt.edu/,PITTSBURGH,6700,215293
+rochester,University of Rochester,https://www.rochester.edu/,Rochester,NY,"University of Rochester, River Campus Libraries",https://library.rochester.edu/,ROCHESTER,7200,195030
+sc,University of South Carolina,https://www.sc.edu/,Columbia,SC,"University of South Carolina, University Libraries",http://library.sc.edu/,SOUTH CAROLINA,7400,218663
+usc,University of Southern California,https://www.usc.edu/,Los Angeles,CA,University of Southern California Libraries,https://libraries.usc.edu/,SOUTHERN CALIFORNIA,7500,123961
+utk,University of Tennessee,https://www.utk.edu/,Knoxville,TN,"University of Tennessee, University Libraries",https://www.lib.utk.edu/,TENNESSEE,8300,221759
+utexas,University of Texas,https://www.utexas.edu/,Austin,TX,University of Texas Libraries,https://www.lib.utexas.edu/,TEXAS,8400,228778
+utah,University of Utah,https://www.utah.edu/,Salt Lake City,UT,"University of Utah, J. Willard Marriott Library",https://lib.utah.edu/,UTAH,8800,230764
+virginia,University of Virginia,http://www.virginia.edu/,Charlottesville,VA,University of Virginia Library,https://www.library.virginia.edu/,VIRGINIA,8900,234076
+washington,University of Washington,https://www.washington.edu/,Seattle,WA,University of Washington University Libraries,http://www.lib.washington.edu/,WASHINGTON,9100,236948
+wisc,University of Wisconsin,https://www.wisc.edu/,Madison,WI,University of Wisconsin Library,https://www.library.wisc.edu/,WISCONSIN,9600,240444
+vanderbilt,Vanderbilt University,https://www.vanderbilt.edu/,Nashville,TN,"Vanderbilt University, Jean and Alexander Heard Libraries",https://www.library.vanderbilt.edu/,VANDERBILT,8850,221999
+vt,Virginia Tech,https://vt.edu/,Blacksburg,VA,"Virginia Tech, University Libraries",https://lib.vt.edu/,VIRGINIA TECH,9000,233921
+wsu,Washington State University,https://wsu.edu/,Pullman,WA,Washington State University Libraries,https://libraries.wsu.edu/,WASHINGTON STATE,9200,236939
 wustl,Washington University,https://wustl.edu/,St. Louis,MO,Washington University Libraries,https://library.wustl.edu/,WASHINGTON U.-ST. LOUIS,9300,179867
 wayne,Wayne State University,https://wayne.edu/,Detroit,MI,Wayne State University Libraries,https://library.wayne.edu/,WAYNE STATE,9400,172644
 yale,Yale University,https://www.yale.edu/,New Haven,CT,Yale University Library,https://web.library.yale.edu/,YALE,9700,130794
