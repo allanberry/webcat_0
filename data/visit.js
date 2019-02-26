@@ -13,7 +13,7 @@ logger.level = "debug";
 log4js.configure({
   appenders: {
     out: { type: 'stdout' },
-    app: { type: 'file', filename: 'logs/scrape.log' }
+    app: { type: 'file', filename: 'log/scrape.log' }
   },
   categories: {
     default: { appenders: [ 'out', 'app' ], level: 'debug' }

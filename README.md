@@ -10,6 +10,8 @@ This is a catalog of websites.
 
 ## Todo
 
+
+
 - write it up
 - make the script kinder to Internet Archive
   - make sure only makes one request for puppeteer, and one for superagent
