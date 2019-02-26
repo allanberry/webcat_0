@@ -4,9 +4,21 @@ const moment = require("moment");
 const csvParse = require("csv-parse/lib/sync");
 const colors = require("colors");
 const puppeteer = require("puppeteer");
+const log4js = require("log4js");
 // const rm = require("rimraf");
-const startDate = "1995-01-01";
 
+const startDate = "1995-01-01";
+const logger = log4js.getLogger();
+logger.level = "debug";
+log4js.configure({
+  appenders: {
+    out: { type: 'stdout' },
+    app: { type: 'file', filename: 'logs/scrape.log' }
+  },
+  categories: {
+    default: { appenders: [ 'out', 'app' ], level: 'debug' }
+  }
+});
 
 // main
 (async () => {
@@ -82,7 +94,7 @@ async function scrapeWayback(browser, library, dateInput) {
         response: {
           status: waybackRaw.status,
           type: waybackRaw.type,
-          headers: waybackRaw.header, 
+          headers: waybackRaw.header
         }
       }
     };
@@ -136,28 +148,29 @@ async function scrapeWayback(browser, library, dateInput) {
         await page.setViewport(viewports[v]);
 
         // screenshots
-        const screenFile = `${screensDir}/${library.slug}-${date.format(wbFormat)}-${v}.png`;
+        const screenFile = `${screensDir}/${library.slug}-${date.format(
+          wbFormat
+        )}-${v}.png`;
         if (!fs.existsSync(screenFile)) {
           await page.screenshot({
             path: screenFile,
             fullPage: true,
-            omitBackground: true,
+            omitBackground: true
           });
-          console.log(
-            `${colors.green("scrn OK")}: ${library.slug}-${date.format(
-              wbFormat
-            )}-${v}.png`)
+          logger.info(
+            `screen OK: ${library.slug}-${date.format(wbFormat)}-${v}.png`
+          );
         } else {
-          console.log(
-            `${colors.yellow("scrn --")}: ${library.slug}-${date.format(
+          logger.warn(
+            `screen --: ${library.slug}-${date.format(
               wbFormat
-            )}-${v}.png`
+            )}-${v}.png (exists)`
           );
         }
 
         // collect extra puppeteer metadata
         output.rendered.page.metrics = await page.metrics();
-        output.rendered.page.title = await page.title()
+        output.rendered.page.title = await page.title();
         // output.wayback.page.accessibility = await page.accessibility.snapshot();
         output.rendered.browser.userAgent = await browser.userAgent();
         output.rendered.browser.version = await browser.version();
@@ -167,51 +180,43 @@ async function scrapeWayback(browser, library, dateInput) {
       }
       // );
     } catch (error) {
-      console.log(
-        // `${colors.red("NOPE   ")}: ${date.format(wbFormat)} ${
-        //   library.slug
-        // } (${colors.red(error.name)})`
-        error
+      logger.error(
+        `screen FAIL: ${library.slug}-${date.format(wbFormat)} error: ${error.name} url: ${waybackUrl}`
       );
+      // logger.error(error);
+      // console.log(
+      //   `${colors.red("scrn NO")}: ${date.format(wbFormat)} ${
+      //     library.slug
+      //   } (${colors.red(error.name)})`
+      //   // error
+      // );
     }
 
     // output metadata
     const mdFile = `${metaDir}/${library.slug}-${date.format(wbFormat)}.json`;
     if (!fs.existsSync(mdFile)) {
       await fs.promises.writeFile(mdFile, JSON.stringify(output));
-      console.log(
-        `${colors.green("meta OK")}: ${library.slug}-${date.format(
-          wbFormat
-        )}.json`
-      );
+      logger.info(`meta OK:   ${library.slug}-${date.format(wbFormat)}.json`);
     } else {
-      console.log(
-        `${colors.yellow("meta --")}: ${library.slug}-${date.format(
-          wbFormat
-        )}.json`
+      logger.warn(
+        `meta --:   ${library.slug}-${date.format(wbFormat)}.json (exists)`
       );
     }
 
     // output raw html
-    const pageFile = `${pagesDir}/${library.slug}-${date.format(wbFormat)}.html`;
+    const pageFile = `${pagesDir}/${library.slug}-${date.format(
+      wbFormat
+    )}.html`;
     if (!fs.existsSync(pageFile)) {
       await fs.promises.writeFile(pageFile, waybackRaw.text);
-      console.log(
-        `${colors.green("page OK")}: ${library.slug}-${date.format(
-          wbFormat
-        )}.html`
-      );
+      logger.info(`page OK:   ${library.slug}-${date.format(wbFormat)}.html`);
     } else {
-      console.log(
-        `${colors.yellow("page --")}: ${library.slug}-${date.format(
-          wbFormat
-        )}.html`
+      logger.warn(
+        `page --:   ${library.slug}-${date.format(wbFormat)}.html (exists)`
       );
     }
-
-
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
   // const result = await axios.get(library.url);
   // console.log(result.data)
