@@ -8,9 +8,17 @@ date: 2019-01-19
 This is a catalog of websites.
 
 
+# Gathering data from a single url
+
+$ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
+
+-u: url
+-s: start date
+-e: end date
+-i: increments
+
+
 ## Todo
-
-
 
 - write it up
 - make the script kinder to Internet Archive

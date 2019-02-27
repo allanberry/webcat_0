@@ -2,12 +2,16 @@ const request = require("superagent");
 const fs = require("fs");
 const moment = require("moment");
 const csvParse = require("csv-parse/lib/sync");
-const colors = require("colors");
+// const colors = require("colors");
 const puppeteer = require("puppeteer");
 const log4js = require("log4js");
+const args = require("minimist")(process.argv.slice(2));
 
 // config
-const startDate = "1995-01-01";
+// const url = args.url;
+const startDate = args.startDate ? args.startDate : moment.utc("1995-01-01");
+const endDate = args.endDate ? args.endDate : moment();
+// const increment = args.increment ? args.increment : "1 year";
 
 // logger
 const logger = log4js.getLogger();
@@ -41,8 +45,8 @@ log4js.configure({
     // iterate libraries
     for (const library of libraries) {
       // iterate dates
-      let date = moment.utc(startDate);
-      while (date.isBefore(moment())) {
+      let date = startDate;
+      while (date.isBefore(endDate)) {
         // scrape
         await scrapeWayback(library, date, browser);
         date = date.add(1, "years");
