@@ -5,18 +5,20 @@ const csvParse = require("csv-parse/lib/sync");
 const colors = require("colors");
 const puppeteer = require("puppeteer");
 const log4js = require("log4js");
-// const rm = require("rimraf");
 
+// config
 const startDate = "1995-01-01";
+
+// logger
 const logger = log4js.getLogger();
 logger.level = "debug";
 log4js.configure({
   appenders: {
-    out: { type: 'stdout' },
-    app: { type: 'file', filename: 'log/scrape.log' }
+    out: { type: "stdout" },
+    app: { type: "file", filename: "log/scrape.log" }
   },
   categories: {
-    default: { appenders: [ 'out', 'app' ], level: 'debug' }
+    default: { appenders: ["out", "app"], level: "debug" }
   }
 });
 
@@ -42,7 +44,7 @@ log4js.configure({
       let date = moment.utc(startDate);
       while (date.isBefore(moment())) {
         // scrape
-        await scrapeWayback(browser, library, date);
+        await scrapeWayback(library, date, browser);
         date = date.add(1, "years");
       }
     }
@@ -54,18 +56,30 @@ log4js.configure({
   }
 })();
 
-async function scrapeWayback(browser, library, dateInput) {
+async function scrapeWayback(library, dateInput, browser = undefined) {
+  // allows use without external browser
+  let localbrowser;
+  if (!browser) {
+    browser = await puppeteer.launch();
+    localbrowser = true;
+  }
+
+  // date format string for moment
   const wbFormat = "YYYYMMDDHHmmss";
 
-  let date;
-
   try {
+    // inquire with wayback for archived site closest in time to input date
     const r = await request.get(
       `https://archive.org/wayback/available?url=${
         library.url
       }/&timestamp=${dateInput.format(wbFormat)}`
     );
-    date = moment.utc(r.body.archived_snapshots.closest.timestamp, wbFormat);
+
+    // determine date and actual Wayback URLs from superagent
+    const date = moment.utc(
+      r.body.archived_snapshots.closest.timestamp,
+      wbFormat
+    );
     const waybackUrl = `http://web.archive.org/web/${date.format(wbFormat)}/${
       library.url
     }`;
@@ -73,8 +87,10 @@ async function scrapeWayback(browser, library, dateInput) {
       wbFormat
     )}id_/${library.url}`;
 
+    // retrieve raw archive HTML from superagent
     const waybackRaw = await request.get(waybackRawUrl);
 
+    // config output
     let output = {
       slug: library.slug,
       site: library.url,
@@ -99,7 +115,7 @@ async function scrapeWayback(browser, library, dateInput) {
       }
     };
 
-    // filesystem
+    // setup filesystem
     const metaDir = `data/scrapes/meta`;
     const pagesDir = `data/scrapes/pages`;
     const screensDir = `data/scrapes/screens`;
@@ -147,7 +163,7 @@ async function scrapeWayback(browser, library, dateInput) {
         });
         await page.setViewport(viewports[v]);
 
-        // screenshots
+        // take screenshots
         const screenFile = `${screensDir}/${library.slug}-${date.format(
           wbFormat
         )}-${v}.png`;
@@ -171,17 +187,17 @@ async function scrapeWayback(browser, library, dateInput) {
         // collect extra puppeteer metadata
         output.rendered.page.metrics = await page.metrics();
         output.rendered.page.title = await page.title();
-        // output.wayback.page.accessibility = await page.accessibility.snapshot();
         output.rendered.browser.userAgent = await browser.userAgent();
         output.rendered.browser.version = await browser.version();
 
-        // cleanup
+        // cleanup page
         await page.close();
       }
-      // );
     } catch (error) {
       logger.error(
-        `screen FAIL: ${library.slug}-${date.format(wbFormat)} error: ${error.name} url: ${waybackUrl}`
+        `screen FAIL: ${library.slug}-${date.format(wbFormat)} error: ${
+          error.name
+        } url: ${waybackUrl}`
       );
       // logger.error(error);
       // console.log(
@@ -218,6 +234,9 @@ async function scrapeWayback(browser, library, dateInput) {
   } catch (error) {
     logger.error(error);
   }
-  // const result = await axios.get(library.url);
-  // console.log(result.data)
+
+  // clean up browser
+  if (localbrowser) {
+    await browser.close();
+  }
 }
