@@ -2,7 +2,6 @@ const request = require("superagent");
 const fs = require("fs");
 const moment = require("moment");
 const csvParse = require("csv-parse/lib/sync");
-// const colors = require("colors");
 const puppeteer = require("puppeteer");
 const log4js = require("log4js");
 const args = require("minimist")(process.argv.slice(2));
