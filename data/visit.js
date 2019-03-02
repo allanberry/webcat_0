@@ -12,6 +12,9 @@ const startDate = args.startDate ? args.startDate : moment.utc("1995-01-01");
 const endDate = args.endDate ? args.endDate : moment();
 // const increment = args.increment ? args.increment : "1 year";
 
+const screenshotsDir = "data/scrapes/screens";
+const wbFormat = "YYYYMMDDHHmmss";
+
 const logger = setupLogger();
 
 /**
@@ -29,9 +32,9 @@ const logger = setupLogger();
       let date = startDate;
       // while (date.isBefore(endDate)) {
       // scrape
-      const wb = await scrapeWayback(library.url, date, browser);
+      const wb = await scrapeWayback(library.slug, library.url, date, browser);
 
-      console.log(wb);
+      // console.log(wb);
 
       // date = date.add(1, "years");
       // }
@@ -50,8 +53,7 @@ const logger = setupLogger();
  * @param {date} dateRequested - A moment date.
  * @param {browser} browser - A Puppeteer browser object.
  */
-async function scrapeWayback(url, date, browser) {
-
+async function scrapeWayback(slug, url, date, browser) {
   // date format string for moment
   const wbFormat = "YYYYMMDDHHmmss";
 
@@ -71,11 +73,20 @@ async function scrapeWayback(url, date, browser) {
       waitUntil: "networkidle0"
     });
 
+    // puppeteer strip wayback elements
+    await page.evaluate(() => {
+      let element = document.querySelector("#wm-ipp");
+      element.parentNode.removeChild(element);
+    });
+
+    // puppeteer take screenshots
+    await screenshots(page, screenshotsDir, slug, dateActual);
+
     // retrieve raw archive HTML from superagent
     const rawHtml = await request.get(rawUrl);
 
-    // config output
-    let output = {
+    // output
+    const output = {
       url: url,
       date: dateActual.format(),
       dateScraped: moment.utc().format(),
@@ -103,6 +114,8 @@ async function scrapeWayback(url, date, browser) {
         }
       }
     };
+
+    // clean up
     await page.close();
 
     // // output metadata
@@ -142,7 +155,6 @@ async function scrapeWayback(url, date, browser) {
  * @param {boolean} raw - Whether or not the actual raw HTML is desired.
  */
 function waybackUrl(url, date, raw = false) {
-  const wbFormat = "YYYYMMDDHHmmss";
   return raw
     ? `http://web.archive.org/web/${date.format(wbFormat)}id_/${url}`
     : `http://web.archive.org/web/${date.format(wbFormat)}/${url}`;
@@ -154,7 +166,6 @@ function waybackUrl(url, date, raw = false) {
  * @param {date} date - A moment date.
  */
 async function getWaybackAvailableDate(url, date) {
-  const wbFormat = "YYYYMMDDHHmmss";
   // inquire with wayback for archived site closest in time to input date
   const availableResponse = await request.get(
     `https://archive.org/wayback/available?url=${url}/&timestamp=${date.format(
@@ -199,6 +210,63 @@ async function readCSV(csv) {
 }
 
 /**
+ * Get screenshots from puppeteer
+ * @param {page} page - A puppeteer page
+ * @param {path} path - a local directory path
+ * @param {string} slug - an arbitrary identifier
+ * @param {string} date - A moment date.
+ */
+async function screenshots(page, path, slug, date) {
+  const viewports = {
+    // "0001x0001": {
+    //   width: 1,
+    //   height: 1,
+    //   // isMobile: false,
+    //   isLandscape: false
+    // },
+    "0600": {
+      width: 600,
+      height: 1
+      // isMobile: true,
+      // isLandscape: false
+    },
+    "1200": {
+      width: 1200,
+      height: 1
+      // isMobile: false,
+      // isLandscape: true
+    }
+  };
+
+  try {
+    // setup screenshot directory
+    await fs.promises.mkdir(path, { recursive: true });
+
+    for (const v in viewports) {
+      await page.setViewport(viewports[v]);
+
+      const screenFile = `${slug}-${date.format(wbFormat)}-${v}.png`;
+      const screenPath = `${path}/${screenFile}`;
+
+      // determine if pic already exists
+      if (!fs.existsSync(screenPath)) {
+        await page.screenshot({
+          path: screenPath,
+          fullPage: true,
+          omitBackground: true
+        });
+        logger.info(`screenshot OK: ${screenFile}`);
+      } else {
+        logger.warn(`screenshot --: ${screenFile} (exists)`);
+      }
+    }
+  } catch (error) {
+    logger.error(`screenshot !!: ${slug}-${date.format(wbFormat)}`);
+    logger.error(error);
+  }
+}
+
+/**
  * Get data from Puppeteer
  */
 async function getPageData(page, url) {
@@ -237,10 +305,10 @@ async function getPageData(page, url) {
     // for (const v in viewports) {
 
     // Navigate to page
-    await page.goto(url, {
-      waitUntil: "networkidle0"
-      // timeout: 100000
-    });
+    // await page.goto(url, {
+    //   waitUntil: "networkidle0"
+    //   // timeout: 100000
+    // });
 
     // // strip wayback div
     // await page.evaluate(() => {
