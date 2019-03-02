@@ -28,6 +28,7 @@
     "log4js": "^4.0.2",
     "minimist": "^1.2.0",
     "moment": "^2.24.0",
+    "nedb": "^1.8.0",
     "puppeteer": "^1.12.2",
     "superagent": "^4.1.0"
   }

@@ -12,44 +12,29 @@ const startDate = args.startDate ? args.startDate : moment.utc("1995-01-01");
 const endDate = args.endDate ? args.endDate : moment();
 // const increment = args.increment ? args.increment : "1 year";
 
-// logger
-const logger = log4js.getLogger();
-logger.level = "debug";
-log4js.configure({
-  appenders: {
-    out: { type: "stdout" },
-    app: { type: "file", filename: "log/scrape.log" }
-  },
-  categories: {
-    default: { appenders: ["out", "app"], level: "debug" }
-  }
-});
+const logger = setupLogger();
 
-// main
+/**
+ * Main process.
+ */
 (async () => {
   try {
     // setup
     const browser = await puppeteer.launch();
-
-    // parse libraries
-    const librariesCSV = await fs.promises.readFile(
-      "data/libraries.csv",
-      "utf8"
-    );
-    const libraries = csvParse(librariesCSV, {
-      columns: true,
-      skip_empty_lines: true
-    });
+    const libraries = await readCSV("data/libraries.csv");
 
     // iterate libraries
     for (const library of libraries) {
       // iterate dates
       let date = startDate;
-      while (date.isBefore(endDate)) {
-        // scrape
-        await scrapeWayback(library, date, browser);
-        date = date.add(1, "years");
-      }
+      // while (date.isBefore(endDate)) {
+      // scrape
+      const wb = await scrapeWayback(library.url, date, browser);
+
+      console.log(wb);
+
+      // date = date.add(1, "years");
+      // }
     }
 
     // cleanup
@@ -59,187 +44,255 @@ log4js.configure({
   }
 })();
 
-async function scrapeWayback(library, dateInput, browser = undefined) {
-  // allows use without external browser
-  let localbrowser;
-  if (!browser) {
-    browser = await puppeteer.launch();
-    localbrowser = true;
-  }
+/**
+ * Get data from the Wayback Machine
+ * @param {string} url
+ * @param {date} dateRequested - A moment date.
+ * @param {browser} browser - A Puppeteer browser object.
+ */
+async function scrapeWayback(url, date, browser) {
 
   // date format string for moment
   const wbFormat = "YYYYMMDDHHmmss";
 
   try {
-    // inquire with wayback for archived site closest in time to input date
-    const r = await request.get(
-      `https://archive.org/wayback/available?url=${
-        library.url
-      }/&timestamp=${dateInput.format(wbFormat)}`
-    );
+    // setup puppeteer
+    const page = await browser.newPage();
 
-    // determine date and actual Wayback URLs from superagent
-    const date = moment.utc(
-      r.body.archived_snapshots.closest.timestamp,
-      wbFormat
-    );
-    const waybackUrl = `http://web.archive.org/web/${date.format(wbFormat)}/${
-      library.url
-    }`;
-    const waybackRawUrl = `http://web.archive.org/web/${date.format(
-      wbFormat
-    )}id_/${library.url}`;
+    // retrieve next date available from Wayback Machine
+    const dateActual = await getWaybackAvailableDate(url, date);
+
+    // build urls
+    const wbUrl = waybackUrl(url, dateActual);
+    const rawUrl = waybackUrl(url, dateActual, true);
+
+    // puppeteer navigate to page
+    await page.goto(wbUrl, {
+      waitUntil: "networkidle0"
+    });
 
     // retrieve raw archive HTML from superagent
-    const waybackRaw = await request.get(waybackRawUrl);
+    const rawHtml = await request.get(rawUrl);
 
     // config output
     let output = {
-      slug: library.slug,
-      site: library.url,
-      date: dateInput.format(),
-      dateRetrieved: moment.utc().format(),
+      url: url,
+      date: dateActual.format(),
+      dateScraped: moment.utc().format(),
 
       // for data from puppeteer, for the most part
       rendered: {
-        url: waybackUrl,
-        page: {},
-        browser: {}
+        url: wbUrl,
+        page: {
+          metrics: await page.metrics(),
+          title: await page.title()
+        },
+        browser: {
+          userAgent: await browser.userAgent(),
+          version: await browser.version()
+        }
       },
 
       // for raw HTML, from Superagent
       raw: {
-        url: waybackRawUrl,
+        url: rawUrl,
         response: {
-          status: waybackRaw.status,
-          type: waybackRaw.type,
-          headers: waybackRaw.header
+          status: rawHtml.status,
+          type: rawHtml.type,
+          headers: rawHtml.header
         }
       }
     };
+    await page.close();
 
-    // setup filesystem
-    const metaDir = `data/scrapes/meta`;
-    const pagesDir = `data/scrapes/pages`;
-    const screensDir = `data/scrapes/screens`;
-    await fs.promises.mkdir(metaDir, { recursive: true });
-    await fs.promises.mkdir(pagesDir, { recursive: true });
-    await fs.promises.mkdir(screensDir, { recursive: true });
+    // // output metadata
+    // const mdFile = `${metaDir}/${library.slug}-${dateActual.format(wbFormat)}.json`;
+    // if (!fs.existsSync(mdFile)) {
+    //   await fs.promises.writeFile(mdFile, JSON.stringify(output));
+    //   logger.info(`meta OK:   ${library.slug}-${dateActual.format(wbFormat)}.json`);
+    // } else {
+    //   logger.warn(
+    //     `meta --:   ${library.slug}-${dateActual.format(wbFormat)}.json (exists)`
+    //   );
+    // }
 
-    // puppeteer
-    try {
-      const viewports = {
-        // "0001x0001": {
-        //   width: 1,
-        //   height: 1,
-        //   // isMobile: false,
-        //   isLandscape: false
-        // },
-        "0600": {
-          width: 600,
-          height: 1
-          // isMobile: true,
-          // isLandscape: false
-        },
-        "1200": {
-          width: 1200,
-          height: 1
-          // isMobile: false,
-          // isLandscape: true
-        }
-      };
+    // // output raw html
+    // const pageFile = `${pagesDir}/${library.slug}-${dateActual.format(
+    //   wbFormat
+    // )}.html`;
+    // if (!fs.existsSync(pageFile)) {
+    //   await fs.promises.writeFile(pageFile, waybackRaw.text);
+    //   logger.info(`page OK:   ${library.slug}-${dateActual.format(wbFormat)}.html`);
+    // } else {
+    //   logger.warn(
+    //     `page --:   ${library.slug}-${dateActual.format(wbFormat)}.html (exists)`
+    //   );
+    // }
 
-      // scraping
-      for (const v in viewports) {
-        const page = await browser.newPage();
-
-        // Navigate to page
-        await page.goto(waybackUrl, {
-          waitUntil: "networkidle0"
-          // timeout: 100000
-        });
-
-        // strip wayback div
-        await page.evaluate(() => {
-          let waybackDiv = document.querySelector("#wm-ipp");
-          waybackDiv.parentNode.removeChild(waybackDiv);
-        });
-        await page.setViewport(viewports[v]);
-
-        // take screenshots
-        const screenFile = `${screensDir}/${library.slug}-${date.format(
-          wbFormat
-        )}-${v}.png`;
-        if (!fs.existsSync(screenFile)) {
-          await page.screenshot({
-            path: screenFile,
-            fullPage: true,
-            omitBackground: true
-          });
-          logger.info(
-            `screen OK: ${library.slug}-${date.format(wbFormat)}-${v}.png`
-          );
-        } else {
-          logger.warn(
-            `screen --: ${library.slug}-${date.format(
-              wbFormat
-            )}-${v}.png (exists)`
-          );
-        }
-
-        // collect extra puppeteer metadata
-        output.rendered.page.metrics = await page.metrics();
-        output.rendered.page.title = await page.title();
-        output.rendered.browser.userAgent = await browser.userAgent();
-        output.rendered.browser.version = await browser.version();
-
-        // cleanup page
-        await page.close();
-      }
-    } catch (error) {
-      logger.error(
-        `screen FAIL: ${library.slug}-${date.format(wbFormat)} error: ${
-          error.name
-        } url: ${waybackUrl}`
-      );
-      // logger.error(error);
-      // console.log(
-      //   `${colors.red("scrn NO")}: ${date.format(wbFormat)} ${
-      //     library.slug
-      //   } (${colors.red(error.name)})`
-      //   // error
-      // );
-    }
-
-    // output metadata
-    const mdFile = `${metaDir}/${library.slug}-${date.format(wbFormat)}.json`;
-    if (!fs.existsSync(mdFile)) {
-      await fs.promises.writeFile(mdFile, JSON.stringify(output));
-      logger.info(`meta OK:   ${library.slug}-${date.format(wbFormat)}.json`);
-    } else {
-      logger.warn(
-        `meta --:   ${library.slug}-${date.format(wbFormat)}.json (exists)`
-      );
-    }
-
-    // output raw html
-    const pageFile = `${pagesDir}/${library.slug}-${date.format(
-      wbFormat
-    )}.html`;
-    if (!fs.existsSync(pageFile)) {
-      await fs.promises.writeFile(pageFile, waybackRaw.text);
-      logger.info(`page OK:   ${library.slug}-${date.format(wbFormat)}.html`);
-    } else {
-      logger.warn(
-        `page --:   ${library.slug}-${date.format(wbFormat)}.html (exists)`
-      );
-    }
+    return output;
   } catch (error) {
     logger.error(error);
   }
+}
 
-  // clean up browser
-  if (localbrowser) {
-    await browser.close();
+/**
+ * Get data from the Wayback Machine
+ * @param {string} url - A full url string.
+ * @param {date} date - A moment date.
+ * @param {boolean} raw - Whether or not the actual raw HTML is desired.
+ */
+function waybackUrl(url, date, raw = false) {
+  const wbFormat = "YYYYMMDDHHmmss";
+  return raw
+    ? `http://web.archive.org/web/${date.format(wbFormat)}id_/${url}`
+    : `http://web.archive.org/web/${date.format(wbFormat)}/${url}`;
+}
+
+/**
+ * Get nearest available date from Wayback Machine
+ * @param {string} url - A full url string.
+ * @param {date} date - A moment date.
+ */
+async function getWaybackAvailableDate(url, date) {
+  const wbFormat = "YYYYMMDDHHmmss";
+  // inquire with wayback for archived site closest in time to input date
+  const availableResponse = await request.get(
+    `https://archive.org/wayback/available?url=${url}/&timestamp=${date.format(
+      wbFormat
+    )}`
+  );
+  // determine date and actual Wayback URLs from superagent
+  return moment.utc(
+    availableResponse.body.archived_snapshots.closest.timestamp,
+    wbFormat
+  );
+}
+
+/**
+ * A logger to track script progress.
+ */
+function setupLogger() {
+  // logger
+  const logger = log4js.getLogger();
+  logger.level = "debug";
+  log4js.configure({
+    appenders: {
+      out: { type: "stdout" },
+      app: { type: "file", filename: "log/scrape.log" }
+    },
+    categories: {
+      default: { appenders: ["out", "app"], level: "debug" }
+    }
+  });
+  return logger;
+}
+
+/**
+ * Simplified csv input.
+ * @param {string} csv - A path to a CSV file.
+ */
+async function readCSV(csv) {
+  return csvParse(await fs.promises.readFile(csv, "utf8"), {
+    columns: true,
+    skip_empty_lines: true
+  });
+}
+
+/**
+ * Get data from Puppeteer
+ */
+async function getPageData(page, url) {
+  // setup filesystem
+  // const metaDir = `data/scrapes/meta`;
+  // const pagesDir = `data/scrapes/pages`;
+  // const screensDir = `data/scrapes/screens`;
+  // await fs.promises.mkdir(metaDir, { recursive: true });
+  // await fs.promises.mkdir(pagesDir, { recursive: true });
+  // await fs.promises.mkdir(screensDir, { recursive: true });
+
+  // puppeteer
+  try {
+    // const viewports = {
+    //   // "0001x0001": {
+    //   //   width: 1,
+    //   //   height: 1,
+    //   //   // isMobile: false,
+    //   //   isLandscape: false
+    //   // },
+    //   "0600": {
+    //     width: 600,
+    //     height: 1
+    //     // isMobile: true,
+    //     // isLandscape: false
+    //   },
+    //   "1200": {
+    //     width: 1200,
+    //     height: 1
+    //     // isMobile: false,
+    //     // isLandscape: true
+    //   }
+    // };
+
+    // scraping
+    // for (const v in viewports) {
+
+    // Navigate to page
+    await page.goto(url, {
+      waitUntil: "networkidle0"
+      // timeout: 100000
+    });
+
+    // // strip wayback div
+    // await page.evaluate(() => {
+    //   let waybackDiv = document.querySelector("#wm-ipp");
+    //   waybackDiv.parentNode.removeChild(waybackDiv);
+    // });
+    // await page.setViewport(viewports[v]);
+
+    // // take screenshots
+    // const screenFile = `${screensDir}/${library.slug}-${date.format(
+    //   wbFormat
+    // )}-${v}.png`;
+    // if (!fs.existsSync(screenFile)) {
+    //   await page.screenshot({
+    //     path: screenFile,
+    //     fullPage: true,
+    //     omitBackground: true
+    //   });
+    //   logger.info(
+    //     `screen OK: ${library.slug}-${date.format(wbFormat)}-${v}.png`
+    //   );
+    // } else {
+    //   logger.warn(
+    //     `screen --: ${library.slug}-${date.format(
+    //       wbFormat
+    //     )}-${v}.png (exists)`
+    //   );
+    // }
+
+    return {
+      metrics: await page.metrics(),
+      title: await page.title()
+      // browser: {
+      //   userAgent: await browser.userAgent(),
+      //   version: await browser.version()
+      // }
+    };
+
+    // }
+  } catch (error) {
+    // logger.error(
+    //   `screen FAIL: ${library.slug}-${date.format(wbFormat)} error: ${
+    //     error.name
+    //   } url: ${waybackUrl}`
+    // );
+    // logger.error(error);
+    // console.log(
+    //   `${colors.red("scrn NO")}: ${date.format(wbFormat)} ${
+    //     library.slug
+    //   } (${colors.red(error.name)})`
+    //   // error
+    // );
+    logger.error(error);
   }
 }
