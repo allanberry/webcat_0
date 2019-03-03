@@ -17,7 +17,7 @@ const scrapesDir = "data/scrapes";
 const waybackDateFormat = "YYYYMMDDHHmmss";
 slugify.extend({ ".": "-" });
 // const url = args.url;
-const startDate = args.startDate ? args.startDate : moment.utc("1995-01-01");
+const startDate = args.startDate ? args.startDate : moment.utc("2012-01-01");
 const endDate = args.endDate ? args.endDate : moment();
 // const increment = args.increment ? args.increment : "1 year";
 
@@ -73,7 +73,7 @@ const viewports = [
         // update database
         db.insert(wb);
 
-        console.log(wb);
+        // console.log(wb);
 
         date = date.add(1, "years");
       }
@@ -119,8 +119,29 @@ async function scrapeWayback(url, date, browser) {
 
     // puppeteer strip wayback elements
     await page.evaluate(() => {
+      // wayback banner
       let element = document.querySelector("#wm-ipp");
       element.parentNode.removeChild(element);
+
+      // stylesheets
+      const wbSheets = [
+        'banner-styles.css',
+        'iconochive.css',
+      ];
+      for (str of wbSheets) {
+        let element = document.querySelectorAll(`link[href*="${str}"`)[0];
+        element.parentNode.removeChild(element);
+      }
+    });
+
+    // puppeteer gather stylesheets
+    const stylesheets = await page.evaluate(x => {
+      return Object.keys(document.styleSheets).map(x => {
+        return {
+          href: document.styleSheets[x].href === null ? 'inline' : document.styleSheets[x].href,
+          rules: document.styleSheets[x].rules.length
+        };
+      });
     });
 
     // puppeteer take screenshots
@@ -151,7 +172,8 @@ async function scrapeWayback(url, date, browser) {
 
     // retrieve internal page elements
     const $ = cheerio.load(rawHtml.text);
-    const rawTitle = $('title').text();
+    const rawTitle = $("title").text();
+    const elementQty = $("html *").length;
 
     // output
     const output = {
@@ -163,15 +185,22 @@ async function scrapeWayback(url, date, browser) {
       // for data from puppeteer, for the most part
       rendered: {
         url: wbUrl,
+        title: await page.title(),
+        css: {
+          stylesheets: stylesheets,
+          metrics: {
+            sheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
+              return val.rules == 0 ? acc + 1 : acc;
+            }, 0),
+            totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
+          },
+        },
         agent: {
           name: "Node.js/Puppeteer",
           url: "https://github.com/GoogleChrome/puppeteer",
           version: packageJson.dependencies.puppeteer
         },
-        page: {
-          metrics: await page.metrics(),
-          title: await page.title()
-        },
+        metrics: await page.metrics(),
         browser: {
           userAgent: await browser.userAgent(),
           version: await browser.version()
@@ -188,12 +217,15 @@ async function scrapeWayback(url, date, browser) {
           url: "https://github.com/visionmedia/superagent",
           version: packageJson.dependencies.superagent
         },
+        metrics: {
+          elements: elementQty
+        },
+        html: `${pageName}`,
         response: {
           status: rawHtml.status,
           type: rawHtml.type,
           headers: rawHtml.header
-        },
-        html: `${pageName}`
+        }
       }
     };
 
@@ -314,7 +346,7 @@ async function screenshot(page, dir, date, viewport) {
           ? document.width
           : document.body.offsetWidth;
 
-      return {height, width};
+      return { height, width };
     });
 
     // retrieve actual image dimensions from disk
