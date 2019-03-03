@@ -3,6 +3,7 @@
 # -------- #
 
 data/scrapes
+data/old
 
 # ----- #
 # Rails #
