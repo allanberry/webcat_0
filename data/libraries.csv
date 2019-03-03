@@ -1,2 +1,2 @@
-slug,college_name,url_college,city,state,library_name,url,arl_name,arl_id,ipeds_id
+slug,collegeName,urlCollege,city,state,libraryName,url,arlName,arlId,ipedsId
 wayne,Wayne State University,https://wayne.edu/,Detroit,MI,Wayne State University Libraries,https://library.wayne.edu/,WAYNE STATE,9400,172644

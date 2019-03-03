@@ -21,6 +21,7 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
 ## Todo
 
 - write it up
+- if page exists (via wb available), don't perform further requests
 - what did I do with my federal data?
 - split images into directories by dimensions
   - remove dimensions from filename

@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/allanberry/webcat#readme",
   "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
     "csv-parse": "^4.3.3",
     "geoip-lite": "^1.3.6",
     "image-size": "^0.7.2",

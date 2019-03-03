@@ -1,4 +1,4 @@
-slug,college_name,college_url,city,state,library_name,arl_name,arl_id,ipeds_id
+slug,collegeName,urlCollege,city,state,libraryName,url,arlName,arlId,ipedsId
 asu,Arizona State University,https://www.asu.edu/,Tempe,AZ,Arizona State University Library,ARIZONA STATE,400,104151
 auburn,Auburn University,http://www.auburn.edu/,Auburn,AL,Auburn University Libraries,AUBURN,440,100858
 bc,Boston College,https://www.bc.edu/,Chestnut Hill,MA,Boston College Libraries,BOSTON COLLEGE,550,164924

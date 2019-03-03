@@ -8,13 +8,14 @@ const args = require("minimist")(process.argv.slice(2));
 const Datastore = require("nedb");
 const geoip = require("geoip-lite");
 const slugify = require("slugify");
-const pjson = require('../package.json');
-const sizeOf = require('image-size');
+const packageJson = require("../package.json");
+const imageSize = require("image-size");
+const cheerio = require("cheerio");
 
 // config
 const scrapesDir = "data/scrapes";
 const waybackDateFormat = "YYYYMMDDHHmmss";
-slugify.extend({'.': '-'})
+slugify.extend({ ".": "-" });
 // const url = args.url;
 const startDate = args.startDate ? args.startDate : moment.utc("1995-01-01");
 const endDate = args.endDate ? args.endDate : moment();
@@ -49,14 +50,13 @@ const viewports = [
   try {
     // setup
     const browser = await puppeteer.launch();
-    const libraries = await readCSV("data/libraries.csv");
     const pages = await readCSV("data/pages.csv");
 
     // get global ip address
     const response = await request.get("ipv4bot.whatismyipaddress.com");
     const ip = response.text;
 
-    // iterate libraries
+    // iterate pages
     for (const page of pages) {
       // iterate dates
       let date = startDate;
@@ -70,11 +70,10 @@ const viewports = [
           geo: geoip.lookup(ip)
         };
 
-        db.insert(wb, function(err, newDoc) {
-          // Callback is optional
-          // newDoc is the newly inserted document, including its _id
-          // newDoc has no key called notToBeSaved since its value was undefined
-        });
+        // update database
+        db.insert(wb);
+
+        console.log(wb);
 
         date = date.add(1, "years");
       }
@@ -141,7 +140,7 @@ async function scrapeWayback(url, date, browser) {
     const rawHtml = await request.get(rawUrl);
     const pageDir = `${scrapesDir}/${slug}/pages`;
     await fs.promises.mkdir(pageDir, { recursive: true });
-    const pageName = `${dateActual.format(waybackDateFormat)}.html`
+    const pageName = `${dateActual.format(waybackDateFormat)}.html`;
     const pageFile = `${pageDir}/${pageName}`;
     if (!fs.existsSync(pageFile)) {
       await fs.promises.writeFile(pageFile, rawHtml.text);
@@ -149,6 +148,10 @@ async function scrapeWayback(url, date, browser) {
     } else {
       logger.warn(`page --:   ${pageFile} (exists)`);
     }
+
+    // retrieve internal page elements
+    const $ = cheerio.load(rawHtml.text);
+    const rawTitle = $('title').text();
 
     // output
     const output = {
@@ -161,9 +164,9 @@ async function scrapeWayback(url, date, browser) {
       rendered: {
         url: wbUrl,
         agent: {
-          name: 'Node.js/Puppeteer',
-          url: 'https://github.com/GoogleChrome/puppeteer',
-          version: pjson.dependencies.puppeteer
+          name: "Node.js/Puppeteer",
+          url: "https://github.com/GoogleChrome/puppeteer",
+          version: packageJson.dependencies.puppeteer
         },
         page: {
           metrics: await page.metrics(),
@@ -179,10 +182,11 @@ async function scrapeWayback(url, date, browser) {
       // for raw HTML, from Superagent
       raw: {
         url: rawUrl,
+        title: rawTitle,
         agent: {
-          name: 'Node.js/Superagent',
-          url: 'https://github.com/visionmedia/superagent',
-          version: pjson.dependencies.superagent
+          name: "Node.js/Superagent",
+          url: "https://github.com/visionmedia/superagent",
+          version: packageJson.dependencies.superagent
         },
         response: {
           status: rawHtml.status,
@@ -284,26 +288,49 @@ async function screenshot(page, dir, date, viewport) {
       await page.screenshot({
         path: file,
         fullPage: viewport.height <= 1 ? true : false
-        // omitBackground: true
       });
       logger.info(`screen OK: ${file}`);
     } else {
       logger.warn(`screen --: ${file} (exists)`);
     }
 
-    // var _docHeight = (document.height !== undefined) ? document.height : document.body.offsetHeight;
-    // var _docWidth = (document.width !== undefined) ? document.width : document.body.offsetWidth;
+    const calculatedDimensions = await page.evaluate(() => {
+      // calculate document height
+      // hat tip https://stackoverflow.com/a/1147768/652626
+      // get largest height that exists in the document
+      const body = document.body;
+      const html = document.documentElement;
+      const height = Math.max(
+        body.scrollHeight,
+        body.offsetHeight,
+        html.clientHeight,
+        html.scrollHeight,
+        html.offsetHeight
+      );
+
+      // getting width is simpler
+      const width =
+        document.width !== undefined
+          ? document.width
+          : document.body.offsetWidth;
+
+      return {height, width};
+    });
 
     // retrieve actual image dimensions from disk
-    const dimensions = sizeOf(file);
+    const physicalDimensions = imageSize(file);
 
     return {
       name: name,
       viewport: viewport,
       dimensions: {
         physical: {
-          height: dimensions.height,
-          width: dimensions.width
+          height: physicalDimensions.height,
+          width: physicalDimensions.width
+        },
+        calculated: {
+          height: calculatedDimensions.height,
+          width: calculatedDimensions.width
         }
       }
     };
@@ -312,5 +339,3 @@ async function screenshot(page, dir, date, viewport) {
     logger.error(error);
   }
 }
-
-async function getHtml(dir, date) {}
