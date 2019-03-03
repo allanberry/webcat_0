@@ -9,10 +9,12 @@ const Datastore = require("nedb");
 const geoip = require("geoip-lite");
 const slugify = require("slugify");
 const pjson = require('../package.json');
+const sizeOf = require('image-size');
 
 // config
 const scrapesDir = "data/scrapes";
 const waybackDateFormat = "YYYYMMDDHHmmss";
+slugify.extend({'.': '-'})
 // const url = args.url;
 const startDate = args.startDate ? args.startDate : moment.utc("1995-01-01");
 const endDate = args.endDate ? args.endDate : moment();
@@ -94,6 +96,7 @@ const viewports = [
 async function scrapeWayback(url, date, browser) {
   // date format string for moment
   const waybackDateFormat = "YYYYMMDDHHmmss";
+
   const slug = slugify(url)
     .replace("/", "_")
     .replace("https:", "")
@@ -127,7 +130,7 @@ async function scrapeWayback(url, date, browser) {
       screenshots.push(
         await screenshot(
           page,
-          `${scrapesDir}/screens/${slug}`,
+          `${scrapesDir}/${slug}/screens`,
           dateActual,
           viewport
         )
@@ -136,7 +139,7 @@ async function scrapeWayback(url, date, browser) {
 
     // retrieve raw archive HTML from superagent, and output to file
     const rawHtml = await request.get(rawUrl);
-    const pageDir = `${scrapesDir}/pages/${slug}`;
+    const pageDir = `${scrapesDir}/${slug}/pages`;
     await fs.promises.mkdir(pageDir, { recursive: true });
     const pageName = `${dateActual.format(waybackDateFormat)}.html`
     const pageFile = `${pageDir}/${pageName}`;
@@ -288,15 +291,19 @@ async function screenshot(page, dir, date, viewport) {
       logger.warn(`screen --: ${file} (exists)`);
     }
 
-    // var _docHeight = (document.height !== undefined) ? document.height : document.body.offsetHeight;
-    // var _docWidth = (document.width !== undefined) ? document.width : document.body.offsetWidth;
+    // retrieve actual image dimensions from disk
+    let h, w;
+    sizeOf(file, function (err, dimensions) {
+      h = dimensions.height;
+      w = dimensions.width;
+    });
 
     return {
       name: name,
       requestedViewport: viewport,
       dimensionsTotal: {
-        height: 123,
-        width: 789,
+        height: h,
+        width: w,
       }
     };
   } catch (error) {
