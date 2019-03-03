@@ -291,19 +291,20 @@ async function screenshot(page, dir, date, viewport) {
       logger.warn(`screen --: ${file} (exists)`);
     }
 
+    // var _docHeight = (document.height !== undefined) ? document.height : document.body.offsetHeight;
+    // var _docWidth = (document.width !== undefined) ? document.width : document.body.offsetWidth;
+
     // retrieve actual image dimensions from disk
-    let h, w;
-    sizeOf(file, function (err, dimensions) {
-      h = dimensions.height;
-      w = dimensions.width;
-    });
+    const dimensions = sizeOf(file);
 
     return {
       name: name,
-      requestedViewport: viewport,
-      dimensionsTotal: {
-        height: h,
-        width: w,
+      viewport: viewport,
+      dimensions: {
+        physical: {
+          height: dimensions.height,
+          width: dimensions.width
+        }
       }
     };
   } catch (error) {
