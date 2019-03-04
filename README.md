@@ -21,10 +21,14 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
 ## Todo
 
 - write it up
+- clean anchors to rm wb cruft, when it makes sense
+  - aggregate anchors:
+    - same primary domain
+    - external domains: different primary domain
+    - other domains in arl list
+    - repeating anchors?
 - if page exists (via wb available), don't perform further requests
 - what did I do with my federal data?
-- split images into directories by dimensions
-  - remove dimensions from filename
 - additional pages
   - contact page
   - about page
@@ -32,24 +36,7 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
   - hours page
   - example topic page
   - example collection page
-- (after webapp) reformat data to fit database
-- additional site data
-  - error rate
 - additional rendered data
-  - dimensions
-    - total
-    - header
-    - main area
-    - footer
-  - rendered styles
-  - features: slice total site area into characteristics, and quantify
-    - searching aids
-    - browsing aids
-    - chats
-    - navigation
-    - branding
-    - news
-    - resources
 - additional raw data
   - features (same as in rendered): slice total site bytes, and quantify
   - tags

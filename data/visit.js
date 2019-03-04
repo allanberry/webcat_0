@@ -43,6 +43,12 @@ const viewports = [
   }
 ];
 
+
+const technologyList = [
+  'ezproxy', 'google-analytics', 'drupal', 'wordpress'
+]
+
+
 /**
  * Main process.
  */
@@ -96,8 +102,10 @@ async function scrapeWayback(url, date, browser) {
   // date format string for moment
   const waybackDateFormat = "YYYYMMDDHHmmss";
 
-  const slug = slugify(url)
-    .replace("/", "_")
+  const slug = slugify(url, {
+    replacement: "-"
+  })
+    .replace("/", "-")
     .replace("https:", "")
     .replace("http:", "");
 
@@ -124,10 +132,7 @@ async function scrapeWayback(url, date, browser) {
       element.parentNode.removeChild(element);
 
       // stylesheets
-      const wbSheets = [
-        'banner-styles.css',
-        'iconochive.css',
-      ];
+      const wbSheets = ["banner-styles.css", "iconochive.css"];
       for (str of wbSheets) {
         let element = document.querySelectorAll(`link[href*="${str}"`)[0];
         element.parentNode.removeChild(element);
@@ -135,13 +140,21 @@ async function scrapeWayback(url, date, browser) {
     });
 
     // puppeteer gather stylesheets
-    const stylesheets = await page.evaluate(x => {
-      return Object.keys(document.styleSheets).map(x => {
+    const stylesheets = await page.evaluate(() => {
+      return Object.keys(document.styleSheets).map(key => {
         return {
-          href: document.styleSheets[x].href === null ? 'inline' : document.styleSheets[x].href,
-          rules: document.styleSheets[x].rules.length
+          href:
+            document.styleSheets[key].href === null
+              ? "inline"
+              : document.styleSheets[key].href,
+          rules: document.styleSheets[key].rules.length
         };
       });
+    });
+
+    // puppeteer gather anchors (links)
+    const anchors = await page.evaluate(() => {
+      return Array.from(document.querySelectorAll(`a`)).map(a => a.href);
     });
 
     // puppeteer take screenshots
@@ -186,21 +199,23 @@ async function scrapeWayback(url, date, browser) {
       rendered: {
         url: wbUrl,
         title: await page.title(),
-        css: {
-          stylesheets: stylesheets,
-          metrics: {
-            sheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
-              return val.rules == 0 ? acc + 1 : acc;
-            }, 0),
-            totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
-          },
-        },
+        stylesheets: stylesheets,
+        // anchors: anchors, // trebles size of db record
         agent: {
           name: "Node.js/Puppeteer",
           url: "https://github.com/GoogleChrome/puppeteer",
           version: packageJson.dependencies.puppeteer
         },
-        metrics: await page.metrics(),
+        metrics: {
+          puppeteer: await page.metrics(),
+          anchors: anchors.length,
+          css: {
+            stylesheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
+              return val.rules == 0 ? acc + 1 : acc;
+            }, 0),
+            totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
+          }
+        },
         browser: {
           userAgent: await browser.userAgent(),
           version: await browser.version()
@@ -218,7 +233,8 @@ async function scrapeWayback(url, date, browser) {
           version: packageJson.dependencies.superagent
         },
         metrics: {
-          elements: elementQty
+          elementQty: elementQty,
+          charCount: rawHtml.text.length
         },
         html: `${pageName}`,
         response: {
