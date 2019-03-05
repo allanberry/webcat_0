@@ -43,12 +43,6 @@ const viewports = [
   }
 ];
 
-
-const technologyList = [
-  'ezproxy', 'google-analytics', 'drupal', 'wordpress'
-]
-
-
 /**
  * Main process.
  */
@@ -62,33 +56,22 @@ const technologyList = [
     const response = await request.get("ipv4bot.whatismyipaddress.com");
     const ip = response.text;
 
-    // iterate pages
-    for (const page of pages) {
-      // iterate dates
-      let date = startDate;
-      while (date.isBefore(endDate)) {
+    // iterate dates
+    let date = startDate;
+    while (date.isBefore(endDate)) {
+      // iterate pages
+      for (const page of pages) {
         // scrape
-        const wb = await scrapeWayback(page.url, date, browser);
-
-        // include ip address and location information
-        wb.source = {
-          ip: ip,
-          geo: geoip.lookup(ip)
-        };
-
-        // update database
-        db.insert(wb);
-
-        // console.log(wb);
-
-        date = date.add(1, "years");
+        const wb = await scrapeWayback(page.url, date, browser, ip);
       }
+      date = date.add(1, "years");
     }
 
     // cleanup
     await browser.close();
   } catch (error) {
-    console.error(error);
+    logger.error(`errortown`);
+    logger.error(error.name, error.message);
   }
 })();
 
@@ -98,7 +81,7 @@ const technologyList = [
  * @param {date} dateRequested - A moment date.
  * @param {browser} browser - A Puppeteer browser object.
  */
-async function scrapeWayback(url, date, browser) {
+async function scrapeWayback(url, date, browser, ip) {
   // date format string for moment
   const waybackDateFormat = "YYYYMMDDHHmmss";
 
@@ -109,16 +92,48 @@ async function scrapeWayback(url, date, browser) {
     .replace("https:", "")
     .replace("http:", "");
 
+  // retrieve next date available from Wayback Machine
+  const dateActual = await getWaybackAvailableDate(url, date);
+
+  try {
+    // output
+    const output = {
+      url: url,
+      slug: slug,
+      date: dateActual.format(),
+      dateScraped: moment.utc().format(),
+      client: {
+        ip: ip,
+        geo: geoip.lookup(ip)
+      },
+
+      // for data from puppeteer, for the most part
+      rendered: await getRendered(url, dateActual, slug, browser),
+
+      // for raw HTML, from Superagent
+      raw: await getRaw(url, dateActual, slug)
+    };
+
+    // update database
+    db.insert(output);
+    logger.info(`data OK:   ${date.format()} ${url}`);
+  } catch (error) {
+    logger.error(`wb !!:    ${date.format()} ${url}`);
+    logger.error(error.name, error.message);
+  }
+}
+
+// function customSlug(url) {
+
+// }
+
+async function getRendered(url, date, slug, browser) {
+  // build urls
+  const wbUrl = waybackUrl(url, date);
+  
   try {
     // setup puppeteer
     const page = await browser.newPage();
-
-    // retrieve next date available from Wayback Machine
-    const dateActual = await getWaybackAvailableDate(url, date);
-
-    // build urls
-    const wbUrl = waybackUrl(url, dateActual);
-    const rawUrl = waybackUrl(url, dateActual, true);
 
     // puppeteer navigate to page
     await page.goto(wbUrl, {
@@ -160,27 +175,64 @@ async function scrapeWayback(url, date, browser) {
     // puppeteer take screenshots
     let screenshots = [];
     for (const viewport of viewports) {
-      screenshots.push(
-        await screenshot(
-          page,
-          `${scrapesDir}/${slug}/screens`,
-          dateActual,
-          viewport
-        )
-      );
+      screenshots.push(await screenshot(date, slug, page, viewport));
     }
 
+    const output = {
+      url: wbUrl,
+      title: await page.title(),
+      stylesheets: stylesheets,
+      // anchors: anchors, // trebles size of db record
+      agent: {
+        name: "Node.js/Puppeteer",
+        url: "https://github.com/GoogleChrome/puppeteer",
+        version: packageJson.dependencies.puppeteer
+      },
+      metrics: {
+        puppeteer: await page.metrics(),
+        anchors: anchors.length,
+        css: {
+          stylesheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
+            return val.rules == 0 ? acc + 1 : acc;
+          }, 0),
+          totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
+        }
+      },
+      browser: {
+        userAgent: await browser.userAgent(),
+        version: await browser.version()
+      },
+      screenshots: screenshots
+    };
+
+    // clean up
+    await page.close();
+
+    return output;
+  } catch (error) {
+    logger.error(`render !!:  ${wbUrl}`);
+    logger.error(error.name, error.message);
+  }
+}
+
+async function getRaw(url, date, slug) {
+  // get raw website data
+  const wbUrl = waybackUrl(url, date, true);
+
+  try {
     // retrieve raw archive HTML from superagent, and output to file
-    const rawHtml = await request.get(rawUrl);
+    const rawHtml = await request.get(wbUrl);
     const pageDir = `${scrapesDir}/${slug}/pages`;
     await fs.promises.mkdir(pageDir, { recursive: true });
-    const pageName = `${dateActual.format(waybackDateFormat)}.html`;
-    const pageFile = `${pageDir}/${pageName}`;
-    if (!fs.existsSync(pageFile)) {
-      await fs.promises.writeFile(pageFile, rawHtml.text);
-      logger.info(`page OK:   ${pageFile}`);
+    const pageName = `${date.format(waybackDateFormat)}.html`;
+    const path = `${pageDir}/${pageName}`;
+    const shortpath = `${slug}/pages/${pageName}`;
+
+    if (!fs.existsSync(path)) {
+      await fs.promises.writeFile(path, rawHtml.text);
+      logger.info(`page OK:   ${shortpath}`);
     } else {
-      logger.warn(`page --:   ${pageFile} (exists)`);
+      logger.warn(`page --:   ${shortpath} (exists)`);
     }
 
     // retrieve internal page elements
@@ -188,70 +240,28 @@ async function scrapeWayback(url, date, browser) {
     const rawTitle = $("title").text();
     const elementQty = $("html *").length;
 
-    // output
-    const output = {
-      url: url,
-      slug: slug,
-      date: dateActual.format(),
-      dateScraped: moment.utc().format(),
-
-      // for data from puppeteer, for the most part
-      rendered: {
-        url: wbUrl,
-        title: await page.title(),
-        stylesheets: stylesheets,
-        // anchors: anchors, // trebles size of db record
-        agent: {
-          name: "Node.js/Puppeteer",
-          url: "https://github.com/GoogleChrome/puppeteer",
-          version: packageJson.dependencies.puppeteer
-        },
-        metrics: {
-          puppeteer: await page.metrics(),
-          anchors: anchors.length,
-          css: {
-            stylesheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
-              return val.rules == 0 ? acc + 1 : acc;
-            }, 0),
-            totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
-          }
-        },
-        browser: {
-          userAgent: await browser.userAgent(),
-          version: await browser.version()
-        },
-        screenshots: screenshots
+    return {
+      url: wbUrl,
+      title: rawTitle,
+      agent: {
+        name: "Node.js/Superagent",
+        url: "https://github.com/visionmedia/superagent",
+        version: packageJson.dependencies.superagent
       },
-
-      // for raw HTML, from Superagent
-      raw: {
-        url: rawUrl,
-        title: rawTitle,
-        agent: {
-          name: "Node.js/Superagent",
-          url: "https://github.com/visionmedia/superagent",
-          version: packageJson.dependencies.superagent
-        },
-        metrics: {
-          elementQty: elementQty,
-          charCount: rawHtml.text.length
-        },
-        html: `${pageName}`,
-        response: {
-          status: rawHtml.status,
-          type: rawHtml.type,
-          headers: rawHtml.header
-        }
+      metrics: {
+        elementQty: elementQty,
+        charCount: rawHtml.text.length
+      },
+      html: `${pageName}`,
+      response: {
+        status: rawHtml.status,
+        type: rawHtml.type,
+        headers: rawHtml.header
       }
     };
-
-    // clean up
-    await page.close();
-
-    // finally return output
-    return output;
   } catch (error) {
-    logger.error(error);
+    logger.error(`raw !!:   ${wbUrl}`);
+    logger.error(error.name, error.message);
   }
 }
 
@@ -320,26 +330,28 @@ async function readCSV(csv) {
  * Get screenshot from puppeteer
  * @param {page} page - A puppeteer page
  * @param {string} dir - a local directory path
- * @param {string} slug - an arbitrary identifier
+ * @param {date} date
  * @param {object} viewport
  */
-async function screenshot(page, dir, date, viewport) {
+async function screenshot(date, slug, page, viewport) {
+  const dir = `${scrapesDir}/${slug}/screens`;
   const name = `${date.format(waybackDateFormat)}-${viewport.name}.png`;
-  const file = `${dir}/${name}`;
+  const path = `${dir}/${name}`;
+  const shortpath = `${slug}/screens/${name}`;
   try {
     // setup screenshot directory
     await fs.promises.mkdir(dir, { recursive: true });
     await page.setViewport(viewport);
 
     // determine if pic already exists
-    if (!fs.existsSync(file)) {
+    if (!fs.existsSync(path)) {
       await page.screenshot({
-        path: file,
+        path: path,
         fullPage: viewport.height <= 1 ? true : false
       });
-      logger.info(`screen OK: ${file}`);
+      logger.info(`screen OK: ${shortpath}`);
     } else {
-      logger.warn(`screen --: ${file} (exists)`);
+      logger.warn(`screen --: ${shortpath} (exists)`);
     }
 
     const calculatedDimensions = await page.evaluate(() => {
@@ -366,7 +378,7 @@ async function screenshot(page, dir, date, viewport) {
     });
 
     // retrieve actual image dimensions from disk
-    const physicalDimensions = imageSize(file);
+    const physicalDimensions = imageSize(path);
 
     return {
       name: name,
@@ -383,7 +395,7 @@ async function screenshot(page, dir, date, viewport) {
       }
     };
   } catch (error) {
-    logger.error(`screen !!: ${file}`);
-    logger.error(error);
+    logger.error(`screen !!: ${date.format()} ${slug}`);
+    logger.error(error.name, error.message);
   }
 }
