@@ -410,19 +410,7 @@ async function screenshot(date, slug, page, viewport) {
 function slugifyUrl(urlInput) {
   const decoded = decodeURI(urlInput);
   const url = new URL(decoded);
-
-  // const output = decoded
-  //   .toString()
-  //   .toLowerCase()
-  //   .replace(/^https?:\/\//, "")
-  //   .replace(/^-+/, "")
-  //   .replace(/-+$/, "")
-  //   .replace(/\/+$/, "")
-  //   .replace(/\//, "-")
-  //   .replace(/\./g, "_");
-
   const host = url.hostname.toString().toLowerCase();
-
   const href = url.href
     .toString()
     .toLowerCase()
@@ -434,8 +422,7 @@ function slugifyUrl(urlInput) {
     .replace(/\/+$/, "")
     .replace(/\//, "-")
     .replace(/\./g, "_");
-
+    
   const mainSlug = host.split(".").slice(-2, -1);
-
   return `${mainSlug}-${slugify(href)}`;
 }
