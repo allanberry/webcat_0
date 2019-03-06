@@ -7,19 +7,18 @@ const log4js = require("log4js");
 const args = require("minimist")(process.argv.slice(2));
 const Datastore = require("nedb");
 const geoip = require("geoip-lite");
-const slugify = require("slugify");
 const packageJson = require("../package.json");
 const imageSize = require("image-size");
 const cheerio = require("cheerio");
+const slugify = require("slugify");
 
 // config
 const scrapesDir = "data/scrapes";
 const waybackDateFormat = "YYYYMMDDHHmmss";
-slugify.extend({ ".": "-" });
-// const url = args.url;
-const startDate = args.startDate ? args.startDate : moment.utc("2012-01-01");
+const url = args.url;
+const startDate = args.startDate ? args.startDate : moment.utc("1995-01-01");
 const endDate = args.endDate ? args.endDate : moment();
-// const increment = args.increment ? args.increment : "1 year";
+const increment = args.increment ? args.increment : "100 years";
 
 // setup database
 const db = new Datastore({ filename: "data/nedb.db", autoload: true });
@@ -59,12 +58,17 @@ const viewports = [
     // iterate dates
     let date = startDate;
     while (date.isBefore(endDate)) {
-      // iterate pages
-      for (const page of pages) {
-        // scrape
-        const wb = await scrapeWayback(page.url, date, browser, ip);
+      // scrape
+      if (url) {
+        // single page
+        const wb = await scrapeWayback(url, date, browser, ip);
+      } else {
+        // multiple pages
+        for (const page of pages) {
+          const wb = await scrapeWayback(page.url, date, browser, ip);
+        }
       }
-      date = date.add(1, "years");
+      date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
     }
 
     // cleanup
@@ -85,52 +89,44 @@ async function scrapeWayback(url, date, browser, ip) {
   // date format string for moment
   const waybackDateFormat = "YYYYMMDDHHmmss";
 
-  const slug = slugify(url, {
-    replacement: "-"
-  })
-    .replace("/", "-")
-    .replace("https:", "")
-    .replace("http:", "");
+  const slug = slugifyUrl(url);
+  console.log(slug);
 
   // retrieve next date available from Wayback Machine
   const dateActual = await getWaybackAvailableDate(url, date);
 
-  try {
-    // output
-    const output = {
-      url: url,
-      slug: slug,
-      date: dateActual.format(),
-      dateScraped: moment.utc().format(),
-      client: {
-        ip: ip,
-        geo: geoip.lookup(ip)
-      },
+  // try {
+  //   // output
+  //   const output = {
+  //     url: url,
+  //     slug: slug,
+  //     date: dateActual.format(),
+  //     dateScraped: moment.utc().format(),
+  //     client: {
+  //       ip: ip,
+  //       geo: geoip.lookup(ip)
+  //     },
 
-      // for data from puppeteer, for the most part
-      rendered: await getRendered(url, dateActual, slug, browser),
+  //     // for data from puppeteer, for the most part
+  //     rendered: await getRendered(url, dateActual, slug, browser),
 
-      // for raw HTML, from Superagent
-      raw: await getRaw(url, dateActual, slug)
-    };
+  //     // for raw HTML, from Superagent
+  //     raw: await getRaw(url, dateActual, slug)
+  //   };
 
-    // update database
-    db.insert(output);
-    logger.info(`data OK:   ${date.format()} ${url}`);
-  } catch (error) {
-    logger.error(`wb !!:    ${date.format()} ${url}`);
-    logger.error(error.name, error.message);
-  }
+  //   // update database
+  //   db.insert(output);
+  //   logger.info(`data OK:   ${date.format()} ${url}`);
+  // } catch (error) {
+  //   logger.error(`wb !!:    ${date.format()} ${url}`);
+  //   logger.error(error.name, error.message);
+  // }
 }
-
-// function customSlug(url) {
-
-// }
 
 async function getRendered(url, date, slug, browser) {
   // build urls
   const wbUrl = waybackUrl(url, date);
-  
+
   try {
     // setup puppeteer
     const page = await browser.newPage();
@@ -228,19 +224,12 @@ async function getRaw(url, date, slug) {
     const path = `${pageDir}/${pageName}`;
     const shortpath = `${slug}/pages/${pageName}`;
 
-    if (!fs.existsSync(path)) {
-      await fs.promises.writeFile(path, rawHtml.text);
-      logger.info(`page OK:   ${shortpath}`);
-    } else {
-      logger.warn(`page --:   ${shortpath} (exists)`);
-    }
-
     // retrieve internal page elements
     const $ = cheerio.load(rawHtml.text);
     const rawTitle = $("title").text();
     const elementQty = $("html *").length;
 
-    return {
+    const output = {
       url: wbUrl,
       title: rawTitle,
       agent: {
@@ -259,6 +248,15 @@ async function getRaw(url, date, slug) {
         headers: rawHtml.header
       }
     };
+
+    if (!fs.existsSync(path)) {
+      await fs.promises.writeFile(path, rawHtml.text);
+      logger.info(`raw OK:    ${shortpath}`);
+    } else {
+      logger.warn(`raw --:    ${shortpath} (exists)`);
+    }
+
+    return output;
   } catch (error) {
     logger.error(`raw !!:   ${wbUrl}`);
     logger.error(error.name, error.message);
@@ -398,4 +396,19 @@ async function screenshot(date, slug, page, viewport) {
     logger.error(`screen !!: ${date.format()} ${slug}`);
     logger.error(error.name, error.message);
   }
+}
+
+function slugifyUrl(url) {
+  const decoded = decodeURI(url);
+  const output = decoded
+    .toString()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "")
+    .replace(/\/+$/, "")
+    .replace(/\//, "-")
+    .replace(/\./g, "_");
+
+  return slugify(output);
 }
