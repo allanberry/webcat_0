@@ -90,37 +90,40 @@ async function scrapeWayback(url, date, browser, ip) {
   const waybackDateFormat = "YYYYMMDDHHmmss";
 
   const slug = slugifyUrl(url);
-  console.log(slug);
 
   // retrieve next date available from Wayback Machine
   const dateActual = await getWaybackAvailableDate(url, date);
 
-  // try {
-  //   // output
-  //   const output = {
-  //     url: url,
-  //     slug: slug,
-  //     date: dateActual.format(),
-  //     dateScraped: moment.utc().format(),
-  //     client: {
-  //       ip: ip,
-  //       geo: geoip.lookup(ip)
-  //     },
+  if (!dateActual) {
+    logger.warn(`wb !!:    ${url} -- not in Wayback Machine!`);
+  } else {
+    try {
+      // output
+      const output = {
+        url: url,
+        slug: slug,
+        date: dateActual.format(),
+        dateScraped: moment.utc().format(),
+        client: {
+          ip: ip,
+          geo: geoip.lookup(ip)
+        },
 
-  //     // for data from puppeteer, for the most part
-  //     rendered: await getRendered(url, dateActual, slug, browser),
+        // for data from puppeteer, for the most part
+        rendered: await getRendered(url, dateActual, slug, browser),
 
-  //     // for raw HTML, from Superagent
-  //     raw: await getRaw(url, dateActual, slug)
-  //   };
+        // for raw HTML, from Superagent
+        raw: await getRaw(url, dateActual, slug)
+      };
 
-  //   // update database
-  //   db.insert(output);
-  //   logger.info(`data OK:   ${date.format()} ${url}`);
-  // } catch (error) {
-  //   logger.error(`wb !!:    ${date.format()} ${url}`);
-  //   logger.error(error.name, error.message);
-  // }
+      // update database
+      db.insert(output);
+      logger.info(`data OK:   ${date.format()} ${url}`);
+    } catch (error) {
+      logger.error(`wb !!:    ${date.format()} ${url}`);
+      logger.error(error.name, error.message);
+    }
+  }
 }
 
 async function getRendered(url, date, slug, browser) {
@@ -281,17 +284,27 @@ function waybackUrl(url, date, raw = false) {
  * @param {date} date - A moment date.
  */
 async function getWaybackAvailableDate(url, date) {
-  // inquire with wayback for archived site closest in time to input date
-  const availableResponse = await request.get(
-    `https://archive.org/wayback/available?url=${url}/&timestamp=${date.format(
-      waybackDateFormat
-    )}`
-  );
-  // determine date and actual Wayback URLs from superagent
-  return moment.utc(
-    availableResponse.body.archived_snapshots.closest.timestamp,
-    waybackDateFormat
-  );
+  try {
+    // inquire with wayback for archived site closest in time to input date
+    const availableResponse = await request.get(
+      `https://archive.org/wayback/available?url=${url}/&timestamp=${date.format(
+        waybackDateFormat
+      )}`
+    );
+
+    if (
+      availableResponse.body.archived_snapshots.closest &&
+      availableResponse.body.archived_snapshots.closest.timestamp
+    ) {
+      // determine date and actual Wayback URLs from superagent
+      return moment.utc(
+        availableResponse.body.archived_snapshots.closest.timestamp,
+        waybackDateFormat
+      );
+    }
+  } catch (error) {
+    logger.error(error);
+  }
 }
 
 /**
@@ -398,17 +411,35 @@ async function screenshot(date, slug, page, viewport) {
   }
 }
 
-function slugifyUrl(url) {
-  const decoded = decodeURI(url);
-  const output = decoded
+function slugifyUrl(urlInput) {
+  const decoded = decodeURI(urlInput);
+  const url = new URL(decoded);
+
+  // const output = decoded
+  //   .toString()
+  //   .toLowerCase()
+  //   .replace(/^https?:\/\//, "")
+  //   .replace(/^-+/, "")
+  //   .replace(/-+$/, "")
+  //   .replace(/\/+$/, "")
+  //   .replace(/\//, "-")
+  //   .replace(/\./g, "_");
+
+  const host = url.hostname.toString().toLowerCase();
+
+  const href = url.href
     .toString()
     .toLowerCase()
-    .replace(/^https?:\/\//, "")
+    .replace(/^https?/, "")
+    .replace(":", "")
     .replace(/^-+/, "")
+    .replace(/^\/+/, "")
     .replace(/-+$/, "")
     .replace(/\/+$/, "")
     .replace(/\//, "-")
     .replace(/\./g, "_");
 
-  return slugify(output);
+  const mainSlug = host.split(".").slice(-2, -1);
+
+  return `${mainSlug}-${slugify(href)}`;
 }
