@@ -91,15 +91,14 @@ async function scrapeWayback(url, date, browser, ip) {
 
   const slug = slugifyUrl(url);
 
-  // retrieve next date available from Wayback Machine
-  const dateActual = await getWaybackAvailableDate(url, date);
-
-  if (!dateActual) {
-    logger.warn(`wb !!:    ${url} -- not in Wayback Machine!`);
-  } else {
-    try {
-      // output
-      const output = {
+  try {
+    // retrieve next date available from Wayback Machine
+    const dateActual = await getWaybackAvailableDate(url, date);
+    if (!dateActual) {
+      logger.warn(`wb !!:    ${url} -- not in Wayback Machine!`);
+    } else {
+      // save to database
+      db.insert({
         url: url,
         slug: slug,
         date: dateActual.format(),
@@ -114,15 +113,12 @@ async function scrapeWayback(url, date, browser, ip) {
 
         // for raw HTML, from Superagent
         raw: await getRaw(url, dateActual, slug)
-      };
-
-      // update database
-      db.insert(output);
-      logger.info(`data OK:   ${date.format()} ${url}`);
-    } catch (error) {
-      logger.error(`wb !!:    ${date.format()} ${url}`);
-      logger.error(error.name, error.message);
+      });
+      logger.info(`data OK:   ${dateActual.format()} ${url}`);
     }
+  } catch (error) {
+    logger.error(`wb !!:    ${date.format()} ${url}`);
+    logger.error(error.name, error.message);
   }
 }
 
