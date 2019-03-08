@@ -5,7 +5,7 @@ const csvParse = require("csv-parse/lib/sync");
 const puppeteer = require("puppeteer");
 const log4js = require("log4js");
 const args = require("minimist")(process.argv.slice(2));
-const Datastore = require("nedb");
+const datastore = require("nedb-promise");
 const geoip = require("geoip-lite");
 const packageJson = require("../package.json");
 const imageSize = require("image-size");
@@ -15,13 +15,14 @@ const slugify = require("slugify");
 // config
 const scrapesDir = "data/scrapes";
 const waybackDateFormat = "YYYYMMDDHHmmss";
+const overwrite = args.overwrite == "true" ? true : false;
 const url = args.url;
 const startDate = args.startDate ? args.startDate : moment.utc("1995-01-01");
 const endDate = args.endDate ? args.endDate : moment();
 const increment = args.increment ? args.increment : "100 years";
 
 // setup database
-const db = new Datastore({ filename: "data/nedb.db", autoload: true });
+const DB = datastore({ filename: "data/nedb.db", autoload: true });
 
 // setup logger
 const logger = setupLogger();
@@ -94,27 +95,49 @@ async function scrapeWayback(url, date, browser, ip) {
   try {
     // retrieve next date available from Wayback Machine
     const dateActual = await getWaybackAvailableDate(url, date);
+
+    const inDatabase = true;
+
     if (!dateActual) {
       logger.warn(`wb !!:    ${url} -- not in Wayback Machine!`);
     } else {
+      // for data from puppeteer, for the most part
+      // if (overwrite) {
+      const rendered = await getRendered(url, dateActual, slug, browser);
+      // }
+
+      // for raw HTML, from Superagent
+      // if (overwrite) {
+      const raw = await getRaw(url, dateActual, slug);
+      // }
+
       // save to database
-      db.insert({
-        url: url,
-        slug: slug,
-        date: dateActual.format(),
-        dateScraped: moment.utc().format(),
-        client: {
-          ip: ip,
-          geo: geoip.lookup(ip)
-        },
+      // const inDatabase = await DB.findOne({ url: url, date: dateActual.format() }).length > 0;
+      // console.log(inDatabase)
 
-        // for data from puppeteer, for the most part
-        rendered: await getRendered(url, dateActual, slug, browser),
-
-        // for raw HTML, from Superagent
-        raw: await getRaw(url, dateActual, slug)
-      });
-      logger.info(`data OK:   ${dateActual.format()} ${url}`);
+      // if (
+      //   overwrite || inDatabase
+      // ) {
+        await DB.insert({
+          url,
+          slug,
+          date: dateActual.format(),
+          dateScraped: moment.utc().format(),
+          client: {
+            ip,
+            geo: geoip.lookup(ip)
+          },
+          rendered,
+          raw
+        });
+        logger.info(`data OK:   ${dateActual.format()} ${url}`);
+      // } else {
+      //   if (overwrite) {
+      //     logger.warn(`data --:   ${dateActual.format()} ${url} (overwrite off)`);
+      //   } else {
+      //     logger.warn(`data --:   ${dateActual.format()} ${url} (exists)`);
+      //   }
+      // }
     }
   } catch (error) {
     logger.error(`wb !!:    ${date.format()} ${url}`);
@@ -205,7 +228,7 @@ async function getRendered(url, date, slug, browser) {
 
     return output;
   } catch (error) {
-    logger.error(`render !!:  ${wbUrl}`);
+    logger.error(`render !!:  ${date.format()} ${url}`);
     logger.error(error.name, error.message);
   }
 }
@@ -250,14 +273,14 @@ async function getRaw(url, date, slug) {
 
     if (!fs.existsSync(path)) {
       await fs.promises.writeFile(path, rawHtml.text);
-      logger.info(`raw OK:    ${shortpath}`);
+      logger.info(`raw OK:    ${date.format()} ${url}`);
     } else {
-      logger.warn(`raw --:    ${shortpath} (exists)`);
+      logger.warn(`raw --:    ${date.format()} ${url} (exists)`);
     }
 
     return output;
   } catch (error) {
-    logger.error(`raw !!:   ${wbUrl}`);
+    logger.error(`raw !!:   ${date.format()} ${url}`);
     logger.error(error.name, error.message);
   }
 }
@@ -299,7 +322,7 @@ async function getWaybackAvailableDate(url, date) {
       );
     }
   } catch (error) {
-    logger.error(error);
+    logger.error(`avail !!   ${date.format()} ${url}`);
   }
 }
 
@@ -356,9 +379,9 @@ async function screenshot(date, slug, page, viewport) {
         path: path,
         fullPage: viewport.height <= 1 ? true : false
       });
-      logger.info(`screen OK: ${shortpath}`);
+      logger.info(`screen OK: ${date.format()} ${shortpath}`);
     } else {
-      logger.warn(`screen --: ${shortpath} (exists)`);
+      logger.warn(`screen --: ${date.format()} ${shortpath} (exists)`);
     }
 
     const calculatedDimensions = await page.evaluate(() => {
@@ -422,7 +445,7 @@ function slugifyUrl(urlInput) {
     .replace(/\/+$/, "")
     .replace(/\//, "-")
     .replace(/\./g, "_");
-    
+
   const mainSlug = host.split(".").slice(-2, -1);
   return `${mainSlug}-${slugify(href)}`;
 }
