@@ -94,48 +94,93 @@ async function scrapeWayback(date, url, browser, ip) {
 
   try {
     // retrieve next date available from Wayback Machine
-    const dateActual = await getWaybackAvailableDate(date, url);
+    const waybackDate = await getWaybackDate(date, url);
 
-    if (dateActual) {
+    if (waybackDate) {
+      // setup puppeteer
+      const page = await browser.newPage();
+
       // determine if data exists in database
-      const inDatabase = (await DB.count({ date: dateActual.format(), url })) > 0;
+      const inDatabase =
+        (await DB.count({ date: waybackDate.format(), url })) > 0;
 
-      // const screenshotsExist =
+      const rawExists = false;
+      const renderedExists = false;
+      const screenshotsExist = false;
 
-
-
-      // for data from puppeteer, for the most part
-      const rendered = await getRendered(dateActual, url, browser);
+      // metadata
+      let metadata = {
+        url,
+        slug: slugifyUrl(url),
+        date: waybackDate.format(),
+        dateScraped: moment.utc().format(),
+        client: {
+          ip,
+          geo: geoip.lookup(ip)
+        }
+      };
 
       // for raw HTML, from Superagent
-      let raw = await getRaw(dateActual, url);
+      if (overwrite || !rawExists) {
+        metadata.raw = await getRaw(waybackDate, url);
+      }
 
-      // save to database
+      // for data from Puppeteer
+      if (overwrite || !renderedExists) {
+        metadata.rendered = await getRendered(waybackDate, url, page);
+        metadata.rendered.browser = {
+          userAgent: await browser.userAgent(),
+          version: await browser.version()
+        }
+      }
+
+      // for screenshots
+      if (overwrite || !screenshotsExist) {
+        metadata.rendered.screenshots = [];
+        for (const viewport of viewports) {
+          metadata.rendered.screenshots.push(
+            await takeScreenshot(date, url, page, viewport)
+          );
+        }
+      }
+
       if (!overwrite && inDatabase) {
-        logger.warn(`data --:   ${dateActual.format()} ${url} (exists)`);
+        logger.warn(`data --:   ${waybackDate.format()} ${url} (exists)`);
       } else {
         await DB.update(
-          { date: dateActual.format(), url },
-          {
-            url,
-            slug: slugifyUrl(url),
-            date: dateActual.format(),
-            dateScraped: moment.utc().format(),
-            client: {
-              ip,
-              geo: geoip.lookup(ip)
-            },
-            rendered,
-            raw
-          },
+          { date: waybackDate.format(), url },
+          metadata,
           { upsert: true }
         );
         if (overwrite) {
-          logger.info(`data OK:   ${dateActual.format()} ${url} (updated)`);
+          // updated
+          logger.info(`data OK:   ${waybackDate.format()} ${url} (updated)`);
         } else {
-          logger.info(`data OK:   ${dateActual.format()} ${url} (new)`);
+          // created
+          logger.info(`data OK:   ${waybackDate.format()} ${url} (created)`);
         }
       }
+
+      // save to database
+      // await DB.update(
+      //   { date: waybackDate.format(), url },
+      //   {
+      //     url,
+      //     slug: slugifyUrl(url),
+      //     date: waybackDate.format(),
+      //     dateScraped: moment.utc().format(),
+      //     client: {
+      //       ip,
+      //       geo: geoip.lookup(ip)
+      //     },
+      //     rendered,
+      //     raw,
+      //   },
+      //   { upsert: true }
+      // );
+
+      // clean up puppeteer
+      await page.close();
     } else {
       logger.warn(`wb !!:    ${url} -- not in Wayback Machine!`);
     }
@@ -145,14 +190,11 @@ async function scrapeWayback(date, url, browser, ip) {
   }
 }
 
-async function getRendered(date, url, browser) {
+async function getRendered(date, url, page) {
   // build urls
   const wbUrl = waybackUrl(date, url);
 
   try {
-    // setup puppeteer
-    const page = await browser.newPage();
-
     // puppeteer navigate to page
     await page.goto(wbUrl, {
       waitUntil: "networkidle0"
@@ -190,13 +232,7 @@ async function getRendered(date, url, browser) {
       return Array.from(document.querySelectorAll(`a`)).map(a => a.href);
     });
 
-    // puppeteer take screenshots
-    let screenshots = [];
-    for (const viewport of viewports) {
-      screenshots.push(await takeScreenshot(date, url, page, viewport));
-    }
-
-    const output = {
+    return {
       url: wbUrl,
       title: await page.title(),
       stylesheets: stylesheets,
@@ -215,18 +251,8 @@ async function getRendered(date, url, browser) {
           }, 0),
           totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
         }
-      },
-      browser: {
-        userAgent: await browser.userAgent(),
-        version: await browser.version()
-      },
-      screenshots: screenshots
+      }
     };
-
-    // clean up
-    await page.close();
-
-    return output;
   } catch (error) {
     logger.error(`render !!:  ${date.format()} ${url}`);
     logger.error(error.name, error.message);
@@ -290,7 +316,7 @@ function waybackUrl(date, url, raw = false) {
  * @param {string} url - A full url string.
  * @param {date} date - A moment date.
  */
-async function getWaybackAvailableDate(date, url) {
+async function getWaybackDate(date, url) {
   try {
     // inquire with wayback for archived site closest in time to input date
     const availableResponse = await request.get(
@@ -353,9 +379,8 @@ function screenshotPath(date, url, viewport) {
 
 // determine if screenshot exists
 async function screenshotExists(date, url, viewport) {
-  return await fs.existsSync(screenshotPath(date, url, viewport))
+  return await fs.existsSync(screenshotPath(date, url, viewport));
 }
-
 
 // get screenshot from puppeteer
 async function takeScreenshot(date, url, page, viewport) {
@@ -370,7 +395,7 @@ async function takeScreenshot(date, url, page, viewport) {
     await page.setViewport(viewport);
 
     // determine if pic already exists
-    if (! await screenshotExists(date, url, viewport)) {
+    if (!(await screenshotExists(date, url, viewport))) {
       await page.screenshot({
         path: path,
         fullPage: viewport.height <= 1 ? true : false
@@ -423,7 +448,7 @@ async function takeScreenshot(date, url, page, viewport) {
   } catch (error) {
     // logger.error(`screen !!: ${date.format()} ${path}`);
     // logger.error(error.name, error.message);
-    logger.error(error)
+    logger.error(error);
   }
 }
 
