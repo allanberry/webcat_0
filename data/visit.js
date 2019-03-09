@@ -13,12 +13,12 @@ const cheerio = require("cheerio");
 const slugify = require("slugify");
 
 // config
-const scrapesDir = "data/scrapes";
+const screenshotsDir = "data/screenshots";
 const waybackDateFormat = "YYYYMMDDHHmmss";
 const overwrite = args.overwrite == "true" ? true : false;
 const url = args.url;
-const startDate = args.startDate ? args.startDate : moment.utc("1995-01-01");
-const endDate = args.endDate ? args.endDate : moment();
+const startDate = args.startDate ? moment.utc(args.startDate) : moment.utc("1995-01-01");
+const endDate = args.endDate ? moment.utc(args.endDate) : moment();
 const increment = args.increment ? args.increment : "100 years";
 
 // setup database
@@ -107,19 +107,16 @@ async function scrapeWayback(url, date, browser, ip) {
       // }
 
       // for raw HTML, from Superagent
-      // if (overwrite) {
       const raw = await getRaw(url, dateActual, slug);
-      // }
 
-      // save to database
+      // determine if data exists
       const inDatabase =
         (await DB.count({ url, date: dateActual.format() })) > 0;
-
+      
+      // save to database
       if (!overwrite && inDatabase) {
         logger.warn(`data --:   ${dateActual.format()} ${url} (exists)`);
       } else {
-        // console.log(url, dateActual.format());
-        console.log(await DB.count({ url, date: dateActual.format() }));
         await DB.update(
           { url, date: dateActual.format() },
           {
@@ -244,11 +241,6 @@ async function getRaw(url, date, slug) {
   try {
     // retrieve raw archive HTML from superagent, and output to file
     const rawHtml = await request.get(wbUrl);
-    const pageDir = `${scrapesDir}/${slug}/pages`;
-    await fs.promises.mkdir(pageDir, { recursive: true });
-    const pageName = `${date.format(waybackDateFormat)}.html`;
-    const path = `${pageDir}/${pageName}`;
-    const shortpath = `${slug}/pages/${pageName}`;
 
     // retrieve internal page elements
     const $ = cheerio.load(rawHtml.text);
@@ -267,20 +259,13 @@ async function getRaw(url, date, slug) {
         elementQty: elementQty,
         charCount: rawHtml.text.length
       },
-      html: `${pageName}`,
       response: {
         status: rawHtml.status,
         type: rawHtml.type,
-        headers: rawHtml.header
+        headers: rawHtml.header,
+        text: rawHtml.text,
       }
     };
-
-    if (!fs.existsSync(path)) {
-      await fs.promises.writeFile(path, rawHtml.text);
-      logger.info(`raw OK:    ${date.format()} ${url}`);
-    } else {
-      logger.warn(`raw --:    ${date.format()} ${url} (exists)`);
-    }
 
     return output;
   } catch (error) {
@@ -368,10 +353,12 @@ async function readCSV(csv) {
  * @param {object} viewport
  */
 async function screenshot(date, slug, page, viewport) {
-  const dir = `${scrapesDir}/${slug}/screens`;
+  // const dir = `${scrapesDir}/${slug}/screens`;
+  const dir = `${screenshotsDir}/${slug}`;
   const name = `${date.format(waybackDateFormat)}-${viewport.name}.png`;
   const path = `${dir}/${name}`;
-  const shortpath = `${slug}/screens/${name}`;
+  // const shortpath = `${slug}/screens/${name}`;
+  const shortpath = `${slug}/${name}`;
   try {
     // setup screenshot directory
     await fs.promises.mkdir(dir, { recursive: true });

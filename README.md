@@ -20,6 +20,7 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
 
 ## Todo
 
+- carry overwrite logic to screenshots
 - write it up
 - handle redirects
   e.g. http://web.archive.org/web/20120103055748/http://asu.edu/lib/
