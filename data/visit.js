@@ -112,32 +112,36 @@ async function scrapeWayback(url, date, browser, ip) {
       // }
 
       // save to database
-      // const inDatabase = await DB.findOne({ url: url, date: dateActual.format() }).length > 0;
-      // console.log(inDatabase)
+      const inDatabase =
+        (await DB.count({ url, date: dateActual.format() })) > 0;
 
-      // if (
-      //   overwrite || inDatabase
-      // ) {
-        await DB.insert({
-          url,
-          slug,
-          date: dateActual.format(),
-          dateScraped: moment.utc().format(),
-          client: {
-            ip,
-            geo: geoip.lookup(ip)
+      if (!overwrite && inDatabase) {
+        logger.warn(`data --:   ${dateActual.format()} ${url} (exists)`);
+      } else {
+        // console.log(url, dateActual.format());
+        console.log(await DB.count({ url, date: dateActual.format() }));
+        await DB.update(
+          { url, date: dateActual.format() },
+          {
+            url,
+            slug,
+            date: dateActual.format(),
+            dateScraped: moment.utc().format(),
+            client: {
+              ip,
+              geo: geoip.lookup(ip)
+            },
+            rendered,
+            raw
           },
-          rendered,
-          raw
-        });
-        logger.info(`data OK:   ${dateActual.format()} ${url}`);
-      // } else {
-      //   if (overwrite) {
-      //     logger.warn(`data --:   ${dateActual.format()} ${url} (overwrite off)`);
-      //   } else {
-      //     logger.warn(`data --:   ${dateActual.format()} ${url} (exists)`);
-      //   }
-      // }
+          { upsert: true }
+        );
+        if (overwrite) {
+          logger.info(`data OK:   ${dateActual.format()} ${url} (updated)`);
+        } else {
+          logger.info(`data OK:   ${dateActual.format()} ${url} (new)`);
+        }
+      }
     }
   } catch (error) {
     logger.error(`wb !!:    ${date.format()} ${url}`);
@@ -208,7 +212,7 @@ async function getRendered(url, date, slug, browser) {
       },
       metrics: {
         puppeteer: await page.metrics(),
-        anchors: anchors.length,
+        anchors: await anchors.length,
         css: {
           stylesheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
             return val.rules == 0 ? acc + 1 : acc;
