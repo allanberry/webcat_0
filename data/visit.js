@@ -17,7 +17,9 @@ const screenshotsDir = "data/screenshots";
 const waybackDateFormat = "YYYYMMDDHHmmss";
 const overwrite = args.overwrite == "true" ? true : false;
 const url = args.url;
-const startDate = args.startDate ? moment.utc(args.startDate) : moment.utc("1995-01-01");
+const startDate = args.startDate
+  ? moment.utc(args.startDate)
+  : moment.utc("1995-01-01");
 const endDate = args.endDate ? moment.utc(args.endDate) : moment();
 const increment = args.increment ? args.increment : "100 years";
 
@@ -62,11 +64,11 @@ const viewports = [
       // scrape
       if (url) {
         // single page
-        const wb = await scrapeWayback(url, date, browser, ip);
+        const wb = await scrapeWayback(date, url, browser, ip);
       } else {
         // multiple pages
         for (const page of pages) {
-          const wb = await scrapeWayback(page.url, date, browser, ip);
+          const wb = await scrapeWayback(date, page.url, browser, ip);
         }
       }
       date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
@@ -86,42 +88,37 @@ const viewports = [
  * @param {date} dateRequested - A moment date.
  * @param {browser} browser - A Puppeteer browser object.
  */
-async function scrapeWayback(url, date, browser, ip) {
+async function scrapeWayback(date, url, browser, ip) {
   // date format string for moment
   const waybackDateFormat = "YYYYMMDDHHmmss";
 
-  const slug = slugifyUrl(url);
-
   try {
     // retrieve next date available from Wayback Machine
-    const dateActual = await getWaybackAvailableDate(url, date);
+    const dateActual = await getWaybackAvailableDate(date, url);
 
-    const inDatabase = true;
+    if (dateActual) {
+      // determine if data exists in database
+      const inDatabase = (await DB.count({ date: dateActual.format(), url })) > 0;
 
-    if (!dateActual) {
-      logger.warn(`wb !!:    ${url} -- not in Wayback Machine!`);
-    } else {
+      // const screenshotsExist =
+
+
+
       // for data from puppeteer, for the most part
-      // if (overwrite) {
-      const rendered = await getRendered(url, dateActual, slug, browser);
-      // }
+      const rendered = await getRendered(dateActual, url, browser);
 
       // for raw HTML, from Superagent
-      const raw = await getRaw(url, dateActual, slug);
+      let raw = await getRaw(dateActual, url);
 
-      // determine if data exists
-      const inDatabase =
-        (await DB.count({ url, date: dateActual.format() })) > 0;
-      
       // save to database
       if (!overwrite && inDatabase) {
         logger.warn(`data --:   ${dateActual.format()} ${url} (exists)`);
       } else {
         await DB.update(
-          { url, date: dateActual.format() },
+          { date: dateActual.format(), url },
           {
             url,
-            slug,
+            slug: slugifyUrl(url),
             date: dateActual.format(),
             dateScraped: moment.utc().format(),
             client: {
@@ -139,6 +136,8 @@ async function scrapeWayback(url, date, browser, ip) {
           logger.info(`data OK:   ${dateActual.format()} ${url} (new)`);
         }
       }
+    } else {
+      logger.warn(`wb !!:    ${url} -- not in Wayback Machine!`);
     }
   } catch (error) {
     logger.error(`wb !!:    ${date.format()} ${url}`);
@@ -146,9 +145,9 @@ async function scrapeWayback(url, date, browser, ip) {
   }
 }
 
-async function getRendered(url, date, slug, browser) {
+async function getRendered(date, url, browser) {
   // build urls
-  const wbUrl = waybackUrl(url, date);
+  const wbUrl = waybackUrl(date, url);
 
   try {
     // setup puppeteer
@@ -194,7 +193,7 @@ async function getRendered(url, date, slug, browser) {
     // puppeteer take screenshots
     let screenshots = [];
     for (const viewport of viewports) {
-      screenshots.push(await screenshot(date, slug, page, viewport));
+      screenshots.push(await takeScreenshot(date, url, page, viewport));
     }
 
     const output = {
@@ -234,9 +233,9 @@ async function getRendered(url, date, slug, browser) {
   }
 }
 
-async function getRaw(url, date, slug) {
+async function getRaw(date, url) {
   // get raw website data
-  const wbUrl = waybackUrl(url, date, true);
+  const wbUrl = waybackUrl(date, url, true);
 
   try {
     // retrieve raw archive HTML from superagent, and output to file
@@ -263,7 +262,7 @@ async function getRaw(url, date, slug) {
         status: rawHtml.status,
         type: rawHtml.type,
         headers: rawHtml.header,
-        text: rawHtml.text,
+        text: rawHtml.text
       }
     };
 
@@ -280,7 +279,7 @@ async function getRaw(url, date, slug) {
  * @param {date} date - A moment date.
  * @param {boolean} raw - Whether or not the actual raw HTML is desired.
  */
-function waybackUrl(url, date, raw = false) {
+function waybackUrl(date, url, raw = false) {
   return raw
     ? `http://web.archive.org/web/${date.format(waybackDateFormat)}id_/${url}`
     : `http://web.archive.org/web/${date.format(waybackDateFormat)}/${url}`;
@@ -291,7 +290,7 @@ function waybackUrl(url, date, raw = false) {
  * @param {string} url - A full url string.
  * @param {date} date - A moment date.
  */
-async function getWaybackAvailableDate(url, date) {
+async function getWaybackAvailableDate(date, url) {
   try {
     // inquire with wayback for archived site closest in time to input date
     const availableResponse = await request.get(
@@ -345,34 +344,40 @@ async function readCSV(csv) {
   });
 }
 
-/**
- * Get screenshot from puppeteer
- * @param {page} page - A puppeteer page
- * @param {string} dir - a local directory path
- * @param {date} date
- * @param {object} viewport
- */
-async function screenshot(date, slug, page, viewport) {
-  // const dir = `${scrapesDir}/${slug}/screens`;
-  const dir = `${screenshotsDir}/${slug}`;
+// determine screenshot full path
+function screenshotPath(date, url, viewport) {
+  const dir = `${screenshotsDir}/${slugifyUrl(url)}`;
   const name = `${date.format(waybackDateFormat)}-${viewport.name}.png`;
-  const path = `${dir}/${name}`;
-  // const shortpath = `${slug}/screens/${name}`;
-  const shortpath = `${slug}/${name}`;
+  return `${dir}/${name}`;
+}
+
+// determine if screenshot exists
+async function screenshotExists(date, url, viewport) {
+  return await fs.existsSync(screenshotPath(date, url, viewport))
+}
+
+
+// get screenshot from puppeteer
+async function takeScreenshot(date, url, page, viewport) {
+  const dir = `${screenshotsDir}/${slugifyUrl(url)}`;
+  const path = screenshotPath(date, url, viewport);
+
+  const name = `${date.format(waybackDateFormat)}-${viewport.name}.png`;
+
   try {
     // setup screenshot directory
     await fs.promises.mkdir(dir, { recursive: true });
     await page.setViewport(viewport);
 
     // determine if pic already exists
-    if (!fs.existsSync(path)) {
+    if (! await screenshotExists(date, url, viewport)) {
       await page.screenshot({
         path: path,
         fullPage: viewport.height <= 1 ? true : false
       });
-      logger.info(`screen OK: ${date.format()} ${shortpath}`);
+      logger.info(`screen OK: ${date.format()} ${path}`);
     } else {
-      logger.warn(`screen --: ${date.format()} ${shortpath} (exists)`);
+      logger.warn(`screen --: ${date.format()} ${path} (exists)`);
     }
 
     const calculatedDimensions = await page.evaluate(() => {
@@ -416,16 +421,17 @@ async function screenshot(date, slug, page, viewport) {
       }
     };
   } catch (error) {
-    logger.error(`screen !!: ${date.format()} ${slug}`);
-    logger.error(error.name, error.message);
+    // logger.error(`screen !!: ${date.format()} ${path}`);
+    // logger.error(error.name, error.message);
+    logger.error(error)
   }
 }
 
-function slugifyUrl(urlInput) {
-  const decoded = decodeURI(urlInput);
-  const url = new URL(decoded);
-  const host = url.hostname.toString().toLowerCase();
-  const href = url.href
+function slugifyUrl(url) {
+  const decoded = decodeURI(url);
+  const outputUrl = new URL(decoded);
+  const host = outputUrl.hostname.toString().toLowerCase();
+  const href = outputUrl.href
     .toString()
     .toLowerCase()
     .replace(/^https?/, "")
