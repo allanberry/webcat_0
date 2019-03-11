@@ -61,6 +61,8 @@ const viewports = [
     // iterate dates
     let date = startDate;
     while (date.isBefore(endDate)) {
+      console.log("");
+      console.log(`${date}`);
       // scrape
       if (url) {
         // single page
@@ -78,7 +80,8 @@ const viewports = [
     await browser.close();
   } catch (error) {
     logger.error(`errortown`);
-    logger.error(error.name, error.message);
+    // logger.error(error.name, error.message);
+    logger.error(error)
   }
 })();
 
@@ -101,92 +104,70 @@ async function scrapeWayback(date, url, browser, ip) {
       const page = await browser.newPage();
 
       // determine if data exists in database
-      const inDatabase =
-        (await DB.count({ date: waybackDate.format(), url })) > 0;
+      const query = { date: waybackDate.format(), url };
+      const inDatabase = (await DB.count(query)) > 0;
+      // const item = await DB.findOne(query);
 
-      const rawExists = false;
-      const renderedExists = false;
-      const screenshotsExist = false;
+      // const rawExists = (item && item.raw);
+      // const renderedExists = (item && item.rendered);
+      // const screenshotsExist = ((item && item.screenshots) && item.screenshots.length > 0);
 
-      // metadata
-      let metadata = {
-        url,
-        slug: slugifyUrl(url),
-        date: waybackDate.format(),
-        dateScraped: moment.utc().format(),
-        client: {
-          ip,
-          geo: geoip.lookup(ip)
-        }
-      };
+      if (overwrite || !inDatabase) {
+        // metadata
+        let metadata = {
+          url,
+          slug: slugifyUrl(url),
+          date: waybackDate.format(),
+          dateScraped: moment.utc().format(),
+          client: {
+            ip,
+            geo: geoip.lookup(ip)
+          }
+        };
 
-      // for raw HTML, from Superagent
-      if (overwrite || !rawExists) {
+        // raw HTML from Superagent
         metadata.raw = await getRaw(waybackDate, url);
-      }
 
-      // for data from Puppeteer
-      if (overwrite || !renderedExists) {
+        // data from Puppeteer
         metadata.rendered = await getRendered(waybackDate, url, page);
+
+        // browser data
         metadata.rendered.browser = {
           userAgent: await browser.userAgent(),
           version: await browser.version()
-        }
-      }
+        };
 
-      // for screenshots
-      if (overwrite || !screenshotsExist) {
+        // screenshots
         metadata.rendered.screenshots = [];
         for (const viewport of viewports) {
           metadata.rendered.screenshots.push(
-            await takeScreenshot(date, url, page, viewport)
+            await takeScreenshot(waybackDate, url, page, viewport)
           );
         }
-      }
 
-      if (!overwrite && inDatabase) {
-        logger.warn(`data --:   ${waybackDate.format()} ${url} (exists)`);
-      } else {
-        await DB.update(
-          { date: waybackDate.format(), url },
-          metadata,
-          { upsert: true }
-        );
+        // write db
+        await DB.update({ date: waybackDate.format(), url }, metadata, {
+          upsert: true
+        });
         if (overwrite) {
           // updated
-          logger.info(`data OK:   ${waybackDate.format()} ${url} (updated)`);
+          logger.info(`OK:        ${waybackDate.format()} ${url} (updated)`);
         } else {
           // created
-          logger.info(`data OK:   ${waybackDate.format()} ${url} (created)`);
+          logger.info(`OK:        ${waybackDate.format()} ${url} (created)`);
         }
+      } else {
+        logger.warn(`--:        ${waybackDate.format()} ${url} (exists)`);
+        // logger.warn(`            attempted: ${waybackUrl(waybackDate, url)}`);
       }
 
-      // save to database
-      // await DB.update(
-      //   { date: waybackDate.format(), url },
-      //   {
-      //     url,
-      //     slug: slugifyUrl(url),
-      //     date: waybackDate.format(),
-      //     dateScraped: moment.utc().format(),
-      //     client: {
-      //       ip,
-      //       geo: geoip.lookup(ip)
-      //     },
-      //     rendered,
-      //     raw,
-      //   },
-      //   { upsert: true }
-      // );
-
-      // clean up puppeteer
+      // clean up
       await page.close();
     } else {
       logger.warn(`wb !!:    ${url} -- not in Wayback Machine!`);
     }
   } catch (error) {
-    logger.error(`wb !!:    ${date.format()} ${url}`);
-    logger.error(error.name, error.message);
+    // logger.error(`wb !!:    ${date.format()} ${url} (${error.name})`);
   }
 }
 
@@ -197,7 +178,8 @@ async function getRendered(date, url, page) {
   try {
     // puppeteer navigate to page
     await page.goto(wbUrl, {
-      waitUntil: "networkidle0"
+      waitUntil: "networkidle0",
+      timeout: 30000
     });
 
     // puppeteer strip wayback elements
@@ -235,7 +217,7 @@ async function getRendered(date, url, page) {
     return {
       url: wbUrl,
       title: await page.title(),
-      stylesheets: stylesheets,
+      stylesheets,
       // anchors: anchors, // trebles size of db record
       agent: {
         name: "Node.js/Puppeteer",
@@ -254,8 +236,9 @@ async function getRendered(date, url, page) {
       }
     };
   } catch (error) {
-    logger.error(`render !!:  ${date.format()} ${url}`);
-    logger.error(error.name, error.message);
+    logger.error(`rend !!:  ${wbUrl} (${error.name})`);
+    // logger.error(`          ${wbUrl}`);
+    // logger.error(error);
   }
 }
 
@@ -294,8 +277,7 @@ async function getRaw(date, url) {
 
     return output;
   } catch (error) {
-    logger.error(`raw !!:   ${date.format()} ${url}`);
-    logger.error(error.name, error.message);
+    logger.error(`raw !!:   ${date.format()} ${url} (${error.name})`);
   }
 }
 
@@ -336,7 +318,7 @@ async function getWaybackDate(date, url) {
       );
     }
   } catch (error) {
-    logger.error(`avail !!   ${date.format()} ${url}`);
+    logger.error(`avail !!   ${date.format()} ${url} (${error.name})`);
   }
 }
 
@@ -400,9 +382,6 @@ async function takeScreenshot(date, url, page, viewport) {
         path: path,
         fullPage: viewport.height <= 1 ? true : false
       });
-      logger.info(`screen OK: ${date.format()} ${path}`);
-    } else {
-      logger.warn(`screen --: ${date.format()} ${path} (exists)`);
     }
 
     const calculatedDimensions = await page.evaluate(() => {
@@ -446,9 +425,7 @@ async function takeScreenshot(date, url, page, viewport) {
       }
     };
   } catch (error) {
-    // logger.error(`screen !!: ${date.format()} ${path}`);
-    // logger.error(error.name, error.message);
-    logger.error(error);
+    logger.error(`screen !!: ${date.format()} ${url} (${error.name})`);
   }
 }
 

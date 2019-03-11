@@ -24,8 +24,8 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
 - write it up
 - handle redirects
   e.g. http://web.archive.org/web/20120103055748/http://asu.edu/lib/
-- handle existing database entries
-  global overwrite
+- handle missing stylesheets
+  e.g. http://web.archive.org/web/20171225143342/http://library.case.edu/ksl/
 - clean anchors to rm wb cruft, when it makes sense
   - aggregate anchors:
     - same primary domain

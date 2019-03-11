@@ -15,7 +15,7 @@ duke,https://library.duke.edu/,root
 emory,http://web.library.emory.edu/,root
 fsu,https://www.lib.fsu.edu/,root
 gwu,https://library.gwu.edu/,root
-georgetown,https://www.library.gatech.edu/,root
+georgetown,https://www.library.georgetown.edu/,root
 gatech,https://www.library.gatech.edu/,root
 harvard,https://library.harvard.edu/,root
 howard,http://library.howard.edu/library/,root
@@ -103,3 +103,10 @@ wustl,https://library.wustl.edu/,root
 wayne,http://lib.wayne.edu/,root
 wayne,https://library.wayne.edu/,root
 yale,https://web.library.yale.edu/,root
+
+fsu,https://www.lib.fsu.edu/,root
+umich,https://www.lib.umich.edu/,root
+utk,https://www.lib.utk.edu/,root
+brown,https://library.brown.edu/,root
+siu,https://lib.siu.edu/,root
+illinois,https://library.illinois.edu/,root
