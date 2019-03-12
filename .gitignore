@@ -5,6 +5,12 @@
 data/screenshots
 data/old
 
+# ------ #
+# Parcel #
+# ------ #
+
+*.cache
+
 # ----- #
 # Rails #
 # ----- #

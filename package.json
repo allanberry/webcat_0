@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "visit": "node data/visit.js",
-    "dev": "nodemon server/app.js & http-server client -p 3001"
+    "dev": "nodemon server/app.js & parcel client/index.html --out-dir client/dist"
   },
   "repository": {
     "type": "git",
