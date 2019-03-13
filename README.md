@@ -7,6 +7,10 @@ date: 2019-01-19
 
 This is a catalog of websites.
 
+# important for understanding setup:
+
+https://alligator.io/vuejs/vue-parceljs/
+
 
 # Gathering data from a single url
 
