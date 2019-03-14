@@ -24,9 +24,11 @@
   "homepage": "https://github.com/allanberry/webcat#readme",
   "dependencies": {
     "@vue/web-component-wrapper": "^1.2.0",
+    "apollo-server-koa": "^2.4.8",
     "cheerio": "^1.0.0-rc.2",
     "csv-parse": "^4.3.3",
     "geoip-lite": "^1.3.6",
+    "graphql": "^14.1.1",
     "image-size": "^0.7.2",
     "koa": "^2.7.0",
     "log4js": "^4.0.2",

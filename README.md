@@ -12,9 +12,17 @@ This is a catalog of websites.
 https://alligator.io/vuejs/vue-parceljs/
 
 
+# Test dev hello world graphql server call:
+
+```bash
+$ http :3000/graphql query:='"{ hello }"'
+```
+
 # Gathering data from a single url
 
+```bash
 $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
+```
 
 -u: url
 -s: start date
