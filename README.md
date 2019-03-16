@@ -10,6 +10,7 @@ This is a catalog of websites.
 # important for understanding setup:
 
 https://alligator.io/vuejs/vue-parceljs/
+https://www.apollographql.com/docs/apollo-server/servers/koa.html
 
 
 # Test dev hello world graphql server call:
