@@ -1,6 +1,12 @@
 <template>
   <div id="site-header">
-    <h1>Webcat</h1>
+    <h1><router-link :to="{ name: 'home' }">Webcat</router-link></h1>
+    <nav>
+      <ul>
+        <li><router-link :to="{ name: 'libraries'}">Libraries</router-link></li>
+        <li><router-link :to="{ name: 'library', params: {slug: 'mit'}}">Library: MIT</router-link></li>
+      </ul>
+    </nav>
   </div>
 </template>
 

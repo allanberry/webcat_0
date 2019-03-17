@@ -8,7 +8,7 @@
         <site-sidebar></site-sidebar>
       </div>
       <div class="col-sm-8">
-        <site-content></site-content>
+        <router-view></router-view>
       </div>
     </main>
     <footer class="row">
@@ -20,7 +20,6 @@
 <script>
 import SiteHeader from "./app/Header.vue";
 import SiteSidebar from "./app/Sidebar.vue";
-import SiteContent from "./app/Content.vue";
 import SiteFooter from "./app/Footer.vue";
 
 export default {
@@ -31,7 +30,6 @@ export default {
   components: {
     SiteHeader,
     SiteSidebar,
-    SiteContent,
     SiteFooter
   }
 };

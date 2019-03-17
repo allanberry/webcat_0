@@ -1,6 +1,7 @@
 <template>
-  <div id="site-content">
+  <div id="site-library">
     <h2>Massachusetts Institute of Technology Libraries</h2>
+    <p>{{ $route.params.slug }}</p>
 
     <h3>Dates collected</h3>
     <ul>
@@ -15,7 +16,8 @@
 
 <script>
 export default {
-  name: "site-content"
+  name: "site-library", 
+  
 };
 </script>
 
