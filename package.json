@@ -26,6 +26,7 @@
     "apollo-server-koa": "^2.4.8",
     "app": "^0.1.0",
     "autoprefixer": "^9.5.0",
+    "babel-polyfill": "^6.26.0",
     "bootstrap": "^4.3.1",
     "cheerio": "^1.0.0-rc.2",
     "csv-parse": "^4.3.3",
@@ -47,6 +48,8 @@
   },
   "devDependencies": {
     "@vue/component-compiler-utils": "^2.6.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
     "sass": "^1.17.2",
     "vue-template-compiler": "^2.6.8"
   }

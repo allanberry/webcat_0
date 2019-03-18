@@ -15,9 +15,18 @@
 </template>
 
 <script>
+// import request from 'superagent';
+
 export default {
   name: "site-library", 
-  
+  created() {
+    this.getData();
+  },
+  methods: {
+    getData: async function() {
+      console.log('blarm');
+    }
+  }
 };
 </script>
 
