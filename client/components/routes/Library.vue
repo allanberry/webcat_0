@@ -10,21 +10,29 @@
       <li>2010-01-01</li>
       <li>2015-01-01</li>
     </ul>
-
   </div>
 </template>
 
 <script>
-// import request from 'superagent';
+import request from "superagent";
 
 export default {
-  name: "site-library", 
+  name: "site-library",
   created() {
     this.getData();
   },
   methods: {
     getData: async function() {
-      console.log('blarm');
+      try {
+        const qs = `{ hello }`;
+        const data = await request
+          .get("http://localhost:3000/graphql")
+          .query({ query: qs });
+
+        console.log(JSON.parse(data.text));
+      } catch (error) {
+        console.error(error);
+      }
     }
   }
 };
