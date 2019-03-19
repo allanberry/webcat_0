@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "visit": "node data/visit.js",
-    "dev": "nodemon server/app.js & parcel client/index.html --out-dir client/dist"
+    "dev": "nodemon server/main.js & parcel client/index.html --out-dir client/dist"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/allanberry/webcat#readme",
   "dependencies": {
-    "apollo-server-koa": "^2.4.8",
+    "apollo-server": "^2.4.8",
     "app": "^0.1.0",
     "autoprefixer": "^9.5.0",
     "babel-polyfill": "^6.26.0",
@@ -33,7 +33,6 @@
     "geoip-lite": "^1.3.6",
     "graphql": "^14.1.1",
     "image-size": "^0.7.2",
-    "koa": "^2.7.0",
     "log4js": "^4.0.2",
     "minimist": "^1.2.0",
     "moment": "^2.24.0",
