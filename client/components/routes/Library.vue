@@ -24,12 +24,14 @@ export default {
   methods: {
     getData: async function() {
       try {
-        const qs = `
-          books {
-            title
-            author
+        const qs = `{
+          visits {
+            _id
+            url
+            date
+            slug
           }
-        `;
+        }`;
         const data = await request
           .get("http://localhost:4000/graphql")
           .query({ query: qs });
