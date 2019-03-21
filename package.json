@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "visit": "node data/visit.js",
-    "dev": "nodemon server/main.js & parcel client/index.html --out-dir client/dist"
+    "dev": "nodemon server/main.js & parcel client/index.html --out-dir client/dist",
+    "build": "rm -rf client/dist && parcel build client/index.html --out-dir client/dist"
   },
   "repository": {
     "type": "git",
@@ -49,6 +50,7 @@
     "@vue/component-compiler-utils": "^2.6.0",
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
+    "cssnano": "^4.1.10",
     "sass": "^1.17.2",
     "vue-template-compiler": "^2.6.8"
   }

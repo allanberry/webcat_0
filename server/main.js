@@ -21,7 +21,7 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     visits: async () => {
-      return await DB.find({});
+      return await DB.find({url: { $regex: /mit\.edu/}});
     }
   }
 };

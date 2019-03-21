@@ -23,8 +23,23 @@ const startDate = args.startDate
 const endDate = args.endDate ? moment.utc(args.endDate) : moment();
 const increment = args.increment ? args.increment : "100 years";
 
-// setup database
-const DB = datastore({ filename: "data/nedb.db", autoload: true });
+// setup database tables
+const colleges = datastore({
+  filename: "data/collected/colleges.db",
+  autoload: true
+});
+const libraries = datastore({
+  filename: "data/collected/libraries.db",
+  autoload: true
+});
+const pages = datastore({
+  filename: "data/collected/pages.db",
+  autoload: true
+});
+const visits = datastore({
+  filename: "data/collected/visits.db",
+  autoload: true
+});
 
 // setup logger
 const logger = setupLogger();
@@ -50,9 +65,12 @@ const viewports = [
  */
 (async () => {
   try {
+    // scrape google
+    todo
+
     // setup
     const browser = await puppeteer.launch();
-    const pages = await readCSV("data/pages.csv");
+    // const pages = await readCSV("data/pages.csv");
 
     // get global ip address
     const response = await request.get("ipv4bot.whatismyipaddress.com");
@@ -60,28 +78,28 @@ const viewports = [
 
     // iterate dates
     let date = startDate;
-    while (date.isBefore(endDate)) {
-      console.log("");
-      console.log(`${date}`);
-      // scrape
-      if (url) {
-        // single page
-        const wb = await scrapeWayback(date, url, browser, ip);
-      } else {
-        // multiple pages
-        for (const page of pages) {
-          const wb = await scrapeWayback(date, page.url, browser, ip);
-        }
-      }
-      date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
-    }
+    // while (date.isBefore(endDate)) {
+    //   console.log("");
+    //   console.log(`${date}`);
+    //   // scrape
+    //   if (url) {
+    //     // single page
+    //     const wb = await scrapeWayback(date, url, browser, ip);
+    //   } else {
+    //     // multiple pages
+    //     for (const page of pages) {
+    //       const wb = await scrapeWayback(date, page.url, browser, ip);
+    //     }
+    //   }
+    //   date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
+    // }
 
     // cleanup
     await browser.close();
   } catch (error) {
     logger.error(`errortown`);
     // logger.error(error.name, error.message);
-    logger.error(error)
+    logger.error(error);
   }
 })();
 
@@ -95,6 +113,10 @@ async function scrapeWayback(date, url, browser, ip) {
   // date format string for moment
   const waybackDateFormat = "YYYYMMDDHHmmss";
 
+  const page = await pages.findOne({ url });
+  const library = await libraries.findOne({ id: page.library_id });
+  const college = await colleges.findOne({ id: library.college_id });
+
   try {
     // retrieve next date available from Wayback Machine
     const waybackDate = await getWaybackDate(date, url);
@@ -104,13 +126,15 @@ async function scrapeWayback(date, url, browser, ip) {
       const page = await browser.newPage();
 
       // determine if data exists in database
-      const query = { date: waybackDate.format(), url };
-      const inDatabase = (await DB.count(query)) > 0;
-      // const item = await DB.findOne(query);
+      const inDatabase =
+        (await visits.count({ date: waybackDate.format(), url })) > 0;
+      // const item = await visits.findOne(query);
 
       // const rawExists = (item && item.raw);
       // const renderedExists = (item && item.rendered);
       // const screenshotsExist = ((item && item.screenshots) && item.screenshots.length > 0);
+
+
 
       if (overwrite || !inDatabase) {
         // metadata
@@ -119,6 +143,9 @@ async function scrapeWayback(date, url, browser, ip) {
           slug: slugifyUrl(url),
           date: waybackDate.format(),
           dateScraped: moment.utc().format(),
+          college,
+          library,
+          page,
           client: {
             ip,
             geo: geoip.lookup(ip)
@@ -146,7 +173,7 @@ async function scrapeWayback(date, url, browser, ip) {
         }
 
         // write db
-        await DB.update({ date: waybackDate.format(), url }, metadata, {
+        await visits.update({ date: waybackDate.format(), url }, metadata, {
           upsert: true
         });
         if (overwrite) {
