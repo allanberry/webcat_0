@@ -6,7 +6,8 @@
   "scripts": {
     "visit": "node data/visit.js",
     "dev": "nodemon server/main.js & parcel client/index.html --out-dir client/dist",
-    "build": "rm -rf client/dist && parcel build client/index.html --out-dir client/dist"
+    "build": "rm -rf client/dist && parcel build client/index.html --out-dir client/dist",
+    "download": "node data/download.js"
   },
   "repository": {
     "type": "git",

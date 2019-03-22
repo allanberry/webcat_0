@@ -11,11 +11,6 @@ const packageJson = require("../package.json");
 const imageSize = require("image-size");
 const cheerio = require("cheerio");
 const slugify = require("slugify");
-const auth = require('./auth');
-const {google} = require('googleapis');
-
-require('dotenv').config()
-
 
 // config
 const screenshotsDir = "data/screenshots";
@@ -81,97 +76,24 @@ const viewports = [
     const response = await request.get("ipv4bot.whatismyipaddress.com");
     const ip = response.text;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Load client secrets from a local file.
-    fs.readFile(`${__dirname}/credentials.json`, (err, content) => {
-      if (err) return console.log('Error loading client secret file:', err);
-
-      const parsedContent = JSON.parse(content);
-
-      // Get sensitive Google keys from ENV
-      parsedContent.installed.client_id = process.env.GOOGLE_CLIENT_ID
-      parsedContent.installed.client_secret = process.env.GOOGLE_CLIENT_SECRET
-
-      // Authorize a client with credentials, then call the Google Sheets API.
-      auth.authorize(parsedContent, listMajors);
-    });
-
-
-    /**
-     * Prints the names and majors of students in a sample spreadsheet:
-     * @see https://docs.google.com/spreadsheets/d/1hqFgqqKbNZwBvB63IzwnbkaKApF4jblnvjTjpxIXu40/edit#gid=0
-     * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
-     */
-    function listMajors(auth) {
-      const sheets = google.sheets({ version: 'v4', auth });
-      sheets.spreadsheets.values.get({
-        spreadsheetId: '1hqFgqqKbNZwBvB63IzwnbkaKApF4jblnvjTjpxIXu40',
-        range: 'libraries!B72:J101',
-      }, (err, res) => {
-        if (err) return console.log('The API returned an error: ' + err);
-        const rows = res.data.values;
-        if (rows.length) {
-          console.log('Name, Major:');
-          // Print columns A and E, which correspond to indices 0 and 4.
-          rows.map((row) => {
-            console.log(`${row[0]}, ${row[4]}`);
-          });
-        } else {
-          console.log('No data found.');
-        }
-      });
-    } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // iterate dates
     let date = startDate;
-    // while (date.isBefore(endDate)) {
-    //   console.log("");
-    //   console.log(`${date}`);
-    //   // scrape
-    //   if (url) {
-    //     // single page
-    //     const wb = await scrapeWayback(date, url, browser, ip);
-    //   } else {
-    //     // multiple pages
-    //     for (const page of pages) {
-    //       const wb = await scrapeWayback(date, page.url, browser, ip);
-    //     }
-    //   }
-    //   date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
-    // }
+    while (date.isBefore(endDate)) {
+      console.log("");
+      console.log(`${date}`);
+
+      // scrape
+      if (url) {
+        // single page
+        const wb = await scrapeWayback(date, url, browser, ip);
+      } else {
+        // multiple pages
+        // for (const page of pages) {
+        //   // const wb = await scrapeWayback(date, page.url, browser, ip);
+        // }
+      }
+      date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
+    }
 
     // cleanup
     await browser.close();
@@ -212,8 +134,6 @@ async function scrapeWayback(date, url, browser, ip) {
       // const rawExists = (item && item.raw);
       // const renderedExists = (item && item.rendered);
       // const screenshotsExist = ((item && item.screenshots) && item.screenshots.length > 0);
-
-
 
       if (overwrite || !inDatabase) {
         // metadata
