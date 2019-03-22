@@ -4,6 +4,13 @@
 
 data/collected/
 
+# ------------- #
+# Google Sheets #
+# ------------- #
+
+data/credentials.json
+*.env*
+
 # ------ #
 # Parcel #
 # ------ #
