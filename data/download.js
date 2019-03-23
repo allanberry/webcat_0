@@ -15,7 +15,7 @@ fs.readFile(credentials, (err, content) => {
   parsedContent.installed.client_secret = process.env.GOOGLE_CLIENT_SECRET;
 
   // Authorize a client with credentials, then call the Google Sheets API.
-  auth.authorize(parsedContent, listMajors);
+  auth.authorize(parsedContent, getFromGoogle);
 });
 
 /**
@@ -23,25 +23,37 @@ fs.readFile(credentials, (err, content) => {
  * @see https://docs.google.com/spreadsheets/d/1hqFgqqKbNZwBvB63IzwnbkaKApF4jblnvjTjpxIXu40/edit#gid=0
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
  */
-function listMajors(auth) {
+function getFromGoogle(auth) {
   const sheets = google.sheets({ version: "v4", auth });
-  sheets.spreadsheets.values.get(
-    {
-      spreadsheetId: "1hqFgqqKbNZwBvB63IzwnbkaKApF4jblnvjTjpxIXu40",
-      range: "libraries!B72:J101"
-    },
-    (err, res) => {
-      if (err) return console.log("The API returned an error: " + err);
-      const rows = res.data.values;
-      if (rows.length) {
-        console.log("Name, Major:");
-        // Print columns A and E, which correspond to indices 0 and 4.
-        rows.map(row => {
-          console.log(`${row[0]}, ${row[4]}`);
-        });
-      } else {
-        console.log("No data found.");
+
+  ['colleges', 'libraries', 'pages'].forEach(sheet => {
+    sheets.spreadsheets.values.get(
+      {
+        spreadsheetId: "1hqFgqqKbNZwBvB63IzwnbkaKApF4jblnvjTjpxIXu40",
+        range: `${sheet}!A1:Z`
+      },
+      (err, res) => {
+        if (err) return console.log("The API returned an error: " + err);
+        const rows = res.data.values;
+        if (rows.length) {
+          const cols = rows[0];
+          console.log(rows.slice(1).map(row => {
+            let obj = {};
+            cols.forEach((col, index) => {
+              if (row[index]) {
+                obj[col] = row[index];
+              }
+            })
+            return(obj);
+          }));
+          console.log('\n\n\n\n\n\n\n');
+        } else {
+          console.log("No data found.");
+        }
       }
-    }
-  );
+    )
+  })
+
+
+  
 }
