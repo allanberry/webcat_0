@@ -60,6 +60,13 @@ async function getFromGoogle(auth) {
               cols.forEach((col, index) => {
                 if (row[index]) {
                   obj[col] = row[index];
+
+                  // deal with Google booleans
+                  if (obj[col] == "TRUE") {
+                    obj[col] = true;
+                  } else if (obj[col] == "FALSE") {
+                    obj[col] = false;
+                  }
                 }
               });
               return obj;
