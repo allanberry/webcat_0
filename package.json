@@ -4,7 +4,7 @@
   "description": "A Catalog of Websites",
   "main": "app.js",
   "scripts": {
-    "visit": "node data/visit.js",
+    "visit": "npm run download && node data/visit.js",
     "dev": "npm run download && nodemon server/main.js & parcel client/index.html --out-dir client/dist",
     "build": "npm run download && rm -rf client/dist && parcel build client/index.html --out-dir client/dist",
     "download": "node data/download.js"

@@ -10,10 +10,10 @@ const packageJson = require("../package.json");
 const imageSize = require("image-size");
 const cheerio = require("cheerio");
 const slugify = require("slugify");
-const setupLogger = require("./utils.js").setupLogger
+const setupLogger = require("./utils.js").setupLogger;
 
 // config
-const screenshotsDir = "data/screenshots";
+const screenshotsDir = "data/collected/screenshots";
 const waybackDateFormat = "YYYYMMDDHHmmss";
 const overwrite = args.overwrite == "true" ? true : false;
 const url = args.url;
@@ -42,7 +42,7 @@ const visits = datastore({
 });
 
 // setup logger
-const logger = setupLogger('visit');
+const logger = setupLogger("visit");
 
 // puppeteer viewports, for screenshots
 const viewports = [
@@ -65,12 +65,8 @@ const viewports = [
  */
 (async () => {
   try {
-    // scrape google
-    // todo
-
     // setup
     const browser = await puppeteer.launch();
-    // const pages = await readCSV("data/pages.csv");
 
     // get global ip address
     const response = await request.get("ipv4bot.whatismyipaddress.com");
@@ -79,18 +75,15 @@ const viewports = [
     // iterate dates
     let date = startDate;
     while (date.isBefore(endDate)) {
-      console.log("");
-      console.log(`${date}`);
-
       // scrape
       if (url) {
         // single page
         const wb = await scrapeWayback(date, url, browser, ip);
-      } else {
-        // multiple pages
-        // for (const page of pages) {
-        //   // const wb = await scrapeWayback(date, page.url, browser, ip);
-        // }
+        //   } else {
+        //     // multiple pages
+        //     // for (const page of pages) {
+        //     //   // const wb = await scrapeWayback(date, page.url, browser, ip);
+        //     // }
       }
       date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
     }
@@ -111,12 +104,8 @@ const viewports = [
  * @param {browser} browser - A Puppeteer browser object.
  */
 async function scrapeWayback(date, url, browser, ip) {
-  // date format string for moment
-  const waybackDateFormat = "YYYYMMDDHHmmss";
-
-  const page = await pages.findOne({ url });
-  const library = await libraries.findOne({ id: page.library_id });
-  const college = await colleges.findOne({ id: library.college_id });
+  // // date format string for moment
+  // const waybackDateFormat = "YYYYMMDDHHmmss";
 
   try {
     // retrieve next date available from Wayback Machine
@@ -131,9 +120,10 @@ async function scrapeWayback(date, url, browser, ip) {
         (await visits.count({ date: waybackDate.format(), url })) > 0;
       // const item = await visits.findOne(query);
 
-      // const rawExists = (item && item.raw);
-      // const renderedExists = (item && item.rendered);
-      // const screenshotsExist = ((item && item.screenshots) && item.screenshots.length > 0);
+      // const rawExists = item && item.raw;
+      // const renderedExists = item && item.rendered;
+      // const screenshotsExist =
+      //   item && item.screenshots && item.screenshots.length > 0;
 
       if (overwrite || !inDatabase) {
         // metadata
@@ -142,9 +132,7 @@ async function scrapeWayback(date, url, browser, ip) {
           slug: slugifyUrl(url),
           date: waybackDate.format(),
           dateScraped: moment.utc().format(),
-          college,
-          library,
-          page,
+          org: await getOrgData(url),
           client: {
             ip,
             geo: geoip.lookup(ip)
@@ -165,6 +153,8 @@ async function scrapeWayback(date, url, browser, ip) {
 
         // screenshots
         metadata.rendered.screenshots = [];
+        console.log('blork')
+
         for (const viewport of viewports) {
           metadata.rendered.screenshots.push(
             await takeScreenshot(waybackDate, url, page, viewport)
@@ -359,6 +349,28 @@ async function readCSV(csv) {
   });
 }
 
+async function getOrgData(url) {
+  let output = {};
+  const page = await pages.findOne({ url });
+  const library = (await page)
+    ? await libraries.findOne({ _id: page.library_id })
+    : await libraries.findOne({ url: url });
+  const college = (await library)
+    ? await colleges.findOne({ _id: library.college_id })
+    : await colleges.findOne({ url: url });
+
+  if (page) {
+    output["page"] = page;
+  }
+  if (library) {
+    output["library"] = library;
+  }
+  if (college) {
+    output["college"] = college;
+  }
+  return output;
+}
+
 // determine screenshot full path
 function screenshotPath(date, url, viewport) {
   const dir = `${screenshotsDir}/${slugifyUrl(url)}`;
@@ -416,6 +428,8 @@ async function takeScreenshot(date, url, page, viewport) {
 
     // retrieve actual image dimensions from disk
     const physicalDimensions = imageSize(path);
+
+    logger.info(`screen ok: ${date.format()} ${url}`);
 
     return {
       name: name,
