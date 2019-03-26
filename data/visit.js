@@ -3,7 +3,6 @@ const fs = require("fs");
 const moment = require("moment");
 const csvParse = require("csv-parse/lib/sync");
 const puppeteer = require("puppeteer");
-const log4js = require("log4js");
 const args = require("minimist")(process.argv.slice(2));
 const datastore = require("nedb-promise");
 const geoip = require("geoip-lite");
@@ -11,6 +10,7 @@ const packageJson = require("../package.json");
 const imageSize = require("image-size");
 const cheerio = require("cheerio");
 const slugify = require("slugify");
+const setupLogger = require("./utils.js").setupLogger
 
 // config
 const screenshotsDir = "data/screenshots";
@@ -42,7 +42,7 @@ const visits = datastore({
 });
 
 // setup logger
-const logger = setupLogger();
+const logger = setupLogger('visit');
 
 // puppeteer viewports, for screenshots
 const viewports = [
@@ -346,25 +346,6 @@ async function getWaybackDate(date, url) {
   } catch (error) {
     logger.error(`avail !!   ${date.format()} ${url} (${error.name})`);
   }
-}
-
-/**
- * A logger to track script progress.
- */
-function setupLogger() {
-  // logger
-  const logger = log4js.getLogger();
-  logger.level = "debug";
-  log4js.configure({
-    appenders: {
-      out: { type: "stdout" },
-      app: { type: "file", filename: "log/scrape.log" }
-    },
-    categories: {
-      default: { appenders: ["out", "app"], level: "debug" }
-    }
-  });
-  return logger;
 }
 
 /**
