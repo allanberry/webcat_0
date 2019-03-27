@@ -78,12 +78,12 @@ const viewports = [
       // scrape
       if (url) {
         // single page
-        const wb = await scrapeWayback(date, url, browser, ip);
-        //   } else {
-        //     // multiple pages
-        //     // for (const page of pages) {
-        //     //   // const wb = await scrapeWayback(date, page.url, browser, ip);
-        //     // }
+        await scrapeWayback(date, url, browser, ip);
+      } else {
+        // multiple pages
+        for (const page of await pages.find({})) {
+          await scrapeWayback(date, page.url, browser, ip);
+        }
       }
       date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
     }
@@ -132,7 +132,7 @@ async function scrapeWayback(date, url, browser, ip) {
           slug: slugifyUrl(url),
           date: waybackDate.format(),
           dateScraped: moment.utc().format(),
-          org: await getOrgData(url),
+          library: await getLibraryData(url),
           client: {
             ip,
             geo: geoip.lookup(ip)
@@ -153,8 +153,6 @@ async function scrapeWayback(date, url, browser, ip) {
 
         // screenshots
         metadata.rendered.screenshots = [];
-        console.log('blork')
-
         for (const viewport of viewports) {
           metadata.rendered.screenshots.push(
             await takeScreenshot(waybackDate, url, page, viewport)
@@ -349,7 +347,7 @@ async function readCSV(csv) {
   });
 }
 
-async function getOrgData(url) {
+async function getLibraryData(url) {
   let output = {};
   const page = await pages.findOne({ url });
   const library = (await page)
@@ -428,8 +426,6 @@ async function takeScreenshot(date, url, page, viewport) {
 
     // retrieve actual image dimensions from disk
     const physicalDimensions = imageSize(path);
-
-    logger.info(`screen ok: ${date.format()} ${url}`);
 
     return {
       name: name,
