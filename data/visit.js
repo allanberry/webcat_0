@@ -82,7 +82,11 @@ const viewports = [
       } else {
         // multiple pages
         for (const page of await pages.find({})) {
-          await scrapeWayback(date, page.url, browser, ip);
+
+          // only perform if spreadsheet says so
+          if (page.visit && page.visit === true) {
+            await scrapeWayback(date, page.url, browser, ip);
+          }
         }
       }
       date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
@@ -193,7 +197,7 @@ async function getRendered(date, url, page) {
     // puppeteer navigate to page
     await page.goto(wbUrl, {
       waitUntil: "networkidle0",
-      timeout: 30000
+      timeout: 60000
     });
 
     // puppeteer strip wayback elements
