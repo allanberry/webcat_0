@@ -7,19 +7,73 @@ date: 2019-01-19
 
 This is a catalog of websites.
 
-# important for understanding setup:
+## important for understanding setup:
 
-https://alligator.io/vuejs/vue-parceljs/
-https://www.apollographql.com/docs/apollo-server/servers/koa.html
+- https://alligator.io/vuejs/vue-parceljs/
+- https://www.apollographql.com/docs/apollo-server/servers/koa.html
 
 
-# Test dev hello world graphql server call:
+## install
+
+For this setup, I assume you're on a Mac, as I am most of the time.  Otherwise, YMMV.  You will need to install:
+
+- Homebrew
+- Node.js and NPM
+- Git
+
+[This Digital Ocean guide](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-and-create-a-local-development-environment-on-macos) looks like a nice tutorial to install Homebrew and Node.
+
+To install Git, this command should do it:
+
+```bash
+$ brew install git
+```
+
+[This guide](https://www.digitalocean.com/community/tutorials/how-to-contribute-to-open-source-getting-started-with-git) will help you to setup Git.
+
+Move to a directory where you want to put this project, clone the directory from GitHub, and install everything:
+
+```bash
+$ cd ~/Documents  # or wherever
+$ git clone https://github.com/allanberry/webcat.git
+$ npm install
+```
+
+At this point you should have a functioning codebase.  Please let me know if anything is amiss.
+
+
+## Get some data
+
+This project doesn't really come with any data; you will need to grab some from the Wayback Machine.  This will get you a few:
+
+```bash
+$ npm run visit -- -u https://lib.asu.edu/ -s 1995-01-01 -i "6 months"
+$ npm run visit -- -u http://asu.edu/lib/ -s 1995-01-01 -i "6 months"
+$ npm run visit -- -u https://www.lib.auburn.edu/ -s 1995-01-01 -i "6 months"
+$ npm run visit -- -u https://library.bc.edu/ -s 1995-01-01 -i "6 months"
+$ npm run visit -- -u http://www.bu.edu/library/ -s 1995-01-01 -i "6 months"
+$ npm run visit -- -u https://lib.byu.edu/ -s 1995-01-01 -i "6 months"
+$ npm run visit -- -u https://library.brown.edu/ -s 1995-01-01 -i "6 months"
+```
+
+
+## GraphQL server:
+
+
+You can start a local graphQL server, for API access, thus:
+
+```bash
+$ npm run dev
+```
+
+This will return data from what you have collected:
 
 ```bash
 $ http :3000/graphql query:='"{ hello }"'
 ```
 
-# Gathering data from a single url
+
+## Gathering data from a single url
 
 ```bash
 $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
@@ -95,3 +149,10 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
     - styles
   - hosts
   - servers
+
+
+## Links for future perusal, use
+
+(h/t Tracy Seneca, via email, 2019-08-01)
+- https://web.archive.org/web/20010413160217/http://sunsite.berkeley.edu/Libweb/
+- https://web.archive.org/web/19991023010617/http://sunsite.berkeley.edu/

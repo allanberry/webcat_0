@@ -1,3 +1,10 @@
+/**
+ * This file is of central importance to this stack.  It visits a URL
+ * (or a series of URLs) and retrieves data (including screenshots) either
+ * from the URL itself or a representation of the URL in the Internet
+ * Archive's wayback machine.
+ */
+
 const request = require("superagent");
 const fs = require("fs");
 const moment = require("moment");

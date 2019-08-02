@@ -1,0 +1,21 @@
+#site-header[data-v-d58d43] {
+  background-color: #222;
+  color: white;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+#site-footer[data-v-0b23e6] {
+  background-color: #222;
+  color: white;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+#app {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+#app main#main-content {
+  flex: 1;
+  background-color: #ddd;
+}
