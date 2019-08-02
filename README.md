@@ -60,7 +60,7 @@ $ npm run visit -- -u https://library.brown.edu/ -s 1995-01-01 -i "6 months"
 ## GraphQL server:
 
 
-You can start a local graphQL server, for API access, thus:
+You can start a live local dev environment (GraphQL server, live client) thus:
 
 ```bash
 $ npm run dev
@@ -69,7 +69,7 @@ $ npm run dev
 This will return data from what you have collected:
 
 ```bash
-$ http :3000/graphql query:='"{ hello }"'
+$ http :4000/graphql query:='"{ colleges { name, url } }"'
 ```
 
 
