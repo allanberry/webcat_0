@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "visit": "npm run download && node data/visit.js",
-    "dev": "npm run download && nodemon server/main.js & parcel client/index.html --out-dir client/dist",
+    "dev": "npm run download && parcel client/index.html --out-dir client/dist & nodemon server/main.js",
     "build": "npm run download && rm -rf client/dist && parcel build client/index.html --out-dir client/dist",
     "download": "node data/download.js"
   },
@@ -33,6 +33,7 @@
     "cheerio": "^1.0.0-rc.2",
     "csv-parse": "^4.3.3",
     "dotenv": "^7.0.0",
+    "es6-promise": "^4.2.8",
     "geoip-lite": "^1.3.6",
     "googleapis": "^42.0.0",
     "graphql": "^14.4.2",
@@ -48,8 +49,9 @@
     "superagent": "^4.1.0",
     "vue": "^2.6.8",
     "vue-hot-reload-api": "^2.3.3",
+    "vue-multiselect": "^2.1.6",
     "vue-router": "^3.0.2",
-    "vuex": "^3.1.0"
+    "vuex": "^3.1.1"
   },
   "devDependencies": {
     "@vue/component-compiler-utils": "^2.6.0",

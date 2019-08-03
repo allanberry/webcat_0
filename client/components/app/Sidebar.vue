@@ -1,24 +1,43 @@
 <template>
   <div id="site-sidebar">
-    <h2>Sidebar</h2>
-    <div class="input-group">
-      <select class="custom-select" id="inputGroupSelect01">
-        <option selected>Choose Library...</option>
-        <option value="1">MIT</option>
-        <option value="2">Stanford</option>
-        <option value="3">UIC</option>
-      </select>
-    </div>
+    <multiselect
+      track-by="_id"
+      label="name"
+      @select="dispatch"
+      :options="libraries"
+    ></multiselect>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
+import Multiselect from "vue-multiselect";
+
 export default {
-  name: "site-sidebar"
+  name: "site-sidebar",
+  data: function() {
+    return {
+    };
+  },
+  computed: {
+    libraries() {
+      return this.$store.state.libraries
+    }
+  },
+  components: {
+    Multiselect
+  },
+  methods: {
+    dispatch(library) {
+      this.$router.push({ name: 'library', params: { slug: library._id } })
+    }
+  }
 };
 </script>
 
 <style scoped lang="scss">
+@import "vue-multiselect/dist/vue-multiselect.min.css";
+
 #site-sidebar {
 }
 </style>

@@ -27,6 +27,12 @@ export default {
   data() {
     return {};
   },
+  created() {
+    this.$store.dispatch('setColleges');
+    this.$store.dispatch('setLibraries');
+    this.$store.dispatch('setPages');
+    this.$store.dispatch('setVisits');
+  },
   components: {
     SiteHeader,
     SiteSidebar,
@@ -42,7 +48,9 @@ export default {
   flex-direction: column;
   main#main-content {
     flex: 1;
-    background-color: #ddd
+    background-color: #ddd;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
 }
 </style>

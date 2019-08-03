@@ -47,65 +47,77 @@ const typeDefs = gql`
   }
 
   type Visit {
-    _id: ID,
-    url: String,
-    date: String,
-    dateScraped: String,
+    _id: ID
+    url: String
+    date: String
+    dateScraped: String
   }
 
   type Query {
+    college(_id: ID!): College
     colleges: [College]
+    library(_id: ID!): Library
     libraries: [Library]
+    page(_id: ID!): Page
     pages: [Page]
-    visits: [Visit]
+    visit(_id: ID!): Visit
+    visits(url: String!): [Visit]
   }
 `;
 
 const resolvers = {
   Query: {
+    college: async (obj, args, context, info) => {
+      return await colleges.findOne({ _id: args._id }, (err, docs) => {
+        console.error(err);
+      });
+    },
     colleges: async () => {
-      // return await DB.find({url: { $regex: /mit\.edu/}});
       return await colleges.find({}, (err, docs) => {
         console.error(err);
       });
     },
+    library: async (obj, args, context, info) => {
+      return await libraries.findOne({ _id: args._id }, (err, docs) => {
+        console.error(err);
+      });
+    },
     libraries: async () => {
-      // return await DB.find({url: { $regex: /mit\.edu/}});
       return await libraries.find({}, (err, docs) => {
         console.error(err);
       });
     },
+    page: async (obj, args, context, info) => {
+      return await pages.findOne({ _id: args._id }, (err, docs) => {
+        console.error(err);
+      });
+    },
     pages: async () => {
-      // return await DB.find({url: { $regex: /mit\.edu/}});
       return await pages.find({}, (err, docs) => {
         console.error(err);
       });
     },
-    visits: async () => {
-      // return await DB.find({url: { $regex: /mit\.edu/}});
-      return await visits.find({}, (err, docs) => {
+    visit: async (obj, args, context, info) => {
+      return await visits.findOne({ _id: args._id }, (err, docs) => {
+        console.error(err);
+      });
+    },
+    visits: async (obj, args, context, info) => {
+      return await visits.find({ url: args.url }, (err, docs) => {
         console.error(err);
       });
     }
   }
 };
 
-// // The GraphQL schema
-// const typeDefs = gql`
-//   type Query {
-//     "A simple type for getting started!"
-//     hello: String
-//   }
-// `;
-
-// // A map of functions which return data for the schema.
-// const resolvers = {
-//   Query: {
-//     hello: async () => 'world'
-//   }
-// };
-
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+  cors: {
+    origin: '*',
+    credentials: true // <-- REQUIRED backend setting
+  },
+  typeDefs,
+  resolvers
+});
 
 server.listen().then(({ url }) => {
   console.log(`🚀  Server ready at ${url}`);

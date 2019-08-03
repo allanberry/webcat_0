@@ -1,7 +1,7 @@
 <template>
   <div id="site-library">
-    <h2>Massachusetts Institute of Technology Libraries</h2>
-    <p>{{ $route.params.slug }}</p>
+    <h2>{{ library.name }}</h2>
+    <p>(current) <a v-bind:href="library.url">website</a></p>
 
     <h3>Dates collected</h3>
     <ul>
@@ -18,25 +18,32 @@ import request from "superagent";
 
 export default {
   name: "site-library",
-  created() {
-    this.getData();
+  data: function() {
+    return {
+      library: {}
+    };
+  },
+  async mounted() {
+    this.library = await this.getData();
   },
   methods: {
     getData: async function() {
       try {
         const qs = `{
-          visits {
+          library(_id: "${this.$route.params.slug}") {
             _id
+            name
             url
-            date
-            slug
+            college_id
+            arl_id
+            arl_name
           }
         }`;
         const data = await request
           .get("http://localhost:4000/graphql")
           .query({ query: qs });
 
-        console.log(JSON.parse(data.text));
+        return JSON.parse(data.text).data.library;
       } catch (error) {
         console.error(error);
       }
