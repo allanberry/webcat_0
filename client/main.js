@@ -1,12 +1,15 @@
 import "babel-polyfill";
-import 'es6-promise/auto'
+import "es6-promise/auto";
 
 import Vue from "vue";
-import Vuex from 'vuex'
-import VueRouter from "vue-router";
+// import Vuex from "vuex";
+// import VueRouter from "vue-router";
 import App from "./components/App.vue";
 import router from "./router.js";
-import store from './store.js';
+import store from "./store.js";
+import AsyncComputed from "vue-async-computed";
+
+Vue.use(AsyncComputed);
 
 new Vue({
   el: "#app",
@@ -14,4 +17,3 @@ new Vue({
   store,
   render: h => h(App)
 });
-

@@ -1,5 +1,7 @@
 const datastore = require("nedb-promise");
 const { ApolloServer, gql } = require("apollo-server");
+const GraphQLJSON = require('graphql-type-json');
+
 
 // setup database
 const colleges = new datastore({
@@ -48,9 +50,21 @@ const typeDefs = gql`
 
   type Visit {
     _id: ID
+    slug: String
     url: String
     date: String
     dateScraped: String
+    rendered: Rendered
+  }
+
+  type Rendered {
+    url: String
+    title: String
+    screenshots: [Screenshot]
+  }
+
+  type Screenshot {
+    name: String
   }
 
   type Query {
@@ -59,9 +73,10 @@ const typeDefs = gql`
     library(_id: ID!): Library
     libraries: [Library]
     page(_id: ID!): Page
-    pages: [Page]
+    pages(library_id: String!): [Page]
     visit(_id: ID!): Visit
     visits(url: String!): [Visit]
+
   }
 `;
 
@@ -92,8 +107,8 @@ const resolvers = {
         console.error(err);
       });
     },
-    pages: async () => {
-      return await pages.find({}, (err, docs) => {
+    pages: async (obj, args, context, info) => {
+      return await pages.find({ library_id: args.library_id }, (err, docs) => {
         console.error(err);
       });
     },
@@ -106,8 +121,8 @@ const resolvers = {
       return await visits.find({ url: args.url }, (err, docs) => {
         console.error(err);
       });
-    }
-  }
+    },
+  },
 };
 
 const server = new ApolloServer({

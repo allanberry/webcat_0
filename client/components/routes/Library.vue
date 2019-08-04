@@ -1,49 +1,106 @@
 <template>
-  <div id="site-library">
-    <h2>{{ library.name }}</h2>
-    <p>(current) <a v-bind:href="library.url">website</a></p>
+  <div id="site-library" v-if="college && library">
+    <h2>{{library.name}}</h2>
 
-    <h3>Dates collected</h3>
-    <ul>
-      <li>2000-01-01</li>
-      <li>2005-01-01</li>
-      <li>2010-01-01</li>
-      <li>2015-01-01</li>
-    </ul>
+    <template v-if="pages && pages.length > 0">
+      <h3>Visits</h3>
+      <ul>
+        <li :key="page.url" v-for="page in pages">
+          <a :href="page.url">{{ page.url }}</a>
+
+          <template v-if="page.visits && page.visits.length > 0">
+            <ul v-if="page.visits && page.visits.length > 0">
+              <li :key="visit._id" v-for="visit in page.visits">
+
+                <template v-if="visit && visit.rendered && visit.rendered.screenshots && visit.rendered.screenshots.length > 0">
+                    <img :key="screenshot.name" v-for="screenshot in visit.rendered.screenshots" 
+                      :src="imagePath(visit, screenshot)"
+                    />
+                </template>
+                {{ formatDate(visit.date) }}
+                
+              </li>
+            </ul>
+          </template>
+        </li>
+      </ul>
+    </template>
   </div>
 </template>
 
 <script>
 import request from "superagent";
+import moment from "moment";
 
 export default {
   name: "site-library",
-  data: function() {
+  data() {
     return {
-      library: {}
+      pages: []
     };
   },
-  async mounted() {
-    this.library = await this.getData();
-  },
   methods: {
-    getData: async function() {
+    formatDate(date_raw) {
+      return moment.utc(date_raw).format("YYYY MMM D, h:mma");
+    },
+    imagePath(visit, screenshot) {
+      return `http://159.89.221.204/iiif/2/webcat%2F${visit.slug}%2F${screenshot.name}/square/200,/0/default.jpg`
+    }
+  },
+  asyncComputed: {
+    college() {
+      return this.$store.getters.college(this.$route.params.slug);
+    },
+    library() {
+      return this.$store.getters.library(this.$route.params.slug);
+    },
+    async pages() {
       try {
+        const library_id = this.$route.params.slug;
         const qs = `{
-          library(_id: "${this.$route.params.slug}") {
+          pages(library_id: "${library_id}") {
             _id
-            name
+            library_id
             url
-            college_id
-            arl_id
-            arl_name
+            name
           }
         }`;
         const data = await request
           .get("http://localhost:4000/graphql")
           .query({ query: qs });
+        const parsed_data = JSON.parse(data.text).data.pages;
 
-        return JSON.parse(data.text).data.library;
+        for (let page of parsed_data) {
+          try {
+            const qs = `{
+              visits(url: "${page.url}") {
+                # _id
+                slug
+                url
+                date
+                dateScraped
+                rendered {
+                  url
+                  title
+                  screenshots {
+                    name
+                  }
+                }
+              }
+            }`;
+            const visits_data = await request
+              .get("http://localhost:4000/graphql")
+              .query({ query: qs });
+
+            page.visits = JSON.parse(visits_data.text).data.visits.sort(
+              (a, b) => (a.date > b.date ? 1 : -1)
+            );
+          } catch (error) {
+            console.error(error);
+          }
+        }
+
+        return parsed_data;
       } catch (error) {
         console.error(error);
       }
@@ -53,6 +110,4 @@ export default {
 </script>
 
 <style scoped lang="scss">
-#site-content {
-}
 </style>

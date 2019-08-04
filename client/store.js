@@ -9,14 +9,8 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    college: {},
     colleges: [],
-    library: {},
-    libraries: [],
-    page: {},
-    pages: [],
-    visit: {},
-    visits: []
+    libraries: []
   },
   mutations: {
     setColleges(state, payload) {
@@ -24,12 +18,18 @@ export default new Vuex.Store({
     },
     setLibraries(state, payload) {
       state.libraries = payload;
+    }
+  },
+  getters:{
+    college(state) {
+      return id => state.colleges.find(item => {
+        return item["_id"] === id
+      });
     },
-    setPages(state, payload) {
-      state.pages = payload;
-    },
-    setVisits(state, payload) {
-      state.visits = payload;
+    library(state) {
+      return id => state.libraries.find(item => {
+        return item["_id"] === id
+      });
     }
   },
   actions: {
@@ -74,46 +74,6 @@ export default new Vuex.Store({
       } catch (error) {
         console.error(error);
       }
-    },
-    async setPages(context) {
-      try {
-        const qs = `{
-          pages {
-            _id
-            library_id
-            url
-            name
-          }
-        }`;
-        const data = await request
-          .get("http://localhost:4000/graphql")
-          .query({ query: qs });
-
-        context.commit("setPages", JSON.parse(data.text).data.pages);
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    async setVisits(context) {
-      try {
-        const url = "https://lib.utah.edu/";
-        const qs = `{
-          visits(url: "${url}") {
-            _id
-            url
-            date
-            dateScraped
-          }
-        }`;
-        const data = await request
-          .get("http://localhost:4000/graphql")
-          .query({ query: qs });
-
-        context.commit("setVisits", JSON.parse(data.text).data.visits);
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    
+    }
   }
 });

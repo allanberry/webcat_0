@@ -4,7 +4,7 @@
       track-by="_id"
       label="name"
       @select="dispatch"
-      :options="libraries"
+      :options="colleges"
     ></multiselect>
   </div>
 </template>
@@ -20,8 +20,8 @@ export default {
     };
   },
   computed: {
-    libraries() {
-      return this.$store.state.libraries
+    colleges() {
+      return this.$store.state.colleges
     }
   },
   components: {

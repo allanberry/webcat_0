@@ -28,10 +28,8 @@ export default {
     return {};
   },
   created() {
-    this.$store.dispatch('setColleges');
-    this.$store.dispatch('setLibraries');
-    this.$store.dispatch('setPages');
-    this.$store.dispatch('setVisits');
+    this.$store.dispatch("setColleges");
+    this.$store.dispatch("setLibraries");
   },
   components: {
     SiteHeader,
@@ -46,9 +44,10 @@ export default {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
+
   main#main-content {
     flex: 1;
-    background-color: #ddd;
+    background-color: #eee;
     padding-top: 1rem;
     padding-bottom: 1rem;
   }
