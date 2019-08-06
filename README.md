@@ -94,6 +94,22 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
 
 - carry overwrite logic to screenshots
 - write it up
+- draft wireframes for basic page types
+  - home page
+  - gallery view
+    - frames
+    - aggregate visualizations, tables
+    - filters
+  - library/college view
+    - focused visualizations
+    - access to raw data
+  - page view
+- make Google Sheets optional
+  - freeze a set of sheets into repository
+  - if Sheets API not active, fallback to frozen sheets
+- collect current webpages as well
+  - optional if redundant?
+- run data collection logic on a schedule?
 - handle redirects
   e.g. http://web.archive.org/web/20120103055748/http://asu.edu/lib/
 - handle missing stylesheets
@@ -135,7 +151,8 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
   - particular roles?
   - links
   - search engines
-  - generating engines
+  - generating engines, e.g. Drupal, WordPress, etc.
+    - use builtwith api?
   - social media
     - links
     - agents
