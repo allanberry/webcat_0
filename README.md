@@ -39,6 +39,11 @@ $ git clone https://github.com/allanberry/webcat.git
 $ npm install
 ```
 
+Now, you will need to [setup the Google Sheets API](https://developers.google.com/sheets/api/quickstart/python), so the downloader can access a Google spreadsheet which contains the requisite college data.
+
+
+
+
 At this point you should have a functioning codebase.  Please let me know if anything is amiss.
 
 
