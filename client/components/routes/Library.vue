@@ -18,7 +18,7 @@
                     />
                 </template>
                 {{ formatDate(visit.date) }}
-                
+
               </li>
             </ul>
           </template>
@@ -44,7 +44,7 @@ export default {
       return moment.utc(date_raw).format("YYYY MMM D, h:mma");
     },
     imagePath(visit, screenshot) {
-      return `http://159.89.221.204/iiif/2/webcat%2F${visit.slug}%2F${screenshot.name}/square/200,/0/default.jpg`
+      return `http://159.89.221.204/iiif/2/webcat%2F${visit.slug}%2F${screenshot.name}/square/200,/0/default.png`
     }
   },
   asyncComputed: {
