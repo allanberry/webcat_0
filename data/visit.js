@@ -210,7 +210,7 @@ async function getRendered(date, url, page) {
     // puppeteer strip wayback elements
     await page.evaluate(() => {
       // wayback banner
-      let element = document.querySelector("#wm-ipp");
+      let element = document.querySelector("#wm-ipp-base");
       element.parentNode.removeChild(element);
 
       // stylesheets

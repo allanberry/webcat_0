@@ -7,7 +7,8 @@
     "visit": "npm run download && node data/visit.js",
     "dev": "npm run download && parcel client/index.html --out-dir client/dist & nodemon server/main.js",
     "build": "npm run download && rm -rf client/dist && parcel build client/index.html --out-dir client/dist",
-    "download": "node data/download.js"
+    "download": "node data/download.js",
+    "clean": "node data/clean.js"
   },
   "repository": {
     "type": "git",
@@ -60,6 +61,7 @@
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
     "cssnano": "^4.1.10",
+    "del": "^5.1.0",
     "sass": "^1.17.2",
     "vue-template-compiler": "^2.6.8"
   }
