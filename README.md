@@ -110,6 +110,9 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
 - collect current webpages as well
   - optional if redundant?
 - run data collection logic on a schedule?
+- use puppeteer to determine coordinates of elements: https://gist.github.com/emmiep/cd35de612412ac6a283613a438e6acfa
+  - form elements
+  - nav/.nav/#nav/.navbar etc. elements
 - handle redirects
   e.g. http://web.archive.org/web/20120103055748/http://asu.edu/lib/
 - handle missing stylesheets
