@@ -47,6 +47,10 @@ const visits = datastore({
   filename: "data/collected/visits.db",
   autoload: true
 });
+const builtwith = datastore({
+  filename: "data/collected/builtwith.db",
+  autoload: true
+});
 
 // setup logger
 const logger = setupLogger("visit");
