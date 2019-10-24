@@ -5,6 +5,7 @@
  * Archive's wayback machine.
  */
 
+require("dotenv").config();
 const request = require("superagent");
 const fs = require("fs");
 const moment = require("moment");
@@ -79,26 +80,29 @@ const viewports = [
     // setup
     const browser = await puppeteer.launch();
 
-    // get global ip address
+    // global ip address
     const response = await request.get("ipv4bot.whatismyipaddress.com");
     const ip = response.text;
 
-    const pages = args.url ? [{url: args.url, visit: true}] : await pages_db.find({});
+    // loop through pages
+    const pages = args.url
+      ? [{ url: args.url, visit: true }]
+      : await pages_db.find({});
     for (const page of pages) {
       const startDate = args.startDate
         ? moment.utc(args.startDate)
         : page.start_date
         ? moment.utc(page.start_date)
         : moment.utc("1995-01-01");
-
       const endDate = args.endDate
         ? moment.utc(args.endDate)
         : page.end_date
         ? moment.utc(page.end_date)
         : moment();
 
+      // wayback
       let date = startDate;
-      const increment = args.increment ? args.increment : "100 years"
+      const increment = args.increment ? args.increment : "100 years";
       while (date.isBefore(endDate)) {
         if (page.visit) {
           await scrapeWayback(date, page.url, browser, ip);
@@ -116,7 +120,34 @@ const viewports = [
   }
 })();
 
+/**
+ * Get data from the Builtwith API
+ */
+async function builtwith(date, url) {
+  // https://api.builtwith.com/v13/api.json?KEY=f857bd0a-cc11-43fa-bdec-112308e8ba1e&LOOKUP=lib.asu.edu
+  // const response = await request.get("ipv4bot.whatismyipaddress.com");
+  // const ip = response.text;
+  try {
+    const inDatabase =
+      (await builtwith_db.count({date: date.format(), url})) > 0;
 
+    const api_key = process.env.BUILTWITH_API_KEY;
+    const builtwith_url = `https://api.builtwith.com/v13/api.json?KEY=${api_key}&LOOKUP=${encodeURIComponent(url)}`
+
+    const data = {}
+
+    // save for later if needed
+    if (overwrite || !inDatabase) {
+      await builtwith_db.update({ date: date.format(), url }, {date: date.format(), url, data}, {
+        upsert: true
+      });
+    }
+
+    return data;
+  } catch (err) {
+    logger.error(err);
+  }
+}
 
 /**
  * Get data from the Wayback Machine
@@ -131,6 +162,10 @@ async function scrapeWayback(date, url, browser, ip) {
   try {
     // retrieve next date available from Wayback Machine
     const waybackDate = await getWaybackDate(date, url);
+
+    // get from builtwith
+    const bw = await builtwith(date, url);
+    console.log(bw);
 
     if (waybackDate) {
       // setup puppeteer
@@ -189,22 +224,33 @@ async function scrapeWayback(date, url, browser, ip) {
           if (date.isSame(waybackDate)) {
             logger.info(`OK: ${url} ${waybackDate.format()} (updated)`);
           } else {
-            logger.info(`OK: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (updated)`);
+            logger.info(
+              `OK: ${url} ${date.format(
+                "YYYY-MM-DD"
+              )}, closest: ${waybackDate.format()} (updated)`
+            );
           }
         } else {
           // created
           if (date.isSame(waybackDate)) {
             logger.info(`OK: ${url} ${waybackDate.format()} (created)`);
           } else {
-            logger.info(`OK: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (created)`);
+            logger.info(
+              `OK: ${url} ${date.format(
+                "YYYY-MM-DD"
+              )}, closest: ${waybackDate.format()} (created)`
+            );
           }
         }
       } else {
         if (date.isSame(waybackDate)) {
           logger.warn(`--: ${url} ${waybackDate.format()} (exists)`);
-
         } else {
-          logger.warn(`--: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (exists)`);
+          logger.warn(
+            `--: ${url} ${date.format(
+              "YYYY-MM-DD"
+            )}, closest: ${waybackDate.format()} (exists)`
+          );
         }
       }
 
@@ -214,7 +260,7 @@ async function scrapeWayback(date, url, browser, ip) {
       logger.warn(`wb !!:  ${url} -- not in Wayback Machine!`);
     }
   } catch (error) {
-    // logger.error(`wb !!:    ${date.format()} ${url} (${error.name})`);
+    logger.error(`wb !!:    ${date.format()} ${url} (${error.name})`);
   }
 }
 
