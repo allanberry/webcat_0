@@ -81,6 +81,8 @@ const viewports = [
 
     // iterate dates
     let date = startDate;
+
+
     while (date.isBefore(endDate)) {
       // scrape
       if (url) {
@@ -91,8 +93,15 @@ const viewports = [
         for (const page of await pages.find({})) {
 
           // only perform if spreadsheet says so
-          if (page.visit && page.visit === true) {
-            await scrapeWayback(date, page.url, browser, ip);
+          if (page.visit) {
+
+            const pageStartDate = page.start_date ? moment.utc(page.start_date) : startDate;
+            const pageEndDate = page.end_date ? moment.utc(page.end_date) : endDate;
+
+            // dates all inclusive
+            if  (date.isBetween(pageStartDate, pageEndDate, null, '[]')) {
+              await scrapeWayback(date, page.url, browser, ip);
+            }
           }
         }
       }
@@ -107,6 +116,8 @@ const viewports = [
     logger.error(error);
   }
 })();
+
+
 
 /**
  * Get data from the Wayback Machine
@@ -176,14 +187,26 @@ async function scrapeWayback(date, url, browser, ip) {
         });
         if (overwrite) {
           // updated
-          logger.info(`OK:        ${waybackDate.format()} ${url} (updated)`);
+          if (date.isSame(waybackDate)) {
+            logger.info(`OK:        ${url} ${waybackDate.format()} (updated)`);
+          } else {
+            logger.info(`OK:        wanted: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (updated)`);
+          }
         } else {
           // created
-          logger.info(`OK:        ${waybackDate.format()} ${url} (created)`);
+          if (date.isSame(waybackDate)) {
+            logger.info(`OK:        ${url} ${waybackDate.format()} (created)`);
+          } else {
+            logger.info(`OK:        wanted: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (created)`);
+          }
         }
       } else {
-        logger.warn(`--:        ${waybackDate.format()} ${url} (exists)`);
-        // logger.warn(`            attempted: ${waybackUrl(waybackDate, url)}`);
+        if (date.isSame(waybackDate)) {
+          logger.warn(`--:        ${url} ${waybackDate.format()} (exists)`);
+
+        } else {
+          logger.warn(`--:        wanted: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (exists)`);
+        }
       }
 
       // clean up
@@ -302,7 +325,7 @@ async function getRaw(date, url) {
 
     return output;
   } catch (error) {
-    logger.error(`raw !!:   ${date.format()} ${url} (${error.name})`);
+    logger.error(`raw !!:   ${url} ${date.format()} (${error.name})`);
   }
 }
 
@@ -343,7 +366,7 @@ async function getWaybackDate(date, url) {
       );
     }
   } catch (error) {
-    logger.error(`avail !!   ${date.format()} ${url} (${error.name})`);
+    logger.error(`avail !!   ${url} ${date.format()} (${error.name})`);
   }
 }
 
@@ -453,7 +476,7 @@ async function takeScreenshot(date, url, page, viewport) {
       }
     };
   } catch (error) {
-    logger.error(`screen !!: ${date.format()} ${url} (${error.name})`);
+    logger.error(`screen !!: ${url} ${date.format()} (${error.name})`);
   }
 }
 
