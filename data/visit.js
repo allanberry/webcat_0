@@ -23,31 +23,31 @@ const setupLogger = require("./utils.js").setupLogger;
 const screenshotsDir = "data/collected/screenshots";
 const waybackDateFormat = "YYYYMMDDHHmmss";
 const overwrite = args.overwrite == "true" ? true : false;
-const url = args.url;
-const startDate = args.startDate
-  ? moment.utc(args.startDate)
-  : moment.utc("1995-01-01");
-const endDate = args.endDate ? moment.utc(args.endDate) : moment();
-const increment = args.increment ? args.increment : "100 years";
+// const url = args.url;
+// const startDate = args.startDate
+//   ? moment.utc(args.startDate)
+//   : moment.utc("1995-01-01");
+// const endDate = args.endDate ? moment.utc(args.endDate) : moment();
+// const increment = args.increment ? args.increment : "100 years";
 
 // setup database tables
-const colleges = datastore({
+const colleges_db = datastore({
   filename: "data/collected/colleges.db",
   autoload: true
 });
-const libraries = datastore({
+const libraries_db = datastore({
   filename: "data/collected/libraries.db",
   autoload: true
 });
-const pages = datastore({
+const pages_db = datastore({
   filename: "data/collected/pages.db",
   autoload: true
 });
-const visits = datastore({
+const visits_db = datastore({
   filename: "data/collected/visits.db",
   autoload: true
 });
-const builtwith = datastore({
+const builtwith_db = datastore({
   filename: "data/collected/builtwith.db",
   autoload: true
 });
@@ -83,33 +83,28 @@ const viewports = [
     const response = await request.get("ipv4bot.whatismyipaddress.com");
     const ip = response.text;
 
-    // iterate dates
-    let date = startDate;
+    const pages = args.url ? [{url: args.url, visit: true}] : await pages_db.find({});
+    for (const page of pages) {
+      const startDate = args.startDate
+        ? moment.utc(args.startDate)
+        : page.start_date
+        ? moment.utc(page.start_date)
+        : moment.utc("1995-01-01");
 
+      const endDate = args.endDate
+        ? moment.utc(args.endDate)
+        : page.end_date
+        ? moment.utc(page.end_date)
+        : moment();
 
-    while (date.isBefore(endDate)) {
-      // scrape
-      if (url) {
-        // single page
-        await scrapeWayback(date, url, browser, ip);
-      } else {
-        // multiple pages
-        for (const page of await pages.find({})) {
-
-          // only perform if spreadsheet says so
-          if (page.visit) {
-
-            const pageStartDate = page.start_date ? moment.utc(page.start_date) : startDate;
-            const pageEndDate = page.end_date ? moment.utc(page.end_date) : endDate;
-
-            // dates all inclusive
-            if  (date.isBetween(pageStartDate, pageEndDate, null, '[]')) {
-              await scrapeWayback(date, page.url, browser, ip);
-            }
-          }
+      let date = startDate;
+      const increment = args.increment ? args.increment : "100 years"
+      while (date.isBefore(endDate)) {
+        if (page.visit) {
+          await scrapeWayback(date, page.url, browser, ip);
         }
+        date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
       }
-      date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
     }
 
     // cleanup
@@ -143,8 +138,8 @@ async function scrapeWayback(date, url, browser, ip) {
 
       // determine if data exists in database
       const inDatabase =
-        (await visits.count({ date: waybackDate.format(), url })) > 0;
-      // const item = await visits.findOne(query);
+        (await visits_db.count({ date: waybackDate.format(), url })) > 0;
+      // const item = await visits_db.findOne(query);
 
       // const rawExists = item && item.raw;
       // const renderedExists = item && item.rendered;
@@ -186,37 +181,37 @@ async function scrapeWayback(date, url, browser, ip) {
         }
 
         // write db
-        await visits.update({ date: waybackDate.format(), url }, metadata, {
+        await visits_db.update({ date: waybackDate.format(), url }, metadata, {
           upsert: true
         });
         if (overwrite) {
           // updated
           if (date.isSame(waybackDate)) {
-            logger.info(`OK:        ${url} ${waybackDate.format()} (updated)`);
+            logger.info(`OK: ${url} ${waybackDate.format()} (updated)`);
           } else {
-            logger.info(`OK:        wanted: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (updated)`);
+            logger.info(`OK: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (updated)`);
           }
         } else {
           // created
           if (date.isSame(waybackDate)) {
-            logger.info(`OK:        ${url} ${waybackDate.format()} (created)`);
+            logger.info(`OK: ${url} ${waybackDate.format()} (created)`);
           } else {
-            logger.info(`OK:        wanted: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (created)`);
+            logger.info(`OK: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (created)`);
           }
         }
       } else {
         if (date.isSame(waybackDate)) {
-          logger.warn(`--:        ${url} ${waybackDate.format()} (exists)`);
+          logger.warn(`--: ${url} ${waybackDate.format()} (exists)`);
 
         } else {
-          logger.warn(`--:        wanted: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (exists)`);
+          logger.warn(`--: ${url} ${date.format('YYYY-MM-DD')}, closest: ${waybackDate.format()} (exists)`);
         }
       }
 
       // clean up
       await page.close();
     } else {
-      logger.warn(`wb !!:    ${url} -- not in Wayback Machine!`);
+      logger.warn(`wb !!:  ${url} -- not in Wayback Machine!`);
     }
   } catch (error) {
     // logger.error(`wb !!:    ${date.format()} ${url} (${error.name})`);
@@ -329,7 +324,7 @@ async function getRaw(date, url) {
 
     return output;
   } catch (error) {
-    logger.error(`raw !!:   ${url} ${date.format()} (${error.name})`);
+    logger.error(`raw !!: ${url} ${date.format()} (${error.name})`);
   }
 }
 
@@ -387,13 +382,13 @@ async function readCSV(csv) {
 
 async function getLibraryData(url) {
   let output = {};
-  const page = await pages.findOne({ url });
+  const page = await pages_db.findOne({ url });
   const library = (await page)
-    ? await libraries.findOne({ _id: page.library_id })
-    : await libraries.findOne({ url: url });
+    ? await libraries_db.findOne({ _id: page.library_id })
+    : await libraries_db.findOne({ url: url });
   const college = (await library)
-    ? await colleges.findOne({ _id: library.college_id })
-    : await colleges.findOne({ url: url });
+    ? await colleges_db.findOne({ _id: library.college_id })
+    : await colleges_db.findOne({ url: url });
 
   if (page) {
     output["page"] = page;
