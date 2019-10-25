@@ -104,9 +104,17 @@ const viewports = [
       let date = startDate;
       const increment = args.increment ? args.increment : "100 years";
       while (date.isBefore(endDate)) {
-        if (page.visit) {
-          await scrapeWayback(date, page.url, browser, ip);
+
+        // manually skip certain dates
+        const skips = page.skip ? page.skip.split(',').map(i => i.trim()) : [];
+
+        if (page.visit && !skips.includes(date.format('YYYY-MM-DD'))) {
+          await getWayback(date, page.url, browser, ip);
+        } else if (page.visit && page.skip) {
+          logger.warn(`--: ${page.url} ${date.format('YYYY-MM-DD')} (skip)`);
         }
+
+        // increment
         date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
       }
     }
@@ -126,7 +134,7 @@ const viewports = [
  * @param {date} dateRequested - A moment date.
  * @param {browser} browser - A Puppeteer browser object.
  */
-async function scrapeWayback(date, url, browser, ip) {
+async function getWayback(date, url, browser, ip) {
   // // date format string for moment
   // const waybackDateFormat = "YYYYMMDDHHmmss";
 
@@ -230,10 +238,10 @@ async function scrapeWayback(date, url, browser, ip) {
       // clean up
       await page.close();
     } else {
-      logger.warn(`wb !!:  ${url} -- not in Wayback Machine!`);
+      logger.warn(`wayback warning: ${waybackUrl(waybackDate, url)} -- not in Wayback Machine!`);
     }
   } catch (error) {
-    logger.error(`wb !!:    ${date.format()} ${url} (${error.name})`);
+    logger.error(`wayback error: ${date.format()} ${url} (${error.name})`);
   }
 }
 
@@ -300,7 +308,7 @@ async function getRendered(url, page) {
       }
     };
   } catch (error) {
-    logger.error(`rend !!: ${url} (${error.name})`);
+    logger.error(`rendered error: ${url} (${error.name})`);
   }
 }
 
@@ -337,7 +345,7 @@ async function getRaw(url) {
 
     return output;
   } catch (error) {
-    logger.error(`raw !!: ${url}(${error.name})`);
+    logger.error(`raw error: ${url} (${error.name})`);
   }
 }
 
@@ -379,7 +387,7 @@ async function getBuiltWith(url) {
       return await builtwith_db.findOne(query);
     }
   } catch (err) {
-    logger.error(err);
+    logger.error(`builtwith error: ${url} (${error.name})`);
   }
 }
 
