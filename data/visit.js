@@ -121,48 +121,6 @@ const viewports = [
 })();
 
 /**
- * Get data from the Builtwith API
- */
-async function builtwith(url) {
-  // https://api.builtwith.com/v13/api.json?KEY=f857bd0a-cc11-43fa-bdec-112308e8ba1e&LOOKUP=lib.asu.edu
-  // const response = await request.get("ipv4bot.whatismyipaddress.com");
-  // const ip = response.text;
-  try {
-    const query = { url };
-    const api = "https://api.builtwith.com/v13/api.json";
-
-    const inDatabase = (await builtwith_db.count(query)) > 0;
-
-    if (overwrite || !inDatabase) {
-      const full_url = `${api}?KEY=${
-        process.env.BUILTWITH_API_KEY
-      }&LOOKUP=${encodeURIComponent(url)}`;
-
-      const response = await request.get(full_url);
-      const data = JSON.parse(response.text);
-
-      // save for later, to reduce API calls
-      await builtwith_db.update(
-        query,
-        Object.assign(query, {
-          api,
-          accessed: moment.utc().format(),
-          data
-        }),
-        {
-          upsert: true
-        }
-      );
-      return data;
-    } else {
-      return await builtwith_db.findOne(query);
-    }
-  } catch (err) {
-    logger.error(err);
-  }
-}
-
-/**
  * Get data from the Wayback Machine
  * @param {string} url
  * @param {date} dateRequested - A moment date.
@@ -175,11 +133,6 @@ async function scrapeWayback(date, url, browser, ip) {
   try {
     // retrieve next date available from Wayback Machine
     const waybackDate = await getWaybackDate(date, url);
-
-    // get from builtwith
-    const bw = await builtwith(waybackUrl(date, url, true));
-
-    
 
     if (waybackDate) {
       // setup puppeteer
@@ -201,7 +154,6 @@ async function scrapeWayback(date, url, browser, ip) {
           url,
           slug: slugifyUrl(url),
           date: waybackDate.format(),
-          dateScraped: moment.utc().format(),
           library: await getLibraryData(url),
           client: {
             ip,
@@ -209,11 +161,18 @@ async function scrapeWayback(date, url, browser, ip) {
           }
         };
 
+        const wbUrl = waybackUrl(waybackDate, url);
+        const wbUrlRaw = waybackUrl(waybackDate, url, true);
+        
+
         // raw HTML from Superagent
-        metadata.raw = await getRaw(waybackDate, url);
+        metadata.raw = await getRaw(wbUrlRaw);
 
         // data from Puppeteer
-        metadata.rendered = await getRendered(waybackDate, url, page);
+        metadata.rendered = await getRendered(wbUrl, page);
+
+        // data from builtwith
+        metadata.builtwith = await getBuiltWith(wbUrlRaw);
 
         // browser data
         metadata.rendered.browser = {
@@ -278,13 +237,10 @@ async function scrapeWayback(date, url, browser, ip) {
   }
 }
 
-async function getRendered(date, url, page) {
-  // build urls
-  const wbUrl = waybackUrl(date, url);
-
+async function getRendered(url, page) {
   try {
     // puppeteer navigate to page
-    await page.goto(wbUrl, {
+    await page.goto(url, {
       waitUntil: "networkidle0",
       timeout: 60000
     });
@@ -322,8 +278,9 @@ async function getRendered(date, url, page) {
     });
 
     return {
-      url: wbUrl,
+      url,
       title: await page.title(),
+      accessed: moment.utc().format(),
       stylesheets,
       // anchors: anchors, // trebles size of db record
       agent: {
@@ -343,19 +300,14 @@ async function getRendered(date, url, page) {
       }
     };
   } catch (error) {
-    logger.error(`rend !!:  ${wbUrl} (${error.name})`);
-    // logger.error(`          ${wbUrl}`);
-    // logger.error(error);
+    logger.error(`rend !!: ${url} (${error.name})`);
   }
 }
 
-async function getRaw(date, url) {
-  // get raw website data
-  const wbUrl = waybackUrl(date, url, true);
-
+async function getRaw(url) {
   try {
     // retrieve raw archive HTML from superagent, and output to file
-    const rawHtml = await request.get(wbUrl);
+    const rawHtml = await request.get(url);
 
     // retrieve internal page elements
     const $ = cheerio.load(rawHtml.text);
@@ -363,8 +315,9 @@ async function getRaw(date, url) {
     const elementQty = $("html *").length;
 
     const output = {
-      url: wbUrl,
+      url,
       title: rawTitle,
+      accessed: moment.utc().format(),
       agent: {
         name: "Node.js/Superagent",
         url: "https://github.com/visionmedia/superagent",
@@ -384,7 +337,49 @@ async function getRaw(date, url) {
 
     return output;
   } catch (error) {
-    logger.error(`raw !!: ${url} ${date.format()} (${error.name})`);
+    logger.error(`raw !!: ${url}(${error.name})`);
+  }
+}
+
+/**
+ * Get data from the Builtwith API
+ */
+async function getBuiltWith(url) {
+  // https://api.builtwith.com/v13/api.json?KEY=f857bd0a-cc11-43fa-bdec-112308e8ba1e&LOOKUP=lib.asu.edu
+  // const response = await request.get("ipv4bot.whatismyipaddress.com");
+  // const ip = response.text;
+  try {
+    const query = { url };
+    const api = "https://api.builtwith.com/v13/api.json";
+
+    const inDatabase = (await builtwith_db.count(query)) > 0;
+
+    if (overwrite || !inDatabase) {
+      const full_url = `${api}?KEY=${
+        process.env.BUILTWITH_API_KEY
+      }&LOOKUP=${encodeURIComponent(url)}`;
+
+      const response = await request.get(full_url);
+      const data = Object.assign(query, {
+        api,
+        accessed: moment.utc().format(),
+        data: JSON.parse(response.text)
+      })
+
+      // save for later, to reduce API calls
+      await builtwith_db.update(
+        query,
+        data,
+        {
+          upsert: true
+        }
+      );
+      return data;
+    } else {
+      return await builtwith_db.findOne(query);
+    }
+  } catch (err) {
+    logger.error(err);
   }
 }
 
