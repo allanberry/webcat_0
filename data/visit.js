@@ -28,7 +28,7 @@ const overwrite = args.overwrite == "true" ? true : false;
 // const startDate = args.startDate
 //   ? moment.utc(args.startDate)
 //   : moment.utc("1995-01-01");
-// const endDate = args.endDate ? moment.utc(args.endDate) : moment();
+// const endDate = args.endDate ? moment.utc(args.endDate) : moment.utc();
 // const increment = args.increment ? args.increment : "100 years";
 
 // setup database tables
@@ -98,7 +98,7 @@ const viewports = [
         ? moment.utc(args.endDate)
         : page.end_date
         ? moment.utc(page.end_date)
-        : moment();
+        : moment.utc();
 
       // wayback
       let date = startDate;
@@ -123,27 +123,40 @@ const viewports = [
 /**
  * Get data from the Builtwith API
  */
-async function builtwith(date, url) {
+async function builtwith(url) {
   // https://api.builtwith.com/v13/api.json?KEY=f857bd0a-cc11-43fa-bdec-112308e8ba1e&LOOKUP=lib.asu.edu
   // const response = await request.get("ipv4bot.whatismyipaddress.com");
   // const ip = response.text;
   try {
-    const inDatabase =
-      (await builtwith_db.count({date: date.format(), url})) > 0;
+    const query = { url };
+    const api = "https://api.builtwith.com/v13/api.json";
 
-    const api_key = process.env.BUILTWITH_API_KEY;
-    const builtwith_url = `https://api.builtwith.com/v13/api.json?KEY=${api_key}&LOOKUP=${encodeURIComponent(url)}`
+    const inDatabase = (await builtwith_db.count(query)) > 0;
 
-    const data = {}
-
-    // save for later if needed
     if (overwrite || !inDatabase) {
-      await builtwith_db.update({ date: date.format(), url }, {date: date.format(), url, data}, {
-        upsert: true
-      });
-    }
+      const full_url = `${api}?KEY=${
+        process.env.BUILTWITH_API_KEY
+      }&LOOKUP=${encodeURIComponent(url)}`;
 
-    return data;
+      const response = await request.get(full_url);
+      const data = JSON.parse(response.text);
+
+      // save for later, to reduce API calls
+      await builtwith_db.update(
+        query,
+        Object.assign(query, {
+          api,
+          accessed: moment.utc().format(),
+          data
+        }),
+        {
+          upsert: true
+        }
+      );
+      return data;
+    } else {
+      return await builtwith_db.findOne(query);
+    }
   } catch (err) {
     logger.error(err);
   }
@@ -164,8 +177,9 @@ async function scrapeWayback(date, url, browser, ip) {
     const waybackDate = await getWaybackDate(date, url);
 
     // get from builtwith
-    const bw = await builtwith(date, url);
-    console.log(bw);
+    const bw = await builtwith(waybackUrl(date, url, true));
+
+    
 
     if (waybackDate) {
       // setup puppeteer
