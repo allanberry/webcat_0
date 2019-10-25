@@ -100,18 +100,22 @@ const viewports = [
         ? moment.utc(page.end_date)
         : moment.utc();
 
-      // wayback
+      // fist, get live URL (no wayback) if available
+      if (page.visit && args.current) {
+        await getCurrent(page.url, browser, ip);
+      }
+
+      // then go into the Wayback Machine for historical data
       let date = startDate;
       const increment = args.increment ? args.increment : "100 years";
       while (date.isBefore(endDate)) {
-
         // manually skip certain dates
-        const skips = page.skip ? page.skip.split(',').map(i => i.trim()) : [];
+        const skips = page.skip ? page.skip.split(",").map(i => i.trim()) : [];
 
-        if (page.visit && !skips.includes(date.format('YYYY-MM-DD'))) {
+        if (page.visit && !skips.includes(date.format("YYYY-MM-DD"))) {
           await getWayback(date, page.url, browser, ip);
         } else if (page.visit && page.skip) {
-          logger.warn(`--: ${page.url} ${date.format('YYYY-MM-DD')} (skip)`);
+          logger.warn(`--: ${page.url} ${date.format("YYYY-MM-DD")} (skip)`);
         }
 
         // increment
@@ -128,124 +132,137 @@ const viewports = [
   }
 })();
 
-/**
- * Get data from the Wayback Machine
- * @param {string} url
- * @param {date} dateRequested - A moment date.
- * @param {browser} browser - A Puppeteer browser object.
- */
-async function getWayback(date, url, browser, ip) {
-  // // date format string for moment
-  // const waybackDateFormat = "YYYYMMDDHHmmss";
-
+async function getCurrent(url, browser, ip) {
   try {
-    // retrieve next date available from Wayback Machine
-    const waybackDate = await getWaybackDate(date, url);
+    const date = moment.utc()
+    await getVisit(date, url, browser, ip, false);
+    logger.info(`OK: ${url} ${date.format("YYYY-MM-DD")} (created)`);
+  } catch (err) {
+    logger.error(`current error: ${url} (${err.name})`);
+  }
+}
 
-    if (waybackDate) {
-      // setup puppeteer
-      const page = await browser.newPage();
+async function getWayback(desiredDate, url, browser, ip) {
+  try {
+    const availDate = await getWaybackDate(desiredDate, url);
+    if (availDate) {
+      await getVisit(availDate, url, browser, ip, true);
+    } else {
+      // if (desiredDate.isSame(availDate)) {
+      //   logger.warn(`--: ${url} ${availDate.format()} (exists)`);
+      // } else {
+      //   logger.warn(
+      //     `--: ${url} ${desiredDate.format(
+      //       "YYYY-MM-DD"
+      //     )}, closest: ${availDate.format()} (exists)`
+      //   );
+      // }
+    }
 
-      // determine if data exists in database
-      const inDatabase =
-        (await visits_db.count({ date: waybackDate.format(), url })) > 0;
-      // const item = await visits_db.findOne(query);
+    // // // report status
+    // if (overwrite) {
+    //   // updated
+    //   if (desiredDate.isSame(date)) {
+    //     logger.info(`OK: ${url} ${date.format()} (updated)`);
+    //   } else {
+    //     logger.info(
+    //       `OK: ${url} ${desiredDate.format(
+    //         "YYYY-MM-DD"
+    //       )}, closest: ${date.format()} (updated)`
+    //     );
+    //   }
+    // } else {
+    //   // created
+    //   if (desiredDate.isSame(date)) {
+    //     logger.info(`OK: ${url} ${date.format()} (created)`);
+    //   } else {
+    //     logger.info(
+    //       `OK: ${url} ${desiredDate.format(
+    //         "YYYY-MM-DD"
+    //       )}, closest: ${date.format()} (created)`
+    //     );
+    //   }
+    // }
 
-      // const rawExists = item && item.raw;
-      // const renderedExists = item && item.rendered;
-      // const screenshotsExist =
-      //   item && item.screenshots && item.screenshots.length > 0;
 
-      if (overwrite || !inDatabase) {
-        // metadata
-        let metadata = {
-          url,
-          slug: slugifyUrl(url),
-          date: waybackDate.format(),
-          library: await getLibraryData(url),
-          client: {
-            ip,
-            geo: geoip.lookup(ip)
-          }
-        };
+    // } else {
+    //   logger.error(
+    //     `wayback error: ${url} ${date.format()} -- not in Wayback Machine?`
+    //   );
 
-        const wbUrl = waybackUrl(waybackDate, url);
-        const wbUrlRaw = waybackUrl(waybackDate, url, true);
-        
 
-        // raw HTML from Superagent
-        metadata.raw = await getRaw(wbUrlRaw);
+  } catch (err) {
+    logger.error(`wayback error: ${url} (${err.name})`);
+  }
+}
 
-        // data from Puppeteer
-        metadata.rendered = await getRendered(wbUrl, page);
+async function getVisit(date, url, browser, ip, wayback = true) {
+  try {
+    // setup puppeteer
+    const page = await browser.newPage();
 
-        // data from builtwith
-        metadata.builtwith = await getBuiltWith(wbUrlRaw);
+    // determine if data exists in database
+    const inDatabase =
+      (await visits_db.count({ date: date.format(), url })) > 0;
 
-        // browser data
-        metadata.rendered.browser = {
-          userAgent: await browser.userAgent(),
-          version: await browser.version()
-        };
+    if (overwrite || !inDatabase) {
+      const renderedURL = wayback ? waybackUrl(date, url, false) : url;
+      const rawURL = wayback ? waybackUrl(date, url, true) : url;
 
-        // screenshots
-        metadata.rendered.screenshots = [];
-        for (const viewport of viewports) {
-          metadata.rendered.screenshots.push(
-            await takeScreenshot(waybackDate, url, page, viewport)
-          );
-        }
-
-        // write db
-        await visits_db.update({ date: waybackDate.format(), url }, metadata, {
-          upsert: true
-        });
-        if (overwrite) {
-          // updated
-          if (date.isSame(waybackDate)) {
-            logger.info(`OK: ${url} ${waybackDate.format()} (updated)`);
-          } else {
-            logger.info(
-              `OK: ${url} ${date.format(
-                "YYYY-MM-DD"
-              )}, closest: ${waybackDate.format()} (updated)`
-            );
-          }
-        } else {
-          // created
-          if (date.isSame(waybackDate)) {
-            logger.info(`OK: ${url} ${waybackDate.format()} (created)`);
-          } else {
-            logger.info(
-              `OK: ${url} ${date.format(
-                "YYYY-MM-DD"
-              )}, closest: ${waybackDate.format()} (created)`
-            );
-          }
-        }
-      } else {
-        if (date.isSame(waybackDate)) {
-          logger.warn(`--: ${url} ${waybackDate.format()} (exists)`);
-        } else {
-          logger.warn(
-            `--: ${url} ${date.format(
-              "YYYY-MM-DD"
-            )}, closest: ${waybackDate.format()} (exists)`
-          );
-        }
+      // metadata
+      let metadata = {
+        url,
+        slug: slugifyUrl(url),
+        date: date.format(),
+        library: await getLibraryData(url),
+        client: {
+          ip,
+          geo: geoip.lookup(ip)
+        },
       }
 
-      // clean up
-      await page.close();
-    } else {
-      logger.warn(`wayback warning: ${waybackUrl(waybackDate, url)} -- not in Wayback Machine!`);
+    //     // raw HTML from Superagent
+    //     raw: await getRaw(rawURL),
+
+    //     // data from Puppeteer
+    //     rendered: await getRendered(renderedURL, page),
+
+    //     // data from builtwith
+    //     builtwith: await getBuiltWith(rawURL)
+    //   };
+
+    //   // browser data
+    //   metadata.rendered.browser = {
+    //     userAgent: await browser.userAgent(),
+    //     version: await browser.version()
+    //   };
+
+    //   // screenshots
+    //   metadata.rendered.screenshots = [];
+    //   for (const viewport of viewports) {
+    //     metadata.rendered.screenshots.push(
+    //       await takeScreenshot(date, url, page, viewport)
+    //     );
+    //   }
+
+    //   // write db
+    //   await visits_db.update({ date: date.format(), url }, metadata, {
+    //     upsert: true
+    //   });
+
+
+
     }
+
+    //   // clean up
+    await page.close();
   } catch (error) {
-    logger.error(`wayback error: ${date.format()} ${url} (${error.name})`);
+    logger.error(`wayback error: ${url} ${date.format()} (${error.name})`);
   }
 }
 
 async function getRendered(url, page) {
+
   try {
     // puppeteer navigate to page
     await page.goto(url, {
@@ -254,58 +271,58 @@ async function getRendered(url, page) {
     });
 
     // puppeteer strip wayback elements
-    await page.evaluate(() => {
-      // wayback banner
-      let element = document.querySelector("#wm-ipp-base");
-      element.parentNode.removeChild(element);
+    // await page.evaluate(() => {
+    //   // wayback banner
+    //   let element = document.querySelector("#wm-ipp-base");
+    //   element.parentNode.removeChild(element);
 
-      // stylesheets
-      const wbSheets = ["banner-styles.css", "iconochive.css"];
-      for (str of wbSheets) {
-        let element = document.querySelectorAll(`link[href*="${str}"`)[0];
-        element.parentNode.removeChild(element);
-      }
-    });
+    //   // stylesheets
+    //   const wbSheets = ["banner-styles.css", "iconochive.css"];
+    //   for (str of wbSheets) {
+    //     let element = document.querySelectorAll(`link[href*="${str}"`)[0];
+    //     element.parentNode.removeChild(element);
+    //   }
+    // });
 
     // puppeteer gather stylesheets
-    const stylesheets = await page.evaluate(() => {
-      return Object.keys(document.styleSheets).map(key => {
-        return {
-          href:
-            document.styleSheets[key].href === null
-              ? "inline"
-              : document.styleSheets[key].href,
-          rules: document.styleSheets[key].rules.length
-        };
-      });
-    });
+    // const stylesheets = await page.evaluate(() => {
+    //   return Object.keys(document.styleSheets).map(key => {
+    //     return {
+    //       href:
+    //         document.styleSheets[key].href === null
+    //           ? "inline"
+    //           : document.styleSheets[key].href,
+    //       rules: document.styleSheets[key].rules.length
+    //     };
+    //   });
+    // });
 
     // puppeteer gather anchors (links)
-    const anchors = await page.evaluate(() => {
-      return Array.from(document.querySelectorAll(`a`)).map(a => a.href);
-    });
+    // const anchors = await page.evaluate(() => {
+    //   return Array.from(document.querySelectorAll(`a`)).map(a => a.href);
+    // });
 
     return {
-      url,
-      title: await page.title(),
-      accessed: moment.utc().format(),
-      stylesheets,
-      // anchors: anchors, // trebles size of db record
-      agent: {
-        name: "Node.js/Puppeteer",
-        url: "https://github.com/GoogleChrome/puppeteer",
-        version: packageJson.dependencies.puppeteer
-      },
-      metrics: {
-        puppeteer: await page.metrics(),
-        anchors: await anchors.length,
-        css: {
-          stylesheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
-            return val.rules == 0 ? acc + 1 : acc;
-          }, 0),
-          totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
-        }
-      }
+      // url,
+      // title: await page.title(),
+      // accessed: moment.utc().format(),
+      // stylesheets,
+      // // anchors: anchors, // trebles size of db record
+      // agent: {
+      //   name: "Node.js/Puppeteer",
+      //   url: "https://github.com/GoogleChrome/puppeteer",
+      //   version: packageJson.dependencies.puppeteer
+      // },
+      // metrics: {
+      //   puppeteer: await page.metrics(),
+      //   anchors: await anchors.length,
+      //   css: {
+      //     stylesheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
+      //       return val.rules == 0 ? acc + 1 : acc;
+      //     }, 0),
+      //     totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
+      //   }
+      // }
     };
   } catch (error) {
     logger.error(`rendered error: ${url} (${error.name})`);
@@ -372,22 +389,18 @@ async function getBuiltWith(url) {
         api,
         accessed: moment.utc().format(),
         data: JSON.parse(response.text)
-      })
+      });
 
       // save for later, to reduce API calls
-      await builtwith_db.update(
-        query,
-        data,
-        {
-          upsert: true
-        }
-      );
+      await builtwith_db.update(query, data, {
+        upsert: true
+      });
       return data;
     } else {
       return await builtwith_db.findOne(query);
     }
   } catch (err) {
-    logger.error(`builtwith error: ${url} (${error.name})`);
+    logger.error(`builtwith error: ${url} (${err.name})`);
   }
 }
 
