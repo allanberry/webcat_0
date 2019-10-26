@@ -39,6 +39,11 @@ $ git clone https://github.com/allanberry/webcat.git
 $ npm install
 ```
 
+Now, you will need to [setup the Google Sheets API](https://developers.google.com/sheets/api/quickstart/python), so the downloader can access a Google spreadsheet which contains the requisite college data.
+
+
+
+
 At this point you should have a functioning codebase.  Please let me know if anything is amiss.
 
 
@@ -47,13 +52,13 @@ At this point you should have a functioning codebase.  Please let me know if any
 This project doesn't really come with any data; you will need to grab some from the Wayback Machine.  This will get you a few:
 
 ```bash
-$ npm run visit -- -u https://lib.asu.edu/ -s 1995-01-01 -i "6 months"
-$ npm run visit -- -u http://asu.edu/lib/ -s 1995-01-01 -i "6 months"
-$ npm run visit -- -u https://www.lib.auburn.edu/ -s 1995-01-01 -i "6 months"
-$ npm run visit -- -u https://library.bc.edu/ -s 1995-01-01 -i "6 months"
-$ npm run visit -- -u http://www.bu.edu/library/ -s 1995-01-01 -i "6 months"
-$ npm run visit -- -u https://lib.byu.edu/ -s 1995-01-01 -i "6 months"
-$ npm run visit -- -u https://library.brown.edu/ -s 1995-01-01 -i "6 months"
+$ npm run visit -- --url https://lib.asu.edu/ --startDate 1995-01-01 --increment "6 months"
+$ npm run visit -- --url http://asu.edu/lib/ --startDate 1995-01-01 --increment "6 months"
+$ npm run visit -- --url https://www.lib.auburn.edu/ --startDate 1995-01-01 --increment "6 months"
+$ npm run visit -- --url https://library.bc.edu/ --startDate 1995-01-01 --increment "6 months"
+$ npm run visit -- --url http://www.bu.edu/library/ --startDate 1995-01-01 --increment "6 months"
+$ npm run visit -- --url https://lib.byu.edu/ --startDate 1995-01-01 --increment "6 months"
+$ npm run visit -- --url https://library.brown.edu/ --startDate 1995-01-01 --increment "6 months"
 ```
 
 
@@ -106,6 +111,9 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
 - collect current webpages as well
   - optional if redundant?
 - run data collection logic on a schedule?
+- use puppeteer to determine coordinates of elements: https://gist.github.com/emmiep/cd35de612412ac6a283613a438e6acfa
+  - form elements
+  - nav/.nav/#nav/.navbar etc. elements
 - handle redirects
   e.g. http://web.archive.org/web/20120103055748/http://asu.edu/lib/
 - handle missing stylesheets
