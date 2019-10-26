@@ -78,7 +78,9 @@ const viewports = [
 (async () => {
   try {
     // setup
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      args: ["--disable-web-security"]
+    });
 
     // global ip address
     const response = await request.get("ipv4bot.whatismyipaddress.com");
@@ -112,6 +114,7 @@ const viewports = [
         // manually skip certain dates
         const skips = page.skip ? page.skip.split(",").map(i => i.trim()) : [];
 
+        // visit or skip, depending
         if (page.visit && !skips.includes(date.format("YYYY-MM-DD"))) {
           await getWayback(date, page.url, browser, ip);
         } else if (page.visit && page.skip) {
@@ -134,9 +137,8 @@ const viewports = [
 
 async function getCurrent(url, browser, ip) {
   try {
-    const date = moment.utc()
+    const date = moment.utc();
     await getVisit(date, url, browser, ip, false);
-    logger.info(`OK: ${url} ${date.format("YYYY-MM-DD")} (created)`);
   } catch (err) {
     logger.error(`current error: ${url} (${err.name})`);
   }
@@ -148,49 +150,12 @@ async function getWayback(desiredDate, url, browser, ip) {
     if (availDate) {
       await getVisit(availDate, url, browser, ip, true);
     } else {
-      // if (desiredDate.isSame(availDate)) {
-      //   logger.warn(`--: ${url} ${availDate.format()} (exists)`);
-      // } else {
-      //   logger.warn(
-      //     `--: ${url} ${desiredDate.format(
-      //       "YYYY-MM-DD"
-      //     )}, closest: ${availDate.format()} (exists)`
-      //   );
-      // }
+      logger.error(
+        `--: ${url} ${desiredDate.format(
+          "YYYY-MM-DD"
+        )} (not available in Wayback)`
+      );
     }
-
-    // // // report status
-    // if (overwrite) {
-    //   // updated
-    //   if (desiredDate.isSame(date)) {
-    //     logger.info(`OK: ${url} ${date.format()} (updated)`);
-    //   } else {
-    //     logger.info(
-    //       `OK: ${url} ${desiredDate.format(
-    //         "YYYY-MM-DD"
-    //       )}, closest: ${date.format()} (updated)`
-    //     );
-    //   }
-    // } else {
-    //   // created
-    //   if (desiredDate.isSame(date)) {
-    //     logger.info(`OK: ${url} ${date.format()} (created)`);
-    //   } else {
-    //     logger.info(
-    //       `OK: ${url} ${desiredDate.format(
-    //         "YYYY-MM-DD"
-    //       )}, closest: ${date.format()} (created)`
-    //     );
-    //   }
-    // }
-
-
-    // } else {
-    //   logger.error(
-    //     `wayback error: ${url} ${date.format()} -- not in Wayback Machine?`
-    //   );
-
-
   } catch (err) {
     logger.error(`wayback error: ${url} (${err.name})`);
   }
@@ -203,7 +168,7 @@ async function getVisit(date, url, browser, ip, wayback = true) {
 
     // determine if data exists in database
     const inDatabase =
-      (await visits_db.count({ date: date.format(), url })) > 0;
+      (await visits_db.count({ date: date.format("YYYY-MM-DD"), url })) > 0;
 
     if (overwrite || !inDatabase) {
       const renderedURL = wayback ? waybackUrl(date, url, false) : url;
@@ -213,48 +178,61 @@ async function getVisit(date, url, browser, ip, wayback = true) {
       let metadata = {
         url,
         slug: slugifyUrl(url),
-        date: date.format(),
+        date: date.format("YYYY-MM-DD"),
         library: await getLibraryData(url),
         client: {
           ip,
           geo: geoip.lookup(ip)
         },
+
+        // raw HTML from Superagent
+        raw: await getRaw(rawURL),
+
+        // data from Puppeteer
+        rendered: await getRendered(renderedURL, page),
+
+        // data from builtwith
+        builtwith: await getBuiltWith(rawURL)
+      };
+
+      // browser data
+      metadata.rendered.browser = {
+        userAgent: await browser.userAgent(),
+        version: await browser.version()
+      };
+
+      // screenshots
+      metadata.rendered.screenshots = [];
+      for (const viewport of viewports) {
+        metadata.rendered.screenshots.push(
+          await takeScreenshot(date, url, page, viewport)
+        );
       }
 
-    //     // raw HTML from Superagent
-    //     raw: await getRaw(rawURL),
+      // write db
+      await visits_db.update({ date: date.format("YYYY-MM-DD"), url }, metadata, {
+        upsert: true
+      });
 
-    //     // data from Puppeteer
-    //     rendered: await getRendered(renderedURL, page),
-
-    //     // data from builtwith
-    //     builtwith: await getBuiltWith(rawURL)
-    //   };
-
-    //   // browser data
-    //   metadata.rendered.browser = {
-    //     userAgent: await browser.userAgent(),
-    //     version: await browser.version()
-    //   };
-
-    //   // screenshots
-    //   metadata.rendered.screenshots = [];
-    //   for (const viewport of viewports) {
-    //     metadata.rendered.screenshots.push(
-    //       await takeScreenshot(date, url, page, viewport)
-    //     );
-    //   }
-
-    //   // write db
-    //   await visits_db.update({ date: date.format(), url }, metadata, {
-    //     upsert: true
-    //   });
-
-
-
+      // report
+      if (overwrite && inDatabase) {
+        logger.info(
+          `OK: ${url} ${date.format(
+            "YYYY-MM-DD"
+          )} (overwritten)`
+        );
+      } else {
+        logger.info(`OK: ${url} ${date.format("YYYY-MM-DD")} (created)`);
+      }
+    } else {
+      logger.warn(
+        `--: ${url} ${date.format(
+          "YYYY-MM-DD"
+        )} (exists)`
+      );
     }
 
-    //   // clean up
+    // clean up
     await page.close();
   } catch (error) {
     logger.error(`wayback error: ${url} ${date.format()} (${error.name})`);
@@ -262,7 +240,6 @@ async function getVisit(date, url, browser, ip, wayback = true) {
 }
 
 async function getRendered(url, page) {
-
   try {
     // puppeteer navigate to page
     await page.goto(url, {
@@ -270,62 +247,68 @@ async function getRendered(url, page) {
       timeout: 60000
     });
 
-    // puppeteer strip wayback elements
-    // await page.evaluate(() => {
-    //   // wayback banner
-    //   let element = document.querySelector("#wm-ipp-base");
-    //   element.parentNode.removeChild(element);
+    page.on("console", msg => console.log(msg.text()));
 
-    //   // stylesheets
-    //   const wbSheets = ["banner-styles.css", "iconochive.css"];
-    //   for (str of wbSheets) {
-    //     let element = document.querySelectorAll(`link[href*="${str}"`)[0];
-    //     element.parentNode.removeChild(element);
-    //   }
-    // });
+    // puppeteer strip wayback elements
+    await page.evaluate(() => {
+      // wayback banner
+      let element = document.querySelector("#wm-ipp-base");
+      if (element) {
+        element.parentNode.removeChild(element);
+      }
+
+      // stylesheets
+      const wbSheets = ["banner-styles.css", "iconochive.css"];
+      for (str of wbSheets) {
+        let element = document.querySelectorAll(`link[href*="${str}"`)[0];
+        if (element) {
+          element.parentNode.removeChild(element);
+        }
+      }
+    });
 
     // puppeteer gather stylesheets
-    // const stylesheets = await page.evaluate(() => {
-    //   return Object.keys(document.styleSheets).map(key => {
-    //     return {
-    //       href:
-    //         document.styleSheets[key].href === null
-    //           ? "inline"
-    //           : document.styleSheets[key].href,
-    //       rules: document.styleSheets[key].rules.length
-    //     };
-    //   });
-    // });
+    const stylesheets = await page.evaluate(() => {
+      return Object.keys(document.styleSheets).map(key => {
+        return {
+          href:
+            document.styleSheets[key].href === null
+              ? "inline"
+              : document.styleSheets[key].href,
+          rules: document.styleSheets[key].rules.length
+        };
+      });
+    });
 
     // puppeteer gather anchors (links)
-    // const anchors = await page.evaluate(() => {
-    //   return Array.from(document.querySelectorAll(`a`)).map(a => a.href);
-    // });
+    const anchors = await page.evaluate(() => {
+      return Array.from(document.querySelectorAll(`a`)).map(a => a.href);
+    });
 
     return {
-      // url,
-      // title: await page.title(),
-      // accessed: moment.utc().format(),
-      // stylesheets,
-      // // anchors: anchors, // trebles size of db record
-      // agent: {
-      //   name: "Node.js/Puppeteer",
-      //   url: "https://github.com/GoogleChrome/puppeteer",
-      //   version: packageJson.dependencies.puppeteer
-      // },
-      // metrics: {
-      //   puppeteer: await page.metrics(),
-      //   anchors: await anchors.length,
-      //   css: {
-      //     stylesheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
-      //       return val.rules == 0 ? acc + 1 : acc;
-      //     }, 0),
-      //     totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
-      //   }
-      // }
+      url,
+      title: await page.title(),
+      accessed: moment.utc().format(),
+      stylesheets,
+      // anchors: anchors, // trebles size of db record
+      agent: {
+        name: "Node.js/Puppeteer",
+        url: "https://github.com/GoogleChrome/puppeteer",
+        version: packageJson.dependencies.puppeteer
+      },
+      metrics: {
+        puppeteer: await page.metrics(),
+        anchors: await anchors.length,
+        css: {
+          stylesheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
+            return val.rules == 0 ? acc + 1 : acc;
+          }, 0),
+          totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
+        }
+      }
     };
-  } catch (error) {
-    logger.error(`rendered error: ${url} (${error.name})`);
+  } catch (err) {
+    logger.err(`rendered err: ${url} (${err.name})`);
   }
 }
 
@@ -361,8 +344,8 @@ async function getRaw(url) {
     };
 
     return output;
-  } catch (error) {
-    logger.error(`raw error: ${url} (${error.name})`);
+  } catch (err) {
+    logger.error(`raw error: ${url} (${err.name})`);
   }
 }
 
