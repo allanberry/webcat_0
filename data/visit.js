@@ -76,11 +76,11 @@ const viewports = [
  * Main process.
  */
 (async () => {
+  // setup
+  const browser = await puppeteer.launch({
+    args: ["--disable-web-security"]
+  });
   try {
-    // setup
-    const browser = await puppeteer.launch({
-      args: ["--disable-web-security"]
-    });
 
     // global ip address
     const response = await request.get("ipv4bot.whatismyipaddress.com");
@@ -125,13 +125,11 @@ const viewports = [
         date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
       }
     }
-
+  } catch (err) {
+    logger.error(`errortown: ${err}`);
+  } finally {
     // cleanup
     await browser.close();
-  } catch (error) {
-    logger.error(`errortown`);
-    // logger.error(error.name, error.message);
-    logger.error(error);
   }
 })();
 
@@ -170,9 +168,10 @@ async function getVisit(date, url, browser, ip, wayback = true) {
     const inDatabase =
       (await visits_db.count({ date: date.format("YYYY-MM-DD"), url })) > 0;
 
+    const renderedURL = wayback ? waybackUrl(date, url, false) : url;
+    const rawURL = wayback ? waybackUrl(date, url, true) : url;
+
     if (overwrite || !inDatabase) {
-      const renderedURL = wayback ? waybackUrl(date, url, false) : url;
-      const rawURL = wayback ? waybackUrl(date, url, true) : url;
 
       // metadata
       let metadata = {
@@ -234,8 +233,8 @@ async function getVisit(date, url, browser, ip, wayback = true) {
 
     // clean up
     await page.close();
-  } catch (error) {
-    logger.error(`wayback error: ${url} ${date.format()} (${error.name})`);
+  } catch (err) {
+    logger.error(`wayback error: ${renderedURL} ${date.format()} (${err.name})`);
   }
 }
 
@@ -247,6 +246,7 @@ async function getRendered(url, page) {
       timeout: 60000
     });
 
+    // for debugging within evaluate steps
     page.on("console", msg => console.log(msg.text()));
 
     // puppeteer strip wayback elements
@@ -275,7 +275,7 @@ async function getRendered(url, page) {
             document.styleSheets[key].href === null
               ? "inline"
               : document.styleSheets[key].href,
-          rules: document.styleSheets[key].rules.length
+          rules: document.styleSheets[key].hasOwnProperty('rules') ? document.styleSheets[key].rules.length : 0
         };
       });
     });
@@ -308,7 +308,7 @@ async function getRendered(url, page) {
       }
     };
   } catch (err) {
-    logger.err(`rendered err: ${url} (${err.name})`);
+    logger.error(`rendered err: ${url} (${err.name})`);
   }
 }
 
