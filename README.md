@@ -99,6 +99,7 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
     - focused visualizations
     - access to raw data
   - page view
+- page white space calculate?
 - make Google Sheets optional
   - freeze a set of sheets into repository
   - if Sheets API not active, fallback to frozen sheets
