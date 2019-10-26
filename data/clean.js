@@ -7,7 +7,9 @@ const del = require('del');
         'data/collected/colleges.db',
         'data/collected/libraries.db',
         'data/collected/pages.db',
-        'data/collected/visits.db'
+        'data/collected/visits.db',
+        'log/download.log',
+        'log/visit.log',
         // 'data/collected/builtwith.db'
     ]);
  

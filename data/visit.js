@@ -243,7 +243,7 @@ async function getRendered(url, page) {
     // puppeteer navigate to page
     await page.goto(url, {
       waitUntil: "networkidle0",
-      timeout: 60000
+      timeout: 15000
     });
 
     // for debugging within evaluate steps
@@ -260,9 +260,9 @@ async function getRendered(url, page) {
       // stylesheets
       const wbSheets = ["banner-styles.css", "iconochive.css"];
       for (str of wbSheets) {
-        let element = document.querySelectorAll(`link[href*="${str}"`)[0];
-        if (element) {
-          element.parentNode.removeChild(element);
+        const sheets = document.querySelectorAll(`link[href*="${str}"`);
+        if (sheets) {
+          sheets.forEach(element => element.parentNode.removeChild(element))
         }
       }
     });
@@ -270,12 +270,13 @@ async function getRendered(url, page) {
     // puppeteer gather stylesheets
     const stylesheets = await page.evaluate(() => {
       return Object.keys(document.styleSheets).map(key => {
+
         return {
           href:
             document.styleSheets[key].href === null
               ? "inline"
               : document.styleSheets[key].href,
-          rules: document.styleSheets[key].hasOwnProperty('rules') ? document.styleSheets[key].rules.length : 0
+          rules: document.styleSheets[key].cssRules ? document.styleSheets[key].cssRules.length : 0
         };
       });
     });
@@ -284,6 +285,7 @@ async function getRendered(url, page) {
     const anchors = await page.evaluate(() => {
       return Array.from(document.querySelectorAll(`a`)).map(a => a.href);
     });
+
 
     return {
       url,
