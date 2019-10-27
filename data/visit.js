@@ -56,6 +56,13 @@ class NotInWaybackError extends Error {
   }
 }
 
+class WaybackOfflineError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "WaybackOfflineError";
+  }
+}
+
 // setup logger
 const logger = setupLogger("visit");
 const timeouts = setupLogger("timeouts");
@@ -106,7 +113,6 @@ const viewports = [
       for (const page of pages) {
         await getWayback(moment.utc(page.date), page.url, browser, ip);
       }
-
     } else {
       // loop through pages from Google Doc
       const pages = args.url
@@ -156,7 +162,6 @@ const viewports = [
 
 async function getWayback(date, url, browser, ip) {
   try {
-
     // console.log(date.format(), url)
 
     const availDate = await getWaybackDate(date, url);
@@ -166,8 +171,10 @@ async function getWayback(date, url, browser, ip) {
       throw new NotInWaybackError();
     }
   } catch (err) {
-    if (["NotInWaybackError"].includes(err.name)) {
+    if (err.name.includes('NotInWaybackError')) {
       logger.error(`!!: ${url} ${date.format("YYYY-MM-DD")} (${err.name})`);
+    } else if (err.message.includes("Service Unavailable")) {
+      logger.error("Wayback machine availability service unavailable");
     } else {
       throw err;
     }
@@ -444,22 +451,29 @@ function waybackUrl(date, url, raw = false) {
  * @param {date} date - A moment date.
  */
 async function getWaybackDate(date, url) {
-  // inquire with wayback for archived site closest in time to input date
-  const availableResponse = await request.get(
-    `https://archive.org/wayback/available?url=${url}/&timestamp=${date.format(
-      waybackDateFormat
-    )}`
-  );
-
-  if (
-    availableResponse.body.archived_snapshots.closest &&
-    availableResponse.body.archived_snapshots.closest.timestamp
-  ) {
-    // determine date and actual Wayback URLs from superagent
-    return moment.utc(
-      availableResponse.body.archived_snapshots.closest.timestamp,
-      waybackDateFormat
+  try {
+    // inquire with wayback for archived site closest in time to input date
+    const availableResponse = await request.get(
+      `https://archive.org/wayback/available?url=${url}/&timestamp=${date.format(
+        waybackDateFormat
+      )}`
     );
+    if (
+      availableResponse.body.archived_snapshots.closest &&
+      availableResponse.body.archived_snapshots.closest.timestamp
+    ) {
+      // determine date and actual Wayback URLs from superagent
+      return moment.utc(
+        availableResponse.body.archived_snapshots.closest.timestamp,
+        waybackDateFormat
+      );
+    }
+  } catch (err) {
+    if (err.message.includes('unable to verify the first certificate')) {
+      throw new WaybackOfflineError();
+    } else {
+      throw err;
+    }
   }
 }
 
