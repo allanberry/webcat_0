@@ -24,12 +24,7 @@ const setupLogger = require("./utils.js").setupLogger;
 const screenshotsDir = "data/collected/screenshots";
 const waybackDateFormat = "YYYYMMDDHHmmss";
 const overwrite = args.overwrite == "true" ? true : false;
-// const url = args.url;
-// const startDate = args.startDate
-//   ? moment.utc(args.startDate)
-//   : moment.utc("1995-01-01");
-// const endDate = args.endDate ? moment.utc(args.endDate) : moment.utc();
-// const increment = args.increment ? args.increment : "100 years";
+const timeout = 60000;
 
 // setup database tables
 const colleges_db = datastore({
@@ -53,8 +48,17 @@ const builtwith_db = datastore({
   autoload: true
 });
 
+// specific error handling
+class NotInWaybackError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'WaybackError';
+  }
+}
+
 // setup logger
 const logger = setupLogger("visit");
+const timeouts = setupLogger("timeouts");
 
 // puppeteer viewports, for screenshots
 const viewports = [
@@ -78,10 +82,10 @@ const viewports = [
 (async () => {
   // setup
   const browser = await puppeteer.launch({
-    args: ["--disable-web-security"]
+    // headless: false,
+    args: ["--disable-web-security", "--allow-running-insecure-content"]
   });
   try {
-
     // global ip address
     const response = await request.get("ipv4bot.whatismyipaddress.com");
     const ip = response.text;
@@ -104,7 +108,7 @@ const viewports = [
 
       // fist, get live URL (no wayback) if available
       if (page.visit && args.current) {
-        await getCurrent(page.url, browser, ip);
+        await getVisit(moment.utc(), page.url, browser, ip, false);
       }
 
       // then go into the Wayback Machine for historical data
@@ -116,7 +120,21 @@ const viewports = [
 
         // visit or skip, depending
         if (page.visit && !skips.includes(date.format("YYYY-MM-DD"))) {
-          await getWayback(date, page.url, browser, ip);
+          try {
+            const availDate = await getWaybackDate(date, page.url);
+            if (availDate) {
+              await getVisit(availDate, page.url, browser, ip, true);
+            } else {
+              throw(new NotInWaybackError)
+            }
+          } catch (err) {
+            if (["NotInWaybackError"].includes(err.name)) {
+              logger.error(`!!: ${url} ${date.format("YYYY-MM-DD")} (${err.name})`);
+            } else {
+              throw(err)
+            }
+          }
+          
         } else if (page.visit && page.skip) {
           logger.warn(`--: ${page.url} ${date.format("YYYY-MM-DD")} (skip)`);
         }
@@ -126,40 +144,17 @@ const viewports = [
       }
     }
   } catch (err) {
-    logger.error(`errortown: ${err}`);
+    logger.error(err)
   } finally {
     // cleanup
     await browser.close();
   }
 })();
 
-async function getCurrent(url, browser, ip) {
-  try {
-    const date = moment.utc();
-    await getVisit(date, url, browser, ip, false);
-  } catch (err) {
-    logger.error(`current error: ${url} (${err.name})`);
-  }
-}
-
-async function getWayback(desiredDate, url, browser, ip) {
-  try {
-    const availDate = await getWaybackDate(desiredDate, url);
-    if (availDate) {
-      await getVisit(availDate, url, browser, ip, true);
-    } else {
-      logger.error(
-        `--: ${url} ${desiredDate.format(
-          "YYYY-MM-DD"
-        )} (not available in Wayback)`
-      );
-    }
-  } catch (err) {
-    logger.error(`wayback error: ${url} (${err.name})`);
-  }
-}
-
 async function getVisit(date, url, browser, ip, wayback = true) {
+  const renderedURL = wayback ? waybackUrl(date, url, false) : url;
+  const rawURL = wayback ? waybackUrl(date, url, true) : url;
+
   try {
     // setup puppeteer
     const page = await browser.newPage();
@@ -168,11 +163,7 @@ async function getVisit(date, url, browser, ip, wayback = true) {
     const inDatabase =
       (await visits_db.count({ date: date.format("YYYY-MM-DD"), url })) > 0;
 
-    const renderedURL = wayback ? waybackUrl(date, url, false) : url;
-    const rawURL = wayback ? waybackUrl(date, url, true) : url;
-
     if (overwrite || !inDatabase) {
-
       // metadata
       let metadata = {
         url,
@@ -209,146 +200,164 @@ async function getVisit(date, url, browser, ip, wayback = true) {
       }
 
       // write db
-      await visits_db.update({ date: date.format("YYYY-MM-DD"), url }, metadata, {
-        upsert: true
-      });
+      await visits_db.update(
+        { date: date.format("YYYY-MM-DD"), url },
+        metadata,
+        {
+          upsert: true
+        }
+      );
 
       // report
       if (overwrite && inDatabase) {
-        logger.info(
-          `OK: ${url} ${date.format(
-            "YYYY-MM-DD"
-          )} (overwritten)`
-        );
+        logger.info(`OK: ${url} ${date.format("YYYY-MM-DD")} (overwritten)`);
       } else {
         logger.info(`OK: ${url} ${date.format("YYYY-MM-DD")} (created)`);
       }
     } else {
-      logger.warn(
-        `--: ${url} ${date.format(
-          "YYYY-MM-DD"
-        )} (exists)`
-      );
+      logger.warn(`--: ${url} ${date.format("YYYY-MM-DD")} (exists)`);
     }
 
     // clean up
     await page.close();
   } catch (err) {
-    logger.error(`wayback error: ${renderedURL} ${date.format()} (${err.name})`);
+    if (["TimeoutError"].includes(err.name)) {
+      const msg = `!!: ${url} ${date.format("YYYY-MM-DD")} (${err.name} ${timeout}ms)`
+      logger.error(msg);
+    } else {
+      logger.error(`!!: ${url} ${date.format("YYYY-MM-DD")} (${err.name}), "${err.message}"`);
+    }
   }
 }
 
 async function getRendered(url, page) {
-  try {
-    // puppeteer navigate to page
-    await page.goto(url, {
-      waitUntil: "networkidle0",
-      timeout: 15000
-    });
+  // puppeteer navigate to page
+  await page.goto(url, {
+    waitUntil: "networkidle0",
+    timeout
+  });
 
-    // for debugging within evaluate steps
-    page.on("console", msg => console.log(msg.text()));
-
-    // puppeteer strip wayback elements
-    await page.evaluate(() => {
-      // wayback banner
-      let element = document.querySelector("#wm-ipp-base");
-      if (element) {
-        element.parentNode.removeChild(element);
+  // for debugging within evaluate steps
+  page.on("console", msg => {
+    if (msg._type === 'error') {
+      if (msg._text.match(/404/)) {
+        logger.error(`!!: ${url} internal error: 404` )
+      } else if (msg._text.match(/Refused to load/)) {
+        logger.error(`!!: ${url} internal error: CORS` )
+      } else {
+        logger.error(`!!: ${url} internal error: "${msg._text}", at "${msg._location.url}"` )
       }
+    }
+  });
 
-      // stylesheets
-      const wbSheets = ["banner-styles.css", "iconochive.css"];
-      for (str of wbSheets) {
-        const sheets = document.querySelectorAll(`link[href*="${str}"`);
-        if (sheets) {
-          sheets.forEach(element => element.parentNode.removeChild(element))
-        }
+  // puppeteer strip wayback elements
+  await page.evaluate(() => {
+    // wayback banner
+    let element = document.querySelector("#wm-ipp-base");
+    if (element) {
+      element.parentNode.removeChild(element);
+    }
+
+    // stylesheets
+    const wbSheets = ["banner-styles.css", "iconochive.css"];
+    for (str of wbSheets) {
+      const sheets = document.querySelectorAll(`link[href*="${str}"`);
+      if (sheets) {
+        sheets.forEach(element => element.parentNode.removeChild(element));
       }
-    });
+    }
+  });
 
-    // puppeteer gather stylesheets
-    const stylesheets = await page.evaluate(() => {
-      return Object.keys(document.styleSheets).map(key => {
-
+  // puppeteer gather stylesheets
+  const stylesheets = await page.evaluate(() => {
+    return Object.keys(document.styleSheets).map(key => {
+      try {
         return {
           href:
             document.styleSheets[key].href === null
               ? "inline"
               : document.styleSheets[key].href,
-          rules: document.styleSheets[key].cssRules ? document.styleSheets[key].cssRules.length : 0
+          found: true,
+          rules: document.styleSheets[key].cssRules.length
         };
-      });
-    });
-
-    // puppeteer gather anchors (links)
-    const anchors = await page.evaluate(() => {
-      return Array.from(document.querySelectorAll(`a`)).map(a => a.href);
-    });
-
-
-    return {
-      url,
-      title: await page.title(),
-      accessed: moment.utc().format(),
-      stylesheets,
-      // anchors: anchors, // trebles size of db record
-      agent: {
-        name: "Node.js/Puppeteer",
-        url: "https://github.com/GoogleChrome/puppeteer",
-        version: packageJson.dependencies.puppeteer
-      },
-      metrics: {
-        puppeteer: await page.metrics(),
-        anchors: await anchors.length,
-        css: {
-          stylesheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
-            return val.rules == 0 ? acc + 1 : acc;
-          }, 0),
-          totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
+      } catch (err) {
+        // Chromium does not like CSS from external sources (CORS); not much I can do about it.
+        if (err.name === "SecurityError") {
+          return {
+            href:
+              document.styleSheets[key].href === null
+                ? "inline"
+                : document.styleSheets[key].href,
+            found: false,
+            rules: 0
+          };
+        } else {
+          throw err;
         }
       }
-    };
-  } catch (err) {
-    logger.error(`rendered err: ${url} (${err.name})`);
-  }
+    });
+  });
+
+  // puppeteer gather anchors (links)
+  const anchors = await page.evaluate(() => {
+    return Array.from(document.querySelectorAll(`a`)).map(a => a.href);
+  });
+
+  return {
+    url,
+    title: await page.title(),
+    accessed: moment.utc().format(),
+    stylesheets,
+    // anchors: anchors, // trebles size of db record
+    agent: {
+      name: "Node.js/Puppeteer",
+      url: "https://github.com/GoogleChrome/puppeteer",
+      version: packageJson.dependencies.puppeteer
+    },
+    metrics: {
+      puppeteer: await page.metrics(),
+      anchors: await anchors.length,
+      css: {
+        stylesheetsWithZeroStyles: stylesheets.reduce((acc, val) => {
+          return val.rules == 0 ? acc + 1 : acc;
+        }, 0),
+        totalStyles: stylesheets.reduce((acc, val) => acc + val.rules, 0)
+      }
+    }
+  };
 }
 
 async function getRaw(url) {
-  try {
-    // retrieve raw archive HTML from superagent, and output to file
-    const rawHtml = await request.get(url);
+  // retrieve raw archive HTML from superagent, and output to file
+  const rawHtml = await request.get(url);
 
-    // retrieve internal page elements
-    const $ = cheerio.load(rawHtml.text);
-    const rawTitle = $("title").text();
-    const elementQty = $("html *").length;
+  // retrieve internal page elements
+  const $ = cheerio.load(rawHtml.text);
+  const rawTitle = $("title").text();
+  const elementQty = $("html *").length;
 
-    const output = {
-      url,
-      title: rawTitle,
-      accessed: moment.utc().format(),
-      agent: {
-        name: "Node.js/Superagent",
-        url: "https://github.com/visionmedia/superagent",
-        version: packageJson.dependencies.superagent
-      },
-      metrics: {
-        elementQty: elementQty,
-        charCount: rawHtml.text.length
-      },
-      response: {
-        status: rawHtml.status,
-        type: rawHtml.type,
-        headers: rawHtml.header,
-        text: rawHtml.text
-      }
-    };
+  const output = {
+    url,
+    title: rawTitle,
+    accessed: moment.utc().format(),
+    agent: {
+      name: "Node.js/Superagent",
+      url: "https://github.com/visionmedia/superagent",
+      version: packageJson.dependencies.superagent
+    },
+    metrics: {
+      elementQty: elementQty,
+      charCount: rawHtml.text.length
+    },
+    response: {
+      status: rawHtml.status,
+      type: rawHtml.type,
+      headers: rawHtml.header,
+      text: rawHtml.text
+    }
+  };
 
-    return output;
-  } catch (err) {
-    logger.error(`raw error: ${url} (${err.name})`);
-  }
+  return output;
 }
 
 /**
@@ -358,34 +367,31 @@ async function getBuiltWith(url) {
   // https://api.builtwith.com/v13/api.json?KEY=f857bd0a-cc11-43fa-bdec-112308e8ba1e&LOOKUP=lib.asu.edu
   // const response = await request.get("ipv4bot.whatismyipaddress.com");
   // const ip = response.text;
-  try {
-    const query = { url };
-    const api = "https://api.builtwith.com/v13/api.json";
 
-    const inDatabase = (await builtwith_db.count(query)) > 0;
+  const query = { url };
+  const api = "https://api.builtwith.com/v13/api.json";
 
-    if (overwrite || !inDatabase) {
-      const full_url = `${api}?KEY=${
-        process.env.BUILTWITH_API_KEY
-      }&LOOKUP=${encodeURIComponent(url)}`;
+  const inDatabase = (await builtwith_db.count(query)) > 0;
 
-      const response = await request.get(full_url);
-      const data = Object.assign(query, {
-        api,
-        accessed: moment.utc().format(),
-        data: JSON.parse(response.text)
-      });
+  if (overwrite || !inDatabase) {
+    const full_url = `${api}?KEY=${
+      process.env.BUILTWITH_API_KEY
+    }&LOOKUP=${encodeURIComponent(url)}`;
 
-      // save for later, to reduce API calls
-      await builtwith_db.update(query, data, {
-        upsert: true
-      });
-      return data;
-    } else {
-      return await builtwith_db.findOne(query);
-    }
-  } catch (err) {
-    logger.error(`builtwith error: ${url} (${err.name})`);
+    const response = await request.get(full_url);
+    const data = Object.assign(query, {
+      api,
+      accessed: moment.utc().format(),
+      data: JSON.parse(response.text)
+    });
+
+    // save for later, to reduce API calls
+    await builtwith_db.update(query, data, {
+      upsert: true
+    });
+    return data;
+  } else {
+    return await builtwith_db.findOne(query);
   }
 }
 
@@ -407,26 +413,22 @@ function waybackUrl(date, url, raw = false) {
  * @param {date} date - A moment date.
  */
 async function getWaybackDate(date, url) {
-  try {
-    // inquire with wayback for archived site closest in time to input date
-    const availableResponse = await request.get(
-      `https://archive.org/wayback/available?url=${url}/&timestamp=${date.format(
-        waybackDateFormat
-      )}`
-    );
+  // inquire with wayback for archived site closest in time to input date
+  const availableResponse = await request.get(
+    `https://archive.org/wayback/available?url=${url}/&timestamp=${date.format(
+      waybackDateFormat
+    )}`
+  );
 
-    if (
-      availableResponse.body.archived_snapshots.closest &&
-      availableResponse.body.archived_snapshots.closest.timestamp
-    ) {
-      // determine date and actual Wayback URLs from superagent
-      return moment.utc(
-        availableResponse.body.archived_snapshots.closest.timestamp,
-        waybackDateFormat
-      );
-    }
-  } catch (error) {
-    logger.error(`avail !!   ${url} ${date.format()} (${error.name})`);
+  if (
+    availableResponse.body.archived_snapshots.closest &&
+    availableResponse.body.archived_snapshots.closest.timestamp
+  ) {
+    // determine date and actual Wayback URLs from superagent
+    return moment.utc(
+      availableResponse.body.archived_snapshots.closest.timestamp,
+      waybackDateFormat
+    );
   }
 }
 
@@ -482,62 +484,56 @@ async function takeScreenshot(date, url, page, viewport) {
 
   const name = `${date.format(waybackDateFormat)}-${viewport.name}.png`;
 
-  try {
-    // setup screenshot directory
-    await fs.promises.mkdir(dir, { recursive: true });
-    await page.setViewport(viewport);
+  // setup screenshot directory
+  await fs.promises.mkdir(dir, { recursive: true });
+  await page.setViewport(viewport);
 
-    // determine if pic already exists
-    if (!(await screenshotExists(date, url, viewport))) {
-      await page.screenshot({
-        path: path,
-        fullPage: viewport.height <= 1 ? true : false
-      });
-    }
-
-    const calculatedDimensions = await page.evaluate(() => {
-      // calculate document height
-      // hat tip https://stackoverflow.com/a/1147768/652626
-      // get largest height that exists in the document
-      const body = document.body;
-      const html = document.documentElement;
-      const height = Math.max(
-        body.scrollHeight,
-        body.offsetHeight,
-        html.clientHeight,
-        html.scrollHeight,
-        html.offsetHeight
-      );
-
-      // getting width is simpler
-      const width =
-        document.width !== undefined
-          ? document.width
-          : document.body.offsetWidth;
-
-      return { height, width };
+  // determine if pic already exists
+  if (!(await screenshotExists(date, url, viewport))) {
+    await page.screenshot({
+      path: path,
+      fullPage: viewport.height <= 1 ? true : false
     });
-
-    // retrieve actual image dimensions from disk
-    const physicalDimensions = imageSize(path);
-
-    return {
-      name: name,
-      viewport: viewport,
-      dimensions: {
-        physical: {
-          height: physicalDimensions.height,
-          width: physicalDimensions.width
-        },
-        calculated: {
-          height: calculatedDimensions.height,
-          width: calculatedDimensions.width
-        }
-      }
-    };
-  } catch (error) {
-    logger.error(`screen !!: ${url} ${date.format()} (${error.name})`);
   }
+
+  const calculatedDimensions = await page.evaluate(() => {
+    // calculate document height
+    // hat tip https://stackoverflow.com/a/1147768/652626
+    // get largest height that exists in the document
+    const body = document.body;
+    const html = document.documentElement;
+    const height = Math.max(
+      body.scrollHeight,
+      body.offsetHeight,
+      html.clientHeight,
+      html.scrollHeight,
+      html.offsetHeight
+    );
+
+    // getting width is simpler
+    const width =
+      document.width !== undefined ? document.width : document.body.offsetWidth;
+
+    return { height, width };
+  });
+
+  // retrieve actual image dimensions from disk
+  const physicalDimensions = imageSize(path);
+
+  return {
+    name: name,
+    viewport: viewport,
+    dimensions: {
+      physical: {
+        height: physicalDimensions.height,
+        width: physicalDimensions.width
+      },
+      calculated: {
+        height: calculatedDimensions.height,
+        width: calculatedDimensions.width
+      }
+    }
+  };
 }
 
 function slugifyUrl(url) {

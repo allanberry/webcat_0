@@ -9,6 +9,7 @@ const del = require('del');
         'data/collected/pages.db',
         'data/collected/visits.db',
         'log/download.log',
+        'log/timeouts.log',
         'log/visit.log',
         // 'data/collected/builtwith.db'
     ]);
