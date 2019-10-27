@@ -52,7 +52,7 @@ const builtwith_db = datastore({
 class NotInWaybackError extends Error {
   constructor(message) {
     super(message);
-    this.name = 'WaybackError';
+    this.name = "NotInWaybackError";
   }
 }
 
@@ -90,66 +90,89 @@ const viewports = [
     const response = await request.get("ipv4bot.whatismyipaddress.com");
     const ip = response.text;
 
-    // loop through pages
-    const pages = args.url
-      ? [{ url: args.url, visit: true }]
-      : await pages_db.find({});
-    for (const page of pages) {
-      const startDate = args.startDate
-        ? moment.utc(args.startDate)
-        : page.start_date
-        ? moment.utc(page.start_date)
-        : moment.utc("1995-01-01");
-      const endDate = args.endDate
-        ? moment.utc(args.endDate)
-        : page.end_date
-        ? moment.utc(page.end_date)
-        : moment.utc();
+    // fist, get live URL (no wayback) if available
+    //TODO; not yet working.  Needs broader idea of current to not waste API resources
+    // if (page.visit && args.current) {
+    //   const currentyear_regex = new RegExp(`^${moment.utc().format("YYYY")}`);
+    //   const found = await visits_db.find({ accessed: { $regex: /^2019/ } });
+    //   // await getVisit(moment.utc(), page.url, browser, ip, false);
+    // }
 
-      // fist, get live URL (no wayback) if available
-      if (page.visit && args.current) {
-        await getVisit(moment.utc(), page.url, browser, ip, false);
+    if (args.file) {
+      // console.log(args.file)
+
+      // get pages from input file
+      const pages = await JSON.parse(fs.readFileSync(args.file));
+      for (const page of pages) {
+        await getWayback(moment.utc(page.date), page.url, browser, ip);
       }
 
-      // then go into the Wayback Machine for historical data
-      let date = startDate;
-      const increment = args.increment ? args.increment : "100 years";
-      while (date.isBefore(endDate)) {
-        // manually skip certain dates
-        const skips = page.skip ? page.skip.split(",").map(i => i.trim()) : [];
+    } else {
+      // loop through pages from Google Doc
+      const pages = args.url
+        ? [{ url: args.url, visit: true }]
+        : await pages_db.find({});
 
-        // visit or skip, depending
-        if (page.visit && !skips.includes(date.format("YYYY-MM-DD"))) {
-          try {
-            const availDate = await getWaybackDate(date, page.url);
-            if (availDate) {
-              await getVisit(availDate, page.url, browser, ip, true);
-            } else {
-              throw(new NotInWaybackError)
-            }
-          } catch (err) {
-            if (["NotInWaybackError"].includes(err.name)) {
-              logger.error(`!!: ${url} ${date.format("YYYY-MM-DD")} (${err.name})`);
-            } else {
-              throw(err)
-            }
+      for (const page of pages) {
+        const startDate = args.startDate
+          ? moment.utc(args.startDate)
+          : page.start_date
+          ? moment.utc(page.start_date)
+          : moment.utc("1995-01-01");
+        const endDate = args.endDate
+          ? moment.utc(args.endDate)
+          : page.end_date
+          ? moment.utc(page.end_date)
+          : moment.utc();
+
+        // go into the Wayback Machine for historical data
+        let date = startDate;
+        const increment = args.increment ? args.increment : "100 years";
+        while (date.isBefore(endDate)) {
+          // manually skip certain dates
+          const skips = page.skip
+            ? page.skip.split(",").map(i => i.trim())
+            : [];
+
+          // visit or skip, depending
+          if (page.visit && !skips.includes(date.format("YYYY-MM-DD"))) {
+            await getWayback(date, page.url, browser, ip);
+          } else if (page.visit && page.skip) {
+            logger.warn(`--: ${page.url} ${date.format("YYYY-MM-DD")} (skip)`);
           }
-          
-        } else if (page.visit && page.skip) {
-          logger.warn(`--: ${page.url} ${date.format("YYYY-MM-DD")} (skip)`);
-        }
 
-        // increment
-        date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
+          // increment
+          date = date.add(increment.split(" ")[0], increment.split(" ")[1]);
+        }
       }
     }
   } catch (err) {
-    logger.error(err)
+    logger.error(err);
   } finally {
     // cleanup
     await browser.close();
   }
 })();
+
+async function getWayback(date, url, browser, ip) {
+  try {
+
+    // console.log(date.format(), url)
+
+    const availDate = await getWaybackDate(date, url);
+    if (availDate) {
+      await getVisit(availDate, url, browser, ip, true);
+    } else {
+      throw new NotInWaybackError();
+    }
+  } catch (err) {
+    if (["NotInWaybackError"].includes(err.name)) {
+      logger.error(`!!: ${url} ${date.format("YYYY-MM-DD")} (${err.name})`);
+    } else {
+      throw err;
+    }
+  }
+}
 
 async function getVisit(date, url, browser, ip, wayback = true) {
   const renderedURL = wayback ? waybackUrl(date, url, false) : url;
@@ -222,10 +245,16 @@ async function getVisit(date, url, browser, ip, wayback = true) {
     await page.close();
   } catch (err) {
     if (["TimeoutError"].includes(err.name)) {
-      const msg = `!!: ${url} ${date.format("YYYY-MM-DD")} (${err.name} ${timeout}ms)`
+      const msg = `!!: ${url} ${date.format("YYYY-MM-DD")} (${
+        err.name
+      } ${timeout}ms)`;
       logger.error(msg);
     } else {
-      logger.error(`!!: ${url} ${date.format("YYYY-MM-DD")} (${err.name}), "${err.message}"`);
+      logger.error(
+        `!!: ${url} ${date.format("YYYY-MM-DD")} (${err.name}), "${
+          err.message
+        }"`
+      );
     }
   }
 }
@@ -239,13 +268,15 @@ async function getRendered(url, page) {
 
   // for debugging within evaluate steps
   page.on("console", msg => {
-    if (msg._type === 'error') {
+    if (msg._type === "error") {
       if (msg._text.match(/404/)) {
-        logger.error(`!!: ${url} internal error: 404` )
+        logger.warn(` !: ${url} internal error: 404`);
       } else if (msg._text.match(/Refused to load/)) {
-        logger.error(`!!: ${url} internal error: CORS` )
+        logger.warn(` !: ${url} internal error: CORS`);
       } else {
-        logger.error(`!!: ${url} internal error: "${msg._text}", at "${msg._location.url}"` )
+        logger.warn(
+          ` !: ${url} internal error: "${msg._text}", at "${msg._location.url}"`
+        );
       }
     }
   });
