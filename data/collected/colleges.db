@@ -1,0 +1,117 @@
+{"_id":"albany","ipeds_id":"196060","name":"University at Albany","url":"https://www.albany.edu/","city":"Albany","state":"NY"}
+{"_id":"arizona","ipeds_id":"104179","name":"University of Arizona","url":"https://www.arizona.edu/","city":"Tucson","state":"AZ"}
+{"_id":"asu","ipeds_id":"104151","name":"Arizona State University","url":"https://www.asu.edu/","city":"Tempe","state":"AZ"}
+{"_id":"auburn","ipeds_id":"100858","name":"Auburn University","url":"http://www.auburn.edu/","city":"Auburn","state":"AL"}
+{"_id":"bc","ipeds_id":"164924","name":"Boston College","url":"https://www.bc.edu/","city":"Chestnut Hill","state":"MA"}
+{"_id":"berkeley","ipeds_id":"110635","name":"University of California, Berkeley","url":"https://www.berkeley.edu/","city":"Berkeley","state":"CA"}
+{"_id":"brown","ipeds_id":"217156","name":"Brown University","url":"https://www.brown.edu/","city":"Providence","state":"RI"}
+{"_id":"bu","ipeds_id":"164988","name":"Boston University","url":"https://www.bu.edu/","city":"Boston","state":"MA"}
+{"_id":"buffalo","ipeds_id":"196088","name":"University at Buffalo","url":"http://www.buffalo.edu/","city":"Buffalo","state":"NY"}
+{"_id":"byu","ipeds_id":"230038","name":"Brigham Young University","url":"https://www.byu.edu/","city":"Provo","state":"UT"}
+{"_id":"case","ipeds_id":"201645","name":"Case Western Reserve University","url":"https://case.edu/","city":"Cleveland","state":"OH"}
+{"_id":"colorado","ipeds_id":"126614","name":"University of Colorado","url":"http://www.cu.edu/","city":"Boulder","state":"CO"}
+{"_id":"colostate","ipeds_id":"126818","name":"Colorado State University","url":"https://www.colostate.edu/","city":"Fort Collins","state":"CO"}
+{"_id":"columbia","ipeds_id":"190150","name":"Columbia University","url":"https://www.columbia.edu/","city":"New York","state":"NY"}
+{"_id":"cornell","ipeds_id":"190415","name":"Cornell University","url":"https://www.cornell.edu/","city":"Ithaca","state":"NY"}
+{"_id":"dartmouth","ipeds_id":"182670","name":"Dartmouth College","url":"https://home.dartmouth.edu/","city":"Hanover","state":"NH"}
+{"_id":"duke","ipeds_id":"198419","name":"Duke University","url":"https://www.duke.edu/","city":"Durham","state":"NC"}
+{"_id":"emory","ipeds_id":"139658","name":"Emory University","url":"http://www.emory.edu/","city":"Atlanta","state":"GA"}
+{"_id":"fsu","ipeds_id":"134097","name":"Florida State University","url":"https://www.fsu.edu/","city":"Tallahassee","state":"FL"}
+{"_id":"gatech","ipeds_id":"139755","name":"Georgia Tech","url":"https://www.gatech.edu/","city":"Atlanta","state":"GA"}
+{"_id":"georgetown","ipeds_id":"131496","name":"Georgetown University","url":"https://www.georgetown.edu/","city":"Washington","state":"DC"}
+{"_id":"gwu","ipeds_id":"131469","name":"George Washington University","url":"https://www.gwu.edu/","city":"Washington","state":"DC"}
+{"_id":"harvard","ipeds_id":"166027","name":"Harvard University","url":"https://www.harvard.edu/","city":"Cambridge","state":"MA"}
+{"_id":"hawaii","ipeds_id":"141574","name":"University of Hawai'i","url":"https://www.hawaii.edu/","city":"Manoa","state":"HI"}
+{"_id":"howard","ipeds_id":"131520","name":"Howard University","url":"https://www2.howard.edu/","city":"Washington","state":"DC"}
+{"_id":"iastate","ipeds_id":"153603","name":"Iowa State University","url":"https://www.iastate.edu/","city":"Ames","state":"IA"}
+{"_id":"illinois","ipeds_id":"145637","name":"University of Illinois","url":"https://illinois.edu/","city":"Champaign","state":"IL"}
+{"_id":"indiana","ipeds_id":"151351","name":"Indiana University","url":"https://www.indiana.edu/","city":"Bloomington","state":"IN"}
+{"_id":"jhu","ipeds_id":"162928","name":"Johns Hopkins University","url":"https://www.jhu.edu/","city":"Baltimore","state":"MD"}
+{"_id":"kent","ipeds_id":"203517","name":"Kent State University","url":"https://www.kent.edu/","city":"Kent","state":"OH"}
+{"_id":"ku","ipeds_id":"155317","name":"University of Kansas","url":"https://ku.edu/","city":"Lawrence","state":"KS"}
+{"_id":"louisville","ipeds_id":"157289","name":"University of Louisville","url":"http://louisville.edu/","city":"Louisville","state":"KY"}
+{"_id":"lsu","ipeds_id":"159391","name":"Louisina State University","url":"https://www.lsu.edu/","city":"Baton Rouge","state":"LA"}
+{"_id":"mcgill","name":"McGill University","url":"https://www.mcgill.ca/","city":"Montreal","state":"QC"}
+{"_id":"mcmaster","name":"McMaster University","url":"https://www.mcmaster.ca/","city":"Hamilton","state":"ON"}
+{"_id":"miamioh","ipeds_id":"204024","name":"Miami University","url":"https://miamioh.edu/","city":"Oxford","state":"OH"}
+{"_id":"missouri","ipeds_id":"178396","name":"University of Missouri","url":"https://missouri.edu/","city":"Columbia","state":"MO"}
+{"_id":"mit","ipeds_id":"166683","name":"Massachusetts Institute of Technology","url":"http://www.mit.edu/","city":"Cambridge","state":"MA"}
+{"_id":"msu","ipeds_id":"171100","name":"Michigan State University","url":"https://msu.edu/","city":"East Lansing","state":"MI"}
+{"_id":"ncsu","ipeds_id":"199193","name":"North Carolina State University","url":"https://www.ncsu.edu/","city":"Raleigh","state":"NC"}
+{"_id":"nd","ipeds_id":"152080","name":"University of Notre Dame","url":"https://www.nd.edu/","city":"South Bend","state":"IN"}
+{"_id":"nw","ipeds_id":"147767","name":"Northwestern University","url":"https://www.northwestern.edu/","city":"Evanston","state":"IL"}
+{"_id":"nyu","ipeds_id":"193900","name":"New York University","url":"https://www.nyu.edu/","city":"New York","state":"NY"}
+{"_id":"ohio","ipeds_id":"204857","name":"University of Ohio","url":"https://www.ohio.edu/","city":"Athens","state":"OH"}
+{"_id":"okstate","ipeds_id":"207388","name":"Oklahoma State University","url":"https://www.okstate.edu/","city":"Stillwater","state":"OK"}
+{"_id":"osu","ipeds_id":"204796","name":"Ohio State University","url":"https://www.osu.edu/","city":"Columbus","state":"OH"}
+{"_id":"ou","ipeds_id":"207500","name":"University of Oklahoma","url":"https://www.ou.edu/","city":"Norman","state":"OK"}
+{"_id":"pitt","ipeds_id":"215293","name":"University of Pittsburgh","url":"https://www.pitt.edu/","city":"Pittsburgh","state":"PA"}
+{"_id":"princeton","ipeds_id":"186131","name":"Princeton University","url":"https://www.princeton.edu/","city":"Princeton","state":"NJ"}
+{"_id":"psu","ipeds_id":"214777","name":"Pennsylvania State University","url":"https://www.psu.edu/","city":"State College","state":"PA"}
+{"_id":"purdue","ipeds_id":"243780","name":"Purdue University","url":"https://www.purdue.edu/","city":"West Lafayette","state":"IN"}
+{"_id":"queensu","name":"Queen's University","url":"https://www.queensu.ca/","city":"Kingston","state":"ON"}
+{"_id":"rice","ipeds_id":"227757","name":"Rice University","url":"https://www.rice.edu/","city":"Houston","state":"TX"}
+{"_id":"rochester","ipeds_id":"195030","name":"University of Rochester","url":"https://www.rochester.edu/","city":"Rochester","state":"NY"}
+{"_id":"rutgers","ipeds_id":"186380","name":"Rutgers University","url":"https://www.rutgers.edu/","city":"New Brunswick","state":"NJ"}
+{"_id":"sc","ipeds_id":"218663","name":"University of South Carolina","url":"https://www.sc.edu/","city":"Columbia","state":"SC"}
+{"_id":"scsb","ipeds_id":"110705","name":"University of California, Santa Barbara","url":"https://www.ucsb.edu/","city":"Santa Barbara","state":"CA"}
+{"_id":"sfu","name":"Simon Fraser University","url":"https://www.sfu.ca/","city":"Burnaby","state":"BC"}
+{"_id":"siu","ipeds_id":"149222","name":"Southern Illinois University","url":"https://siu.edu/","city":"Carbondale","state":"IL"}
+{"_id":"stanford","ipeds_id":"243744","name":"Stanford University","url":"https://www.stanford.edu/","city":"Stanford","state":"CA"}
+{"_id":"stonybrook","ipeds_id":"196097","name":"Stony Brook University","url":"https://www.stonybrook.edu/","city":"Stony Brook","state":"NY"}
+{"_id":"syr","ipeds_id":"196413","name":"Syracuse University","url":"https://www.syracuse.edu/","city":"Syracuse","state":"NY"}
+{"_id":"tamu","ipeds_id":"228723","name":"Texas A&M University","url":"https://www.tamu.edu/","city":"College Station","state":"TX"}
+{"_id":"temple","ipeds_id":"216339","name":"Temple University","url":"https://www.temple.edu/","city":"Philadelphia","state":"PA"}
+{"_id":"ttu","ipeds_id":"229115","name":"Texas Tech University","url":"https://www.ttu.edu/","city":"Lubbock","state":"TX"}
+{"_id":"tulane","ipeds_id":"160755","name":"Tulane University","url":"https://tulane.edu/","city":"New Orleans","state":"LA"}
+{"_id":"ua","ipeds_id":"100751","name":"University of Alabama","url":"https://www.ua.edu/","city":"Tuscaloosa","state":"AL"}
+{"_id":"ualberta","name":"University of Alberta","url":"https://www.ualberta.ca/","city":"Edmonton","state":"AB"}
+{"_id":"ubc","name":"University of British Columbia","url":"https://www.ubc.ca/","city":"Vancouver","state":"BC"}
+{"_id":"uc","ipeds_id":"201885","name":"University of Cincinnati","url":"https://www.uc.edu/","city":"Cincinnati","state":"OH"}
+{"_id":"ucalgary","name":"University of Calgary","url":"http://www.ucalgary.ca/","city":"Calgary","state":"AB"}
+{"_id":"ucdavis","ipeds_id":"110644","name":"University of California, Davis","url":"https://www.ucdavis.edu/","city":"Davis","state":"CA"}
+{"_id":"uchicago","ipeds_id":"144050","name":"University of Chicago","url":"https://www.uchicago.edu/","city":"Chicago","state":"IL"}
+{"_id":"uci","ipeds_id":"110653","name":"University of California, Irvine","url":"https://uci.edu/","city":"Irvine","state":"CA"}
+{"_id":"ucla","ipeds_id":"110662","name":"University of California, Los Angeles","url":"http://www.ucla.edu/","city":"Los Angeles","state":"CA"}
+{"_id":"uconn","ipeds_id":"129020","name":"University of Connecticut","url":"https://uconn.edu/","city":"Storrs","state":"CT"}
+{"_id":"ucr","ipeds_id":"110671","name":"University of California, Riverside","url":"https://www.ucr.edu/","city":"Riverside","state":"CA"}
+{"_id":"ucsd","ipeds_id":"110680","name":"University of California, San Diego","url":"https://ucsd.edu/","city":"San Diego","state":"CA"}
+{"_id":"udel","ipeds_id":"130943","name":"University of Delaware","url":"https://www.udel.edu/","city":"Newark","state":"DE"}
+{"_id":"ufl","ipeds_id":"134130","name":"University of Florida","url":"http://www.ufl.edu/","city":"Gainesville","state":"FL"}
+{"_id":"uga","ipeds_id":"139959","name":"University of Georgia","url":"https://www.uga.edu/","city":"Athens","state":"GA"}
+{"_id":"uh","ipeds_id":"225511","name":"University of Houston","url":"http://www.uh.edu/","city":"Houston","state":"TX"}
+{"_id":"uic","ipeds_id":"145600","name":"University of Illinois, Chicago","url":"https://www.uic.edu/","city":"Chicago","state":"IL"}
+{"_id":"uiowa","ipeds_id":"153658","name":"University of Iowa","url":"https://uiowa.edu/","city":"Iowa City","state":"IA"}
+{"_id":"uky","ipeds_id":"157085","name":"University of Kentucky","url":"http://www.uky.edu/","city":"Lexington","state":"KY"}
+{"_id":"ulaval","name":"Université Laval","url":"https://www.ulaval.ca/","city":"Quebec","state":"QC"}
+{"_id":"umanitoba","name":"University of Manitoba","url":"http://umanitoba.ca/","city":"Winnipeg","state":"MB"}
+{"_id":"umass","ipeds_id":"166629","name":"University of Massachusetts","url":"https://www.umass.edu/","city":"Amherst","state":"MA"}
+{"_id":"umd","ipeds_id":"163286","name":"University of Maryland","url":"https://www.umd.edu/","city":"College Park","state":"MD"}
+{"_id":"umich","ipeds_id":"170976","name":"University of Michigan","url":"https://umich.edu/","city":"Ann Arbor","state":"MI"}
+{"_id":"umn","ipeds_id":"174066","name":"University of Minnesota","url":"https://twin-cities.umn.edu/","city":"MInneapolis","state":"MN"}
+{"_id":"unc","ipeds_id":"199120","name":"University of North Carolina","url":"https://www.unc.edu/","city":"Chapel Hill","state":"NC"}
+{"_id":"unl","ipeds_id":"181464","name":"University of Nebraska","url":"https://www.unl.edu/","city":"Lincoln","state":"NB"}
+{"_id":"unm","ipeds_id":"187985","name":"University of New Mexico","url":"http://www.unm.edu/","city":"Albuquerque","state":"NM"}
+{"_id":"uoguelph","name":"University of Guelph","url":"https://www.uoguelph.ca/","city":"Guelph","state":"ON"}
+{"_id":"uoregon","ipeds_id":"209551","name":"University of Oregon","url":"https://www.uoregon.edu/","city":"Eugene","state":"OR"}
+{"_id":"uottawa","name":"University of Ottawa","url":"https://www.uottawa.ca/en","city":"Ottawa","state":"ON"}
+{"_id":"upenn","ipeds_id":"215062","name":"University of Pennsylvania","url":"https://www.upenn.edu/","city":"Philadelphia","state":"PA"}
+{"_id":"usask","name":"University of Saskatchewan","url":"https://www.usask.ca/","city":"Saskatoon","state":"SK"}
+{"_id":"usc","ipeds_id":"123961","name":"University of Southern California","url":"https://www.usc.edu/","city":"Los Angeles","state":"CA"}
+{"_id":"utah","ipeds_id":"230764","name":"University of Utah","url":"https://www.utah.edu/","city":"Salt Lake City","state":"UT"}
+{"_id":"utexas","ipeds_id":"228778","name":"University of Texas","url":"https://www.utexas.edu/","city":"Austin","state":"TX"}
+{"_id":"utk","ipeds_id":"221759","name":"University of Tennessee","url":"https://www.utk.edu/","city":"Knoxville","state":"TN"}
+{"_id":"utoronto","name":"University of Toronto","url":"https://www.utoronto.ca/","city":"Toronto","state":"ON"}
+{"_id":"uwaterloo","name":"University of Waterloo","url":"https://uwaterloo.ca/","city":"Waterloo","state":"ON"}
+{"_id":"uwo","name":"Western University","url":"https://www.uwo.ca/","city":"London","state":"ON"}
+{"_id":"vanderbilt","ipeds_id":"221999","name":"Vanderbilt University","url":"https://www.vanderbilt.edu/","city":"Nashville","state":"TN"}
+{"_id":"vcu","ipeds_id":"234030","name":"Virginia Commonwealth University","url":"https://vcu.edu","city":"Richmond","state":"VA"}
+{"_id":"virginia","ipeds_id":"234076","name":"University of Virginia","url":"http://www.virginia.edu/","city":"Charlottesville","state":"VA"}
+{"_id":"vt","ipeds_id":"233921","name":"Virginia Tech","url":"https://vt.edu/","city":"Blacksburg","state":"VA"}
+{"_id":"washington","ipeds_id":"236948","name":"University of Washington","url":"https://www.washington.edu/","city":"Seattle","state":"WA"}
+{"_id":"wayne","ipeds_id":"172644","name":"Wayne State University","url":"https://wayne.edu/","city":"Detroit","state":"MI"}
+{"_id":"wisc","ipeds_id":"240444","name":"University of Wisconsin","url":"https://www.wisc.edu/","city":"Madison","state":"WI"}
+{"_id":"wsu","ipeds_id":"236939","name":"Washington State University","url":"https://wsu.edu/","city":"Pullman","state":"WA"}
+{"_id":"wustl","ipeds_id":"179867","name":"Washington University","url":"https://wustl.edu/","city":"St. Louis","state":"MO"}
+{"_id":"yale","ipeds_id":"130794","name":"Yale University","url":"https://www.yale.edu/","city":"New Haven","state":"CT"}
+{"_id":"yorku","name":"York University","url":"https://www.yorku.ca/","city":"North York","state":"ON"}

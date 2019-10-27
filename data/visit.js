@@ -65,7 +65,6 @@ class WaybackOfflineError extends Error {
 
 // setup logger
 const logger = setupLogger("visit");
-const timeouts = setupLogger("timeouts");
 
 // puppeteer viewports, for screenshots
 const viewports = [

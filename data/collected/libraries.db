@@ -1,0 +1,126 @@
+{"_id":"albany","college_id":"albany","ipeds_id":"196060","url":"https://library.albany.edu/","name":"University at Albany, University Libraries","arl_id":"7800","arl_name":"SUNY-ALBANY","type":"State"}
+{"_id":"archives","url":"http://www.archives.gov/","name":"National Archives and Records Administration","arl_id":"9915","arl_name":"NATL ARCHIVES","type":"Nonacademic"}
+{"_id":"arizona","college_id":"arizona","ipeds_id":"104179","url":"http://new.library.arizona.edu/","name":"University of Arizona, University Libraries","arl_id":"300","arl_name":"ARIZONA","type":"State"}
+{"_id":"asu","college_id":"asu","ipeds_id":"104151","url":"https://lib.asu.edu/","name":"Arizona State University Library","arl_id":"400","arl_name":"ARIZONA STATE","type":"State"}
+{"_id":"auburn","college_id":"auburn","ipeds_id":"100858","url":"https://www.lib.auburn.edu/","name":"Auburn University Libraries","arl_id":"440","arl_name":"AUBURN","type":"State"}
+{"_id":"bc","college_id":"bc","ipeds_id":"164924","url":"https://library.bc.edu/","name":"Boston College Libraries","arl_id":"550","arl_name":"BOSTON COLLEGE","type":"Private"}
+{"_id":"berkeley","college_id":"berkeley","ipeds_id":"110635","url":"http://www.lib.berkeley.edu/","name":"University of California, Berkeley Library","arl_id":"900","arl_name":"CALIFORNIA, BERKELEY","type":"State"}
+{"_id":"bpl","url":"http://www.bpl.org/","name":"Boston Public Library","arl_id":"9850","arl_name":"BOSTON PUBLIC","type":"Nonacademic"}
+{"_id":"brown","college_id":"brown","ipeds_id":"217156","url":"https://library.brown.edu/","name":"Brown University Library","arl_id":"800","arl_name":"BROWN","type":"Private"}
+{"_id":"bu","college_id":"bu","ipeds_id":"164988","url":"http://www.bu.edu/library/","name":"Boston University Libraries","arl_id":"500","arl_name":"BOSTON","type":"Private"}
+{"_id":"buffalo","college_id":"buffalo","ipeds_id":"196088","url":"https://library.buffalo.edu/","name":"University at Buffalo, University Libraries","arl_id":"7900","arl_name":"SUNY-BUFFALO","type":"State"}
+{"_id":"byu","college_id":"byu","ipeds_id":"230038","url":"https://lib.byu.edu/","name":"Brigham Young University, Harold B. Lee Library","arl_id":"600","arl_name":"BRIGHAM YOUNG","type":"Private"}
+{"_id":"case","college_id":"case","ipeds_id":"201645","url":"http://library.case.edu/","name":"Case Western Reserve University, Kelvin Smith Library","arl_id":"1500","arl_name":"CASE WESTERN RESERVE","type":"Private"}
+{"_id":"colorado","college_id":"colorado","ipeds_id":"126614","url":"https://www.colorado.edu/libraries/","name":"University of Colorado, University Libraries","arl_id":"1800","arl_name":"COLORADO","type":"State"}
+{"_id":"colostate","college_id":"colostate","ipeds_id":"126818","url":"https://lib.colostate.edu/","name":"Colorado State University Libraries","arl_id":"1900","arl_name":"COLORADO STATE","type":"State"}
+{"_id":"columbia","college_id":"columbia","ipeds_id":"190150","url":"https://library.columbia.edu/","name":"Columbia University Libraries","arl_id":"2000","arl_name":"COLUMBIA","type":"Private"}
+{"_id":"cornell","college_id":"cornell","ipeds_id":"190415","url":"https://www.library.cornell.edu/","name":"Cornell University Library","arl_id":"2200","arl_name":"CORNELL","type":"Private"}
+{"_id":"crl","url":"http://www.crl.edu/","name":"Center for Research Libraries","arl_id":"9870","arl_name":"CENTER FOR RESEARCH LIBS","type":"Nonacademic"}
+{"_id":"dartmouth","college_id":"dartmouth","ipeds_id":"182670","url":"https://www.library.dartmouth.edu/","name":"Dartmouth College Library","arl_id":"2300","arl_name":"DARTMOUTH","type":"Private"}
+{"_id":"duke","college_id":"duke","ipeds_id":"198419","url":"https://library.duke.edu/","name":"Duke University Libraries","arl_id":"2400","arl_name":"DUKE","type":"Private"}
+{"_id":"emory","college_id":"emory","ipeds_id":"139658","url":"http://web.library.emory.edu/","name":"Emory University, Robert W. Woodruff Library","arl_id":"2500","arl_name":"EMORY","type":"Private"}
+{"_id":"fsu","college_id":"fsu","ipeds_id":"134097","url":"https://www.lib.fsu.edu/","name":"Florida State University Libraries","arl_id":"2700","arl_name":"FLORIDA STATE","type":"State"}
+{"_id":"gatech","college_id":"gatech","ipeds_id":"139755","url":"https://www.library.gatech.edu/","name":"Georgia Tech Library","arl_id":"2950","arl_name":"GEORGIA TECH","type":"State"}
+{"_id":"georgetown","college_id":"georgetown","ipeds_id":"131496","url":"https://www.library.georgetown.edu/","name":"Georgetown University Library","arl_id":"2800","arl_name":"GEORGETOWN","type":"Private"}
+{"_id":"gwu","college_id":"gwu","ipeds_id":"131469","url":"https://library.gwu.edu/","name":"George Washington University Libraries","arl_id":"2750","arl_name":"GEORGE WASHINGTON","type":"Private"}
+{"_id":"harvard","college_id":"harvard","ipeds_id":"166027","url":"https://library.harvard.edu/","name":"Harvard University Library","arl_id":"3100","arl_name":"HARVARD","type":"Private"}
+{"_id":"hawaii","college_id":"hawaii","ipeds_id":"141574","url":"http://manoa.hawaii.edu/library/","name":"University of Hawai'i Library","arl_id":"3200","arl_name":"HAWAII","type":"State"}
+{"_id":"howard","college_id":"howard","ipeds_id":"131520","url":"http://library.howard.edu/library/","name":"Howard University Libraries","arl_id":"3400","arl_name":"HOWARD","type":"Private"}
+{"_id":"iastate","college_id":"iastate","ipeds_id":"153603","url":"http://www.lib.iastate.edu/","name":"Iowa Stateu University Library","arl_id":"3800","arl_name":"IOWA STATE","type":"State"}
+{"_id":"illinois","college_id":"illinois","ipeds_id":"145637","url":"https://library.illinois.edu/","name":"University of Illinois, University Library","arl_id":"3500","arl_name":"ILLINOIS, URBANA","type":"State"}
+{"_id":"indiana","college_id":"indiana","ipeds_id":"151351","url":"https://libraries.indiana.edu/","name":"Indiana University Libraries","arl_id":"3600","arl_name":"INDIANA","type":"State"}
+{"_id":"jhu","college_id":"jhu","ipeds_id":"162928","url":"https://www.library.jhu.edu/","name":"Johns Hopkins University, Sheridan Libraries","arl_id":"3900","arl_name":"JOHNS HOPKINS","type":"Private"}
+{"_id":"kent","college_id":"kent","ipeds_id":"203517","url":"https://www.library.kent.edu/","name":"Kent State University Libraries","arl_id":"4200","arl_name":"KENT STATE","type":"State"}
+{"_id":"ku","college_id":"ku","ipeds_id":"155317","url":"https://lib.ku.edu/","name":"University of Kansas Libraries","arl_id":"4100","arl_name":"KANSAS","type":"State"}
+{"_id":"loc","url":"http://www.loc.gov/","name":"Library of Congress","arl_id":"9890","arl_name":"LIBRARY OF CONGRESS","type":"Nonacademic"}
+{"_id":"louisville","college_id":"louisville","ipeds_id":"157289","url":"http://louisville.edu/library/","name":"University of Louisville Libraries","arl_id":"4420","arl_name":"LOUISVILLE","type":"State"}
+{"_id":"lsu","college_id":"lsu","ipeds_id":"159391","url":"https://www.lib.lsu.edu/","name":"Louisina State University Libraries","arl_id":"4400","arl_name":"LOUISIANA STATE","type":"State"}
+{"_id":"mcgill","college_id":"mcgill","url":"http://www.mcgill.ca/library/","name":"McGill University Library","arl_id":"4500","arl_name":"MCGILL","type":"Canadian"}
+{"_id":"mcmaster","college_id":"mcmaster","url":"http://www.mcmaster.ca/library/","name":"McMaster University Libraries","arl_id":"4600","arl_name":"MCMASTER","type":"Canadian"}
+{"_id":"miamioh","college_id":"miamioh","ipeds_id":"135726","url":"https://www.lib.miamioh.edu/","name":"Miami University Libraries","arl_id":"5000","arl_name":"MIAMI","type":"Private"}
+{"_id":"missouri","college_id":"missouri","ipeds_id":"178396","url":"http://library.missouri.edu/","name":"University of Missouri Libraries","arl_id":"5400","arl_name":"MISSOURI","type":"State"}
+{"_id":"mit","college_id":"mit","ipeds_id":"166683","url":"https://libraries.mit.edu/","name":"Massachusetts Institute of Technology Libraries","arl_id":"4900","arl_name":"MIT","type":"Private"}
+{"_id":"msu","college_id":"msu","ipeds_id":"171100","url":"https://lib.msu.edu/","name":"Michigan State University Libraries","arl_id":"5200","arl_name":"MICHIGAN STATE","type":"State"}
+{"_id":"nal","url":"http://www.nal.usda.gov/","name":"National Agricultural Library","arl_id":"9910","arl_name":"NATL AGRICULTURAL LIB","type":"Nonacademic"}
+{"_id":"ncsu","college_id":"ncsu","ipeds_id":"199193","url":"https://www.lib.ncsu.edu/","name":"North Carolina State University Libraries","arl_id":"5850","arl_name":"NORTH CAROLINA STATE","type":"State"}
+{"_id":"nd","college_id":"nd","ipeds_id":"152080","url":"https://library.nd.edu/","name":"University of Notre Dame, Hesburgh Libraries","arl_id":"6000","arl_name":"NOTRE DAME","type":"Private"}
+{"_id":"nlm","url":"http://www.nlm.nih.gov/","name":"National Library of Medicine","arl_id":"9930","arl_name":"NATL LIB OF MEDICINE","type":"Nonacademic"}
+{"_id":"nw","college_id":"nw","ipeds_id":"147767","url":"https://www.library.northwestern.edu/","name":"Northwestern University Libraries","arl_id":"5900","arl_name":"NORTHWESTERN","type":"Private"}
+{"_id":"nypl","url":"http://www.nypl.org/","name":"New York Public Library","arl_id":"9950","arl_name":"NEW YORK PUBLIC","type":"Nonacademic"}
+{"_id":"nysl","url":"http://www.nysl.nysed.gov/","name":"New York State Library","arl_id":"9960","arl_name":"NEW YORK STATE","type":"Nonacademic"}
+{"_id":"nyu","college_id":"nyu","ipeds_id":"193900","url":"http://library.nyu.edu/","name":"New York University, Division of Libraries","arl_id":"5700","arl_name":"NEW YORK","type":"Private"}
+{"_id":"ohio","college_id":"ohio","ipeds_id":"204857","url":"https://www.library.ohio.edu/","name":"University of Ohio, University Libraries","arl_id":"6050","arl_name":"OHIO","type":"State"}
+{"_id":"okstate","college_id":"okstate","ipeds_id":"207388","url":"https://library.okstate.edu/","name":"Oklahoma State University Library","arl_id":"6300","arl_name":"OKLAHOMA STATE","type":"State"}
+{"_id":"osu","college_id":"osu","ipeds_id":"204796","url":"https://library.osu.edu/","name":"Ohio State University Libraries","arl_id":"6100","arl_name":"OHIO STATE","type":"State"}
+{"_id":"ou","college_id":"ou","ipeds_id":"207500","url":"https://libraries.ou.edu/","name":"University of Oklahoma Libraries","arl_id":"6200","arl_name":"OKLAHOMA","type":"State"}
+{"_id":"pitt","college_id":"pitt","ipeds_id":"215293","url":"https://www.library.pitt.edu/","name":"University of Pittsburgh, University Library System","arl_id":"6700","arl_name":"PITTSBURGH","type":"State"}
+{"_id":"princeton","college_id":"princeton","ipeds_id":"186131","url":"http://library.princeton.edu/","name":"Princeton University Library","arl_id":"6800","arl_name":"PRINCETON","type":"Private"}
+{"_id":"psu","college_id":"psu","ipeds_id":"214777","url":"https://libraries.psu.edu/","name":"Pennsylvania State University Libraries","arl_id":"6600","arl_name":"PENNSYLVANIA STATE","type":"State"}
+{"_id":"purdue","college_id":"purdue","ipeds_id":"243780","url":"https://www.lib.purdue.edu/","name":"Purdue University Libraries","arl_id":"6900","arl_name":"PURDUE","type":"State"}
+{"_id":"queensu","college_id":"queensu","url":"http://library.queensu.ca/","name":"Queen's University Library","arl_id":"7000","arl_name":"QUEEN'S","type":"Canadian"}
+{"_id":"rice","college_id":"rice","ipeds_id":"227757","url":"https://library.rice.edu/","name":"Rice University, Fondren Library","arl_id":"7100","arl_name":"RICE","type":"Private"}
+{"_id":"rochester","college_id":"rochester","ipeds_id":"195030","url":"https://library.rochester.edu/","name":"University of Rochester, River Campus Libraries","arl_id":"7200","arl_name":"ROCHESTER","type":"Private"}
+{"_id":"rutgers","college_id":"rutgers","ipeds_id":"186380","url":"https://www.libraries.rutgers.edu/","name":"Rutgers University Libraries","arl_id":"7300","arl_name":"RUTGERS","type":"State"}
+{"_id":"sc","college_id":"sc","ipeds_id":"218663","url":"http://library.sc.edu/","name":"University of South Carolina, University Libraries","arl_id":"7400","arl_name":"SOUTH CAROLINA","type":"State"}
+{"_id":"scsb","college_id":"scsb","ipeds_id":"110705","url":"https://www.library.ucsb.edu/","name":"University of California, Santa Barbara Library","arl_id":"1400","arl_name":"CALIFORNIA, SANTA BARBARA","type":"State"}
+{"_id":"sfu","college_id":"sfu","url":"https://www.lib.sfu.ca/","name":"Simon Fraser University Library","arl_id":"7390","arl_name":"SIMON FRASER","type":"Canadian"}
+{"_id":"sil","url":"http://www.sil.si.edu/","name":"Smithsonian Libraries","arl_id":"9980","arl_name":"SMITHSONIAN","type":"Nonacademic"}
+{"_id":"siu","college_id":"siu","ipeds_id":"149222","url":"https://lib.siu.edu/","name":"Southern Illinois University, Morris Library","arl_id":"7600","arl_name":"SOUTHERN ILLINOIS","type":"State"}
+{"_id":"stanford","college_id":"stanford","url":"https://library.stanford.edu/","name":"Stanford University Libraries","arl_id":"7700","arl_name":"STANFORD","type":"Private"}
+{"_id":"stonybrook","college_id":"stonybrook","ipeds_id":"196097","url":"http://www.library.stonybrook.edu/","name":"Stony Brook University Libraries","arl_id":"8000","arl_name":"SUNY-STONY BROOK","type":"State"}
+{"_id":"syr","college_id":"syr","ipeds_id":"196413","url":"https://library.syr.edu/","name":"Syracuse University Libraries","arl_id":"8100","arl_name":"SYRACUSE","type":"Private"}
+{"_id":"tamu","college_id":"tamu","ipeds_id":"228723","url":"https://library.tamu.edu/","name":"Texas A&M University Libraries","arl_id":"8500","arl_name":"TEXAS A&M","type":"State"}
+{"_id":"temple","college_id":"temple","ipeds_id":"216339","url":"https://library.temple.edu/","name":"Temple University Libraries","arl_id":"8200","arl_name":"TEMPLE","type":"State"}
+{"_id":"ttu","college_id":"ttu","ipeds_id":"229115","url":"https://library.ttu.edu/","name":"Texas Tech University, University Libraries","arl_id":"8550","arl_name":"TEXAS TECH","type":"State"}
+{"_id":"tulane","college_id":"tulane","ipeds_id":"160755","url":"https://library.tulane.edu/","name":"Tulane University, Howard Tilton Memorial Library","arl_id":"8700","arl_name":"TULANE","type":"Private"}
+{"_id":"ua","college_id":"ua","ipeds_id":"100751","url":"https://www.lib.ua.edu/","name":"University of Alabama Libraries","arl_id":"100","arl_name":"ALABAMA","type":"State"}
+{"_id":"ualberta","college_id":"ualberta","url":"https://www.library.ualberta.ca/","name":"University of Alberta Libraries","arl_id":"200","arl_name":"ALBERTA","type":"Canadian"}
+{"_id":"ubc","college_id":"ubc","url":"http://www.library.ubc.ca/","name":"University of British Columbia Library","arl_id":"700","arl_name":"BRITISH COLUMBIA","type":"Canadian"}
+{"_id":"uc","college_id":"uc","ipeds_id":"201885","url":"https://www.libraries.uc.edu/","name":"University of Cincinnati Libraries","arl_id":"1700","arl_name":"CINCINNATI","type":"State"}
+{"_id":"ucalgary","college_id":"ucalgary","url":"https://library.ucalgary.ca/","name":"University of Calgary - Libraries and Cultural Resources","arl_id":"860","arl_name":"CALGARY","type":"Canadian"}
+{"_id":"ucdavis","college_id":"ucdavis","ipeds_id":"110644","url":"https://www.library.ucdavis.edu/","name":"University of California, Davis, University Library","arl_id":"1000","arl_name":"CALIFORNIA, DAVIS ","type":"State"}
+{"_id":"uchicago","college_id":"uchicago","ipeds_id":"144050","url":"https://www.lib.uchicago.edu/","name":"University of Chicago Library","arl_id":"1600","arl_name":"CHICAGO","type":"Private"}
+{"_id":"uci","college_id":"uci","ipeds_id":"110653","url":"https://lib.uci.edu/","name":"University of California, Irvine Libraries","arl_id":"1050","arl_name":"CALIFORNIA, IRVINE","type":"State"}
+{"_id":"ucla","college_id":"ucla","ipeds_id":"110662","url":"http://www.library.ucla.edu/","name":"University of California, Los Angeles Library","arl_id":"1100","arl_name":"CALIFORNIA, LOS ANGELES","type":"State"}
+{"_id":"uconn","college_id":"uconn","ipeds_id":"129020","url":"https://lib.uconn.edu/","name":"University of Connecticut Library","arl_id":"2100","arl_name":"CONNECTICUT","type":"State"}
+{"_id":"ucr","college_id":"ucr","ipeds_id":"110671","url":"https://library.ucr.edu/","name":"University of California, Riverside Library","arl_id":"1200","arl_name":"CALIFORNIA, RIVERSIDE","type":"State"}
+{"_id":"ucsd","college_id":"ucsd","ipeds_id":"110680","url":"https://library.ucsd.edu/","name":"University of California, San Diego Library","arl_id":"1300","arl_name":"CALIFORNIA, SAN DIEGO","type":"State"}
+{"_id":"udel","college_id":"udel","ipeds_id":"130943","url":"https://library.udel.edu/","name":"University of Delaware, Library, Museums & Press","arl_id":"2350","arl_name":"DELAWARE","type":"State"}
+{"_id":"ufl","college_id":"ufl","ipeds_id":"134130","url":"http://library.ufl.edu/","name":"University of Florida, George A. Smathers Libraries","arl_id":"2600","arl_name":"FLORIDA","type":"State"}
+{"_id":"uga","college_id":"uga","ipeds_id":"139959","url":"https://www.libs.uga.edu/","name":"University of Georgia Libraries","arl_id":"2900","arl_name":"GEORGIA","type":"State"}
+{"_id":"uh","college_id":"uh","ipeds_id":"225511","url":"https://libraries.uh.edu/","name":"University of Houston Libraries","arl_id":"3300","arl_name":"HOUSTON","type":"State"}
+{"_id":"uic","college_id":"uic","ipeds_id":"145600","url":"https://library.uic.edu/","name":"University of Illinois, Chicago Library","arl_id":"3490","arl_name":"ILLINOIS, CHICAGO","type":"State"}
+{"_id":"uiowa","college_id":"uiowa","ipeds_id":"153658","url":"https://www.lib.uiowa.edu/","name":"University of Iowa Libraries","arl_id":"3700","arl_name":"IOWA","type":"State"}
+{"_id":"uky","college_id":"uky","ipeds_id":"157085","url":"http://libraries.uky.edu/","name":"University of Kentucky Libraries","arl_id":"4300","arl_name":"KENTUCKY","type":"State"}
+{"_id":"ulaval","college_id":"ulaval","url":"http://www.bibl.ulaval.ca/","name":"Bibliothèque de l’Université Laval","arl_id":"4350","arl_name":"LAVAL","type":"Canadian"}
+{"_id":"umanitoba","college_id":"umanitoba","url":"http://www.umanitoba.ca/libraries/","name":"University of Manitoba Libraries","arl_id":"4650","arl_name":"MANITOBA","type":"Canadian"}
+{"_id":"umass","college_id":"umass","ipeds_id":"166629","url":"https://www.library.umass.edu/","name":"University of Massachusetts Libraries","arl_id":"4800","arl_name":"MASSACHUSETTS","type":"State"}
+{"_id":"umd","college_id":"umd","ipeds_id":"163286","url":"https://www.lib.umd.edu/","name":"University of Maryland Libraries","arl_id":"4700","arl_name":"MARYLAND","type":"State"}
+{"_id":"umich","college_id":"umich","ipeds_id":"170976","url":"https://www.lib.umich.edu/","name":"University of Michigan Library","arl_id":"5100","arl_name":"MICHIGAN","type":"State"}
+{"_id":"umn","college_id":"umn","ipeds_id":"174066","url":"https://www.lib.umn.edu/","name":"University of Minnesota Libraries","arl_id":"5300","arl_name":"MINNESOTA","type":"State"}
+{"_id":"unc","college_id":"unc","ipeds_id":"199120","url":"https://library.unc.edu/","name":"University of North Carolina Libraries","arl_id":"5800","arl_name":"NORTH CAROLINA","type":"State"}
+{"_id":"unl","college_id":"unl","ipeds_id":"181464","url":"https://libraries.unl.edu/","name":"University of Nebraska Libraries","arl_id":"5500","arl_name":"NEBRASKA","type":"State"}
+{"_id":"unm","college_id":"unm","ipeds_id":"187985","url":"https://library.unm.edu/","name":"University of New Mexico Libraries","arl_id":"5600","arl_name":"NEW MEXICO","type":"State"}
+{"_id":"uoguelph","college_id":"uoguelph","url":"https://www.lib.uoguelph.ca/","name":"University of Guelph Library","arl_id":"3000","arl_name":"GUELPH","type":"Canadian"}
+{"_id":"uoregon","college_id":"uoregon","ipeds_id":"209551","url":"https://library.uoregon.edu/","name":"University of Oregon Libraries","arl_id":"6400","arl_name":"OREGON","type":"State"}
+{"_id":"uottawa","college_id":"uottawa","url":"http://www.biblio.uottawa.ca/","name":"University of Ottawa Library","arl_id":"6430","arl_name":"OTTAWA","type":"Canadian"}
+{"_id":"upenn","college_id":"upenn","ipeds_id":"215062","url":"https://www.library.upenn.edu/","name":"University of Pennsylvania Libraries","arl_id":"6500","arl_name":"PENNSYLVANIA","type":"Private"}
+{"_id":"usask","college_id":"usask","url":"http://library.usask.ca/","name":"University of Saskatchewan Library","arl_id":"7370","arl_name":"SASKATCHEWAN","type":"Canadian"}
+{"_id":"usc","college_id":"usc","ipeds_id":"123961","url":"https://libraries.usc.edu/","name":"University of Southern California Libraries","arl_id":"7500","arl_name":"SOUTHERN CALIFORNIA","type":"Private"}
+{"_id":"utah","college_id":"utah","ipeds_id":"230764","url":"https://lib.utah.edu/","name":"University of Utah, J. Willard Marriott Library","arl_id":"8800","arl_name":"UTAH","type":"State"}
+{"_id":"utexas","college_id":"utexas","ipeds_id":"228778","url":"https://www.lib.utexas.edu/","name":"University of Texas Libraries","arl_id":"8400","arl_name":"TEXAS","type":"State"}
+{"_id":"utk","college_id":"utk","ipeds_id":"221759","url":"https://www.lib.utk.edu/","name":"University of Tennessee, University Libraries","arl_id":"8300","arl_name":"TENNESSEE","type":"State"}
+{"_id":"utoronto","college_id":"utoronto","url":"http://www.library.utoronto.ca/","name":"University of Toronto Libraries","arl_id":"8600","arl_name":"TORONTO","type":"Canadian"}
+{"_id":"uwaterloo","college_id":"uwaterloo","url":"http://www.lib.uwaterloo.ca/","name":"University of Waterloo Library","arl_id":"9350","arl_name":"WATERLOO","type":"Canadian"}
+{"_id":"uwo","college_id":"uwo","url":"http://www.lib.uwo.ca/","name":"Western University Libraries","arl_id":"9500","arl_name":"WESTERN","type":"Canadian"}
+{"_id":"vanderbilt","college_id":"vanderbilt","ipeds_id":"221999","url":"https://www.library.vanderbilt.edu/","name":"Vanderbilt University, Jean and Alexander Heard Libraries","arl_id":"8850","arl_name":"VANDERBILT","type":"Private"}
+{"_id":"vcu","college_id":"vcu","ipeds_id":"234030","url":"https://www.library.vcu.edu/","name":"Virginia Commonwealth University Libraries","arl_id":"8950","arl_name":"VCU","type":"Public"}
+{"_id":"virginia","college_id":"virginia","ipeds_id":"234076","url":"https://www.library.virginia.edu/","name":"University of Virginia Library","arl_id":"8900","arl_name":"VIRGINIA","type":"State"}
+{"_id":"vt","college_id":"vt","ipeds_id":"233921","url":"https://lib.vt.edu/","name":"Virginia Tech, University Libraries","arl_id":"9000","arl_name":"VIRGINIA TECH","type":"State"}
+{"_id":"washington","college_id":"washington","ipeds_id":"236948","url":"http://www.lib.washington.edu/","name":"University of Washington University Libraries","arl_id":"9100","arl_name":"WASHINGTON","type":"State"}
+{"_id":"wayne","college_id":"wayne","ipeds_id":"172644","url":"https://library.wayne.edu/","name":"Wayne State University Libraries","arl_id":"9400","arl_name":"WAYNE STATE","type":"State"}
+{"_id":"wisc","college_id":"wisc","ipeds_id":"240444","url":"https://www.library.wisc.edu/","name":"University of Wisconsin Library","arl_id":"9600","arl_name":"WISCONSIN","type":"State"}
+{"_id":"wsu","college_id":"wsu","ipeds_id":"236939","url":"https://libraries.wsu.edu/","name":"Washington State University Libraries","arl_id":"9200","arl_name":"WASHINGTON STATE","type":"State"}
+{"_id":"wustl","college_id":"wustl","ipeds_id":"179867","url":"https://library.wustl.edu/","name":"Washington University Libraries","arl_id":"9300","arl_name":"WASHINGTON U.-ST. LOUIS","type":"Private"}
+{"_id":"yale","college_id":"yale","ipeds_id":"130794","url":"https://web.library.yale.edu/","name":"Yale University Libraries","arl_id":"9700","arl_name":"YALE","type":"Private"}
+{"_id":"yorku","college_id":"yorku","url":"http://www.library.yorku.ca/","name":"York University Libraries","arl_id":"9800","arl_name":"YORK","type":"Canadian"}

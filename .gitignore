@@ -3,10 +3,10 @@
 # -------- #
 
 data/collected/screenshots/
-data/collected/colleges.db
-data/collected/libraries.db
-data/collected/pages.db
-data/collected/visits.db
+# data/collected/colleges.db
+# data/collected/libraries.db
+# data/collected/pages.db
+# data/collected/visits.db
 # data/collected/builtwith.db
 
 # ------ #
