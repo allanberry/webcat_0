@@ -8,7 +8,8 @@
     "dev": "npm run download && parcel client/index.html --out-dir client/dist & nodemon server/main.js",
     "build": "npm run download && rm -rf client/dist && parcel build client/index.html --out-dir client/dist",
     "download": "node data/download.js",
-    "clean": "node data/clean.js"
+    "clean": "node data/clean.js",
+    "test": "jest --verbose"
   },
   "repository": {
     "type": "git",
@@ -29,7 +30,6 @@
     "apollo-server": "^2.8.1",
     "app": "^0.1.0",
     "autoprefixer": "^9.5.0",
-    "babel-polyfill": "^6.26.0",
     "bootstrap": "^4.3.1",
     "cheerio": "^1.0.0-rc.2",
     "csv-parse": "^4.6.5",
@@ -59,9 +59,11 @@
   "devDependencies": {
     "@vue/component-compiler-utils": "^2.6.0",
     "babel-core": "^6.26.3",
+    "babel-jest": "^24.9.0",
     "babel-preset-env": "^1.7.0",
     "cssnano": "^4.1.10",
     "del": "^5.1.0",
+    "jest": "^24.9.0",
     "sass": "^1.17.2",
     "vue-template-compiler": "^2.6.8"
   }
