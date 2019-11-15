@@ -182,3 +182,93 @@ $ npm run visit -- -u http://example.com -s 1995-01-01 -i "6 months"
 (h/t Tracy Seneca, via email, 2019-08-01)
 - https://web.archive.org/web/20010413160217/http://sunsite.berkeley.edu/Libweb/
 - https://web.archive.org/web/19991023010617/http://sunsite.berkeley.edu/
+
+
+## Subroutines
+
+inputs
+  url, or list of URLs
+  date, or list of dates
+  overwrite
+  current
+
+
+1. invoke
+  1. authorize
+  1. download data
+  1. orchestrate
+    1. gather
+    1. postprocess
+
+1. orchestrate
+  1. determine steps to perform (steps user intends to perform)
+    1. determine whether data already exists
+    1. determine whether date/url exists in Wayback
+      1. adjust date
+      1. record
+  1. perform steps (list of urls, list of dates)
+
+1. gather
+  1. get
+    - raw, using superagent (url)
+      1. prepare
+        - log versions, etc.
+        - retrieve data
+      1. scrape
+        - html analysis
+          - count characters
+          - gather menus
+    - rendered, using puppeteer (url)
+      1. prepare
+        - log versions, etc.
+        - retrieve data
+        - remove wayback elements if necessary
+      1. scrape
+        - screenshots
+          - formal analysis
+          - color analysis
+        - css
+          - gather colors
+          - count rules
+        - javascript
+          - count characters
+        - links
+          - gather anchors
+    - builtwith (url)
+      1. prepare
+        - log versions, etc.
+        - retrieve data
+      1. scrape
+    - lighthouse (url)
+      1. prepare
+        - log versions, etc.
+        - retrieve data
+      1. scrape
+  1. save (output dict)
+
+1. postprocess
+  1. create derivative data
+    - complexity analysis
+    - text analysis
+      - natural language processing
+
+
+subroutines
+  - html (url)
+    return: html compuobject
+
+  - css (url)
+    return: css object
+
+  - js (url)
+    return: js object
+
+  - screenshots (url or urls)
+    save: images to folder
+    return: screenshots object
+
+  - links (html text)
+    return: links array
+targettar
+  - menus (html text)
+    return: menus object
