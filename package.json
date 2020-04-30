@@ -40,7 +40,7 @@
     "graphql": "^14.4.2",
     "graphql-type-json": "^0.3.0",
     "image-size": "^0.7.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "log4js": "^4.0.2",
     "minimist": "^1.2.0",
     "moment": "^2.24.0",
