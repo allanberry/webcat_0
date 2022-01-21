@@ -41,7 +41,7 @@
     "graphql-type-json": "^0.3.0",
     "image-size": "^0.7.2",
     "jquery": "^3.4.1",
-    "log4js": "^4.0.2",
+    "log4js": "^6.4.0",
     "minimist": "^1.2.0",
     "moment": "^2.24.0",
     "nedb-promise": "^2.0.1",
